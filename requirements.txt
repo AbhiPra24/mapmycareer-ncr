@@ -1,0 +1,6 @@
+streamlit>=1.35.0
+streamlit-folium>=0.20.0
+folium>=0.16.0
+pandas>=2.2.0
+numpy>=1.26.0
+geopy>=2.4.0
