@@ -6,6 +6,7 @@ heatmap density layers, coordinate jittering, and rich styled HTML popup cards.
 """
 
 import html
+from functools import lru_cache
 from typing import Dict, List, Optional
 import folium
 from folium.plugins import HeatMap, MarkerCluster
@@ -64,24 +65,17 @@ WORKPLACE_COLORS: Dict[str, str] = {
 }
 
 
-def create_job_popup_html(job: Dict[str, any]) -> str:
+@lru_cache(maxsize=4096)
+def _create_job_popup_html_cached(
+    job_id: str, title: str, company: str, job_type: str,
+    exp_level: str, exp_yoe: str, workplace: str, hub: str,
+    city: str, salary: str, apply_url: str, logo_url: str,
+    skills: tuple  # tuple of strings for hashability
+) -> str:
     """
-    Generates a modern, high-contrast HTML popup card for a job pin with company logo.
+    LRU-cached inner implementation of popup HTML generation.
+    Accepts only hashable primitives so functools.lru_cache can key on them.
     """
-    job_id = html.escape(str(job.get("id", "")))
-    title = html.escape(str(job.get("title", "Software Engineer")))
-    company = html.escape(str(job.get("company", "Tech Enterprise")))
-    job_type = str(job.get("job_type", "Full-time"))
-    exp_level = str(job.get("experience_level", "Mid"))
-    exp_yoe = html.escape(str(job.get("experience_yoe", "")))
-    workplace = str(job.get("workplace_model", "Hybrid"))
-    hub = html.escape(str(job.get("hub", "Delhi NCR Hub")))
-    city = html.escape(str(job.get("city", "Delhi NCR")))
-    salary = html.escape(str(job.get("salary_range", "Competitive")))
-    apply_url = html.escape(str(job.get("apply_url", "https://linkedin.com")))
-    logo_url = html.escape(str(job.get("company_logo", "https://img.icons8.com/color/48/domain--v1.png")))
-    skills = job.get("skills", [])
-
     jt_style = JOB_TYPE_COLORS.get(job_type, JOB_TYPE_COLORS["Full-time"])
     exp_color = EXP_LEVEL_COLORS.get(exp_level, "#6B7280")
     wp_color = WORKPLACE_COLORS.get(workplace, "#4B5563")
@@ -209,6 +203,30 @@ def create_job_popup_html(job: Dict[str, any]) -> str:
     </div>
     """
     return html_content
+
+
+def create_job_popup_html(job: Dict[str, any]) -> str:
+    """
+    Generates a modern, high-contrast HTML popup card for a job pin with company logo.
+    Delegates to the lru_cache-backed helper using flat hashable arguments.
+    """
+    skills = job.get("skills", [])
+    return _create_job_popup_html_cached(
+        job_id=html.escape(str(job.get("id", ""))),
+        title=html.escape(str(job.get("title", "Software Engineer"))),
+        company=html.escape(str(job.get("company", "Tech Enterprise"))),
+        job_type=str(job.get("job_type", "Full-time")),
+        exp_level=str(job.get("experience_level", "Mid")),
+        exp_yoe=html.escape(str(job.get("experience_yoe", ""))),
+        workplace=str(job.get("workplace_model", "Hybrid")),
+        hub=html.escape(str(job.get("hub", "Delhi NCR Hub"))),
+        city=html.escape(str(job.get("city", "Delhi NCR"))),
+        salary=html.escape(str(job.get("salary_range", "Competitive"))),
+        apply_url=html.escape(str(job.get("apply_url", "https://linkedin.com"))),
+        logo_url=html.escape(str(job.get("company_logo", "https://img.icons8.com/color/48/domain--v1.png"))),
+        skills=tuple(skills) if isinstance(skills, list) else (),
+    )
+
 
 
 def create_company_marker_icon(logo_url: str, company: str, marker_color: str = "#2563EB") -> folium.DivIcon:
@@ -349,7 +367,7 @@ def build_delhi_ncr_map(
             jt_meta = JOB_TYPE_COLORS.get(job_type, JOB_TYPE_COLORS["Full-time"])
 
             popup_html = create_job_popup_html(job)
-            popup = folium.Popup(folium.IFrame(popup_html, width=320, height=275), max_width=330)
+            popup = folium.Popup(popup_html, max_width=340)
 
             # Tooltip preview
             tooltip_text = f"<b>{html.escape(job.get('company', ''))}</b><br>{html.escape(job.get('title', ''))}<br><span style='color:#6B7280;'>{html.escape(job.get('hub', ''))}</span>"

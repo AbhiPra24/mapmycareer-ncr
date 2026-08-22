@@ -17,6 +17,30 @@ except ImportError:
 from utils.geocoder import GeoCoder, apply_jitter
 from utils.map_renderer import build_delhi_ncr_map
 
+
+# ---------------------------------------------------------
+# Cached Map Builder — keyed on serialised filter state
+# ---------------------------------------------------------
+@st.cache_data(show_spinner=False)
+def get_cached_map_html(filtered_records_json: str, visualization_mode: str) -> str:
+    """
+    Builds the Folium map and returns its rendered HTML string.
+    Cached so identical filter combinations skip a full map rebuild.
+    Using HTML string (vs Map object) avoids pickle issues with folium.
+    """
+    import json as _json
+    records = _json.loads(filtered_records_json)
+    m = build_delhi_ncr_map(
+        jobs=records,
+        visualization_mode=visualization_mode,
+        center_lat=28.5355,
+        center_lon=77.2500,
+        zoom_start=10,
+        enable_jitter=True,
+        jitter_amount=0.0020,
+    )
+    return m._repr_html_()
+
 # ---------------------------------------------------------
 # Page Config — wide, no sidebar
 # ---------------------------------------------------------
@@ -177,6 +201,7 @@ st.markdown(f"""
 f_col1, f_col2, f_col3, f_col4, f_col5, f_col6 = st.columns([2, 1.4, 1.2, 1.2, 1.2, 1.2])
 
 with f_col1:
+    st.caption("🔍 Search")
     search_query = st.text_input(
         "🔍 Search",
         placeholder="Role, company, skill, city…",
@@ -184,6 +209,7 @@ with f_col1:
     )
 
 with f_col2:
+    st.caption("🏙️ City")
     city_opts = ["Gurugram", "Noida", "Delhi"]
     city_opts = [c for c in city_opts if c in df_all["city"].unique()] if not df_all.empty else city_opts
     selected_cities = st.multiselect(
@@ -195,6 +221,7 @@ with f_col2:
     )
 
 with f_col3:
+    st.caption("🎯 Level")
     exp_opts = ["Entry", "Mid", "Senior", "Lead"]
     selected_exp = st.multiselect(
         "Level",
@@ -205,6 +232,7 @@ with f_col3:
     )
 
 with f_col4:
+    st.caption("💼 Type")
     jtype_opts = sorted(df_all["job_type"].unique().tolist()) if not df_all.empty else ["Full-time", "Contract", "Internship", "Part-time"]
     selected_jtypes = st.multiselect(
         "Type",
@@ -215,6 +243,7 @@ with f_col4:
     )
 
 with f_col5:
+    st.caption("🏢 Workplace")
     wp_opts = sorted(df_all["workplace_model"].unique().tolist()) if not df_all.empty else ["Hybrid", "On-site", "Remote"]
     selected_wp = st.multiselect(
         "Workplace",
@@ -225,6 +254,7 @@ with f_col5:
     )
 
 with f_col6:
+    st.caption("🗺️ Map Layer")
     vis_mode = st.selectbox(
         "Map Layer",
         options=["Combined (Pins + HeatMap)", "Interactive Pin Clusters", "Hiring Density HeatMap"],
@@ -276,7 +306,7 @@ st.markdown(f"""
 <div class="stat-row">
     <div class="stat-pill">💼 <b>{total_openings}</b> openings <span style="color:#9CA3AF;font-weight:400;">of {len(df_all)}</span></div>
     <div class="stat-pill">🏙️ Top city: <b>{top_city}</b></div>
-    <div class="stat-pill">🏢 Hottest hub: <b>{top_hub[:38]}{'…' if len(top_hub) > 38 else ''}</b></div>
+    <div class="stat-pill" title="{top_hub}">🏢 Hottest hub: <b>{top_hub[:38]}{'…' if len(top_hub) > 38 else ''}</b></div>
     <div class="stat-pill">🔥 Top skill: <b>{top_skill}</b></div>
 </div>
 """, unsafe_allow_html=True)
@@ -290,22 +320,13 @@ with tab_map:
     if total_openings == 0:
         st.info("⚠️ No jobs match the current filters. Try widening your search.")
     else:
-        delhi_map = build_delhi_ncr_map(
-            jobs=filtered_records,
-            visualization_mode=vis_mode,
-            center_lat=28.5355,
-            center_lon=77.2500,
-            zoom_start=10,
-            enable_jitter=True,
-            jitter_amount=0.0020,
-        )
-
-        if st_folium is not None:
-            st_folium(delhi_map, width="100%", height=620, returned_objects=[])
-        else:
-            delhi_map.save("map_fallback.html")
-            with open("map_fallback.html", "r", encoding="utf-8") as f:
-                st.components.v1.html(f.read(), height=620)
+        # Build map via cached HTML — instant on repeated filter combos
+        with st.spinner("Building map…"):
+            map_html = get_cached_map_html(
+                filtered_records_json=json.dumps(filtered_records, sort_keys=True),
+                visualization_mode=vis_mode,
+            )
+        st.components.v1.html(map_html, height=620, scrolling=False)
 
         # Legend
         st.markdown("""
@@ -362,7 +383,7 @@ with tab_analytics:
             ]).value_counts().head(20)
             st.bar_chart(skills_series, color="#0D9488", height=300)
     else:
-        st.info("No data available for the current filter selection.")
+        st.info("⚠️ No data available for the current filter selection. Try widening your city, level, or type filters.")
 
 
 with tab_table:
@@ -390,13 +411,13 @@ with tab_table:
             mime="text/csv"
         )
     else:
-        st.info("No results for the current filters.")
+        st.info("⚠️ No results for the current filters. Try widening your search or removing some filter selections.")
 
 # ---------------------------------------------------------
 # Footer
 # ---------------------------------------------------------
 st.markdown("""
-<div style="text-align:center;font-size:11px;color:#D1D5DB;padding:16px 0 8px 0;border-top:1px solid #F3F4F6;margin-top:10px;">
+<div style="text-align:center;font-size:11px;color:#6B7280;padding:16px 0 8px 0;border-top:1px solid #F3F4F6;margin-top:10px;">
     MapMyCareer · Delhi NCR · Built with Streamlit &amp; Folium
 </div>
 """, unsafe_allow_html=True)
