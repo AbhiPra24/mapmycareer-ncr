@@ -1,12 +1,14 @@
 # 🗺️ MapMyCareer (Delhi NCR)
 ### *Interactive Geo-Spatial Job Exploration & Tech Radar for Delhi NCR*
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://mapmycareer.streamlit.app/)
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Dataset: 100% Real](https://img.shields.io/badge/Dataset-520%2B%20Verified%20Live%20Jobs-success.svg)](data/sample_jobs.json)
 
 **MapMyCareer** is a modern geo-spatial intelligence application designed to map, explore, and analyze **520+ verified real tech job openings** across the **Delhi National Capital Region (NCR)** — covering major innovation hubs in **Gurugram**, **Noida**, and **Delhi**.
+
+👉 **Live Application**: [https://mapmycareer.streamlit.app/](https://mapmycareer.streamlit.app/)
 
 ---
 
