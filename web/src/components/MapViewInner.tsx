@@ -107,8 +107,8 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
         style={{ minHeight: '100%', width: '100%', background: '#09090b' }}
       >
         <TileLayer
-          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
         <MapController selectedJob={selectedJob} hoveredJob={hoveredJob} />
