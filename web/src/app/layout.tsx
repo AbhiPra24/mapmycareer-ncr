@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/react';
 import './globals.css';
 
 const geistSans = Geist({
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
     title: 'MapMyCareer Delhi NCR · Geo-Spatial Tech Job Radar',
     description:
       'Map-first interactive job discovery for Delhi NCR tech corridors (Gurugram, Noida, Delhi).',
-    url: 'https://mapmycareer.vercel.app',
+    url: 'https://www.mapmycareer.online',
     siteName: 'MapMyCareer',
     locale: 'en_IN',
     type: 'website',
@@ -45,6 +46,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
+        <Analytics />
       </body>
     </html>
   );
