@@ -14,27 +14,95 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'MapMyCareer Delhi NCR - Geo-Spatial Job Discovery & Tech Radar',
+  metadataBase: new URL('https://www.mapmycareer.online'),
+  title: {
+    default: 'MapMyCareer Delhi NCR - Geo-Spatial Job Discovery & Tech Radar',
+    template: '%s | MapMyCareer',
+  },
   description:
-    'Explore 500+ verified real tech jobs across Gurugram, Noida, and Delhi with interactive map corridors, salary filters, and metro insights.',
+    'Explore 500+ verified real tech jobs across Gurugram, Noida, and Delhi with interactive map corridors, campus coordinates, commute insights, and salary filters.',
   keywords: [
-    'Delhi NCR Jobs',
-    'Gurgaon Tech Jobs',
-    'Noida Software Engineer Jobs',
-    'DLF Cyber City Jobs',
-    'MapMyCareer',
+    'Delhi NCR Tech Jobs',
+    'Gurgaon Software Engineer Jobs',
+    'Noida Developer Jobs',
+    'DLF Cyber City Tech Openings',
+    'Golf Course Road Gurgaon Jobs',
+    'Sector 62 Noida IT Jobs',
+    'Noida Expressway Tech Parks',
+    'Aerocity Delhi Tech Jobs',
     'Geospatial Job Radar',
+    'MapMyCareer',
+    'Tech Jobs Commute Radar',
   ],
-  authors: [{ name: 'MapMyCareer Team' }],
+  authors: [{ name: 'Abhinav Prakash' }, { name: 'MapMyCareer' }],
+  creator: 'Abhinav Prakash',
+  publisher: 'MapMyCareer',
+  applicationName: 'MapMyCareer',
+  alternates: {
+    canonical: '/',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   openGraph: {
     title: 'MapMyCareer Delhi NCR · Geo-Spatial Tech Job Radar',
     description:
-      'Map-first interactive job discovery for Delhi NCR tech corridors (Gurugram, Noida, Delhi).',
+      'Map-first interactive job discovery for Delhi NCR tech corridors (Gurugram, Noida, Delhi). Explore 500+ verified tech jobs mapped to exact office campuses.',
     url: 'https://www.mapmycareer.online',
     siteName: 'MapMyCareer',
     locale: 'en_IN',
     type: 'website',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'MapMyCareer Delhi NCR · Geo-Spatial Tech Job Radar',
+    description:
+      'Explore 500+ verified tech jobs mapped to exact office campuses across Gurugram, Noida & Delhi.',
+  },
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': 'https://www.mapmycareer.online/#website',
+      url: 'https://www.mapmycareer.online',
+      name: 'MapMyCareer',
+      description:
+        'Geospatial tech job discovery radar for Delhi NCR (Gurugram, Noida, Delhi).',
+      inLanguage: 'en-IN',
+    },
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://www.mapmycareer.online/#webapp',
+      name: 'MapMyCareer Delhi NCR Job Radar',
+      url: 'https://www.mapmycareer.online',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'All',
+      browserRequirements: 'Requires JavaScript. Requires HTML5.',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'INR',
+      },
+      featureList: [
+        'Interactive Leaflet Pin Clusters',
+        'Hiring Density Heatmaps',
+        'Campus & Tech Park Coordinates',
+        '500+ Verified Live Tech Openings in Delhi NCR',
+        'Inline Filtering by Stack, Experience, and Work Model',
+      ],
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -44,6 +112,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
         <Analytics />
