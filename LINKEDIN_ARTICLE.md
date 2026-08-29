@@ -4,11 +4,42 @@ Below are the clean text versions formatted specifically for LinkedIn's editor (
 
 ---
 
-## 📋 1. LinkedIn Post (For regular Feed Update)
+## 🚀 1. Follow-up Launch Post (Custom Domain Announcement)
 
 *Copy everything between the cut lines below and paste directly into LinkedIn's post box:*
 
---- ✂️ COPY START (POST) ✂️ ---
+--- ✂️ COPY START (FOLLOW-UP POST) ✂️ ---
+
+Exciting Milestone: MapMyCareer is now officially live on its own custom domain! 🗺️✨
+
+👉 Explore now: https://www.mapmycareer.online/
+
+When I first launched MapMyCareer, the goal was simple: solve the dreaded "How bad will my daily commute be?" question for tech professionals navigating job offers across Delhi NCR. 
+
+Instead of vague tags like "Gurugram" or "Noida", MapMyCareer maps live tech openings to their exact tech parks and office towers (DLF Cyber City, Sector 62 Noida, Golf Course Road, Aerocity, and Noida Expressway).
+
+Following incredible feedback and traction from the community, we have upgraded:
+📍 Custom Domain: Faster, dedicated, and cleaner access at mapmycareer.online
+⚡ Interactive Radar: Campus-level coordinates across 520+ verified tech roles
+🔥 Commute Clarity: Density heatmaps & cluster exploration to spot tech corridors in seconds
+
+If you are currently exploring tech roles in Delhi NCR or planning your next career move, take it for a spin!
+
+Would love to hear your thoughts and suggestions for upcoming features (metro line overlays & new cities coming next). 🚀
+
+💻 GitHub: https://github.com/AbhiPra24/mapmycareer-ncr
+
+#MapMyCareer #DelhiNCR #TechHiring #WebDevelopment #DataVisualization #Python #Streamlit #OpenSource #CareerGrowth
+
+--- ✂️ COPY END (FOLLOW-UP POST) ✂️ ---
+
+---
+
+## 📋 2. Standard Launch Post (General Feed Update)
+
+*Copy everything between the cut lines below and paste directly into LinkedIn's post box:*
+
+--- ✂️ COPY START (STANDARD POST) ✂️ ---
 
 Searching for a tech job in Delhi NCR usually comes with one major unanswered question:
 "How bad is the daily commute going to be?"
@@ -27,7 +58,7 @@ Tech Stack:
 Python | Streamlit | Folium / Leaflet | Pandas
 
 🌐 Try the Live App:
-https://mapmycareer.streamlit.app/
+https://www.mapmycareer.online/
 
 💻 GitHub Repository:
 https://github.com/AbhiPra24/mapmycareer-ncr
@@ -36,11 +67,11 @@ Would love to hear your thoughts, feedback, and what corridors we should map nex
 
 #Python #Streamlit #DataVisualization #GeoSpatial #DelhiNCR #TechHiring #OpenSource #SoftwareEngineering #Career
 
---- ✂️ COPY END (POST) ✂️ ---
+--- ✂️ COPY END (STANDARD POST) ✂️ ---
 
 ---
 
-## 📰 2. LinkedIn Article (For "Write article" on LinkedIn)
+## 📰 3. Updated LinkedIn Article (For "Write article" / Edit Article on LinkedIn)
 
 *Copy the text below into LinkedIn's Article Editor:*
 
@@ -65,7 +96,7 @@ To address this information gap, I designed and built MapMyCareer (Delhi NCR) �
 ---
 
 🌐 Try the Live Application:
-https://mapmycareer.streamlit.app/
+https://www.mapmycareer.online/
 
 ---
 
@@ -115,7 +146,7 @@ Explore the project on GitHub:
 https://github.com/AbhiPra24/mapmycareer-ncr
 
 Live App:
-https://mapmycareer.streamlit.app/
+https://www.mapmycareer.online/
 
 If you are building in the spatial data or developer tools space, I would love to connect and exchange ideas!
 
