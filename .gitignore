@@ -59,3 +59,12 @@ Thumbs.db
 *.swp
 *.swo
 *~
+.claude.json
+.mcp.json
+.playwright-mcp/
+
+# Node / Web dependencies & builds
+node_modules/
+.next/
+web/.next/
+web/node_modules/

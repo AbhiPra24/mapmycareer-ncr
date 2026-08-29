@@ -42,17 +42,40 @@
 
 ```
 mapmycareer-ncr/
-├── app.py                     # Streamlit frontend with minimal UI & cached map rendering
-├── requirements.txt           # Production dependencies
-├── .gitignore                 # Standard Python & environment ignore rules
-├── README.md                  # Project documentation & setup instructions
+├── app.py                     # Streamlit frontend (Python) with Folium map
+├── requirements.txt           # Python dependencies
 ├── data/
-│   └── sample_jobs.json       # Dataset of 524 verified real jobs with apply links & coordinates
-└── utils/
-    ├── __init__.py            # Utility package exports
-    ├── geocoder.py            # SQLite-backed geocoder with coordinate caching
-    └── map_renderer.py        # Folium Leaflet builder, caching, and custom HTML popups
+│   └── sample_jobs.json       # Dataset of verified real jobs with coordinates
+├── utils/
+│   ├── geocoder.py            # Geocoder & coordinate jittering
+│   └── map_renderer.py        # Folium Leaflet builder
+└── web/                       # 🚀 Modern React + Next.js App Router Frontend
+    ├── src/
+    │   ├── app/               # Next.js App Router (page.tsx, layout.tsx)
+    │   ├── components/        # MapView, FilterBar, JobCard, JobDetailsModal, Header
+    │   ├── types/             # TypeScript Job & Filter interfaces
+    │   └── lib/               # Fast client-side fuzzy search & filter engine
+    ├── public/data/jobs.json  # Web static dataset
+    ├── package.json
+    └── vercel.json            # 1-Click Vercel Deployment configuration
 ```
+
+---
+
+## 🚀 Running the Next.js Web App (Vercel Ready)
+
+```bash
+cd web
+npm install
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) to view the split-screen interactive web app.
+
+### 🌐 Deploying to Vercel
+1. Push your repository to GitHub.
+2. Import the repo in [Vercel](https://vercel.com).
+3. Set the **Root Directory** to `web`.
+4. Deploy! It automatically builds and serves on Vercel Edge CDN with zero configuration.
 
 ---
 
