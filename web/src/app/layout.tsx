@@ -67,6 +67,9 @@ export const metadata: Metadata = {
     description:
       'Explore 500+ verified tech jobs mapped to exact office campuses across Gurugram, Noida & Delhi.',
   },
+  verification: {
+    google: 'XR4_4wE5Q3wYA7z66aZFzdZNDBgLOQoOYDowiaKROck',
+  },
 };
 
 const jsonLd = {
