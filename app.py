@@ -210,8 +210,7 @@ with f_col1:
 
 with f_col2:
     st.caption("🏙️ City")
-    city_opts = ["Gurugram", "Noida", "Delhi"]
-    city_opts = [c for c in city_opts if c in df_all["city"].unique()] if not df_all.empty else city_opts
+    city_opts = sorted(df_all["city"].unique().tolist()) if not df_all.empty else ["Gurugram", "Noida", "Delhi"]
     selected_cities = st.multiselect(
         "City",
         options=city_opts,
