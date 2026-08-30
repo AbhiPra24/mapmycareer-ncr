@@ -1,0 +1,44 @@
+name: Scheduled Live Job Ingestion Engine
+
+on:
+  schedule:
+    # Runs every 12 hours (at 00:00 and 12:00 UTC)
+    - cron: '0 0,12 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  ingest-and-sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run Multi-Source Ingestion & Liveness Engine
+        run: |
+          python3 utils/job_ingestion_engine.py
+
+      - name: Commit & Push Fresh Job Datasets
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/sample_jobs.json web/public/data/jobs.json README.md
+          if git diff --staged --quiet; then
+            echo "No new jobs or updates to commit."
+          else
+            git commit -m "chore(data): auto-sync live verified jobs via ingestion engine [skip ci]"
+            git push
+          fi

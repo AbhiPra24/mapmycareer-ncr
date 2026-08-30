@@ -45,14 +45,14 @@ def get_cached_map_html(filtered_records_json: str, visualization_mode: str) -> 
 # Page Config — wide, no sidebar
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="MapMyCareer · Delhi NCR",
+    page_title="MapMyCareer · India Tech Radar",
     page_icon="🗺️",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
 # ---------------------------------------------------------
-# Global CSS — minimal, clean
+# Global CSS — minimal, clean & Dark Mode Resilient
 # ---------------------------------------------------------
 st.markdown("""
 <style>
@@ -76,15 +76,14 @@ section[data-testid="stSidebar"] { display: none; }
 .nav-logo {
     font-size: 18px;
     font-weight: 800;
-    color: #111827;
     letter-spacing: -0.4px;
 }
 .nav-logo span { color: #2563EB; }
 .nav-badge {
     font-size: 11px;
-    background: #EFF6FF;
+    background: rgba(37, 99, 235, 0.08);
     color: #2563EB;
-    border: 1px solid #BFDBFE;
+    border: 1px solid rgba(191, 219, 254, 0.6);
     border-radius: 20px;
     padding: 3px 10px;
     font-weight: 600;
@@ -111,15 +110,23 @@ section[data-testid="stSidebar"] { display: none; }
     flex-wrap: wrap;
 }
 .stat-pill {
-    background: #FFFFFF;
-    border: 1px solid #E5E7EB;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(229, 231, 235, 0.8);
     border-radius: 8px;
     padding: 6px 14px;
     font-size: 12px;
     font-weight: 600;
-    color: #374151;
 }
-.stat-pill b { color: #111827; font-size: 15px; }
+@media (prefers-color-scheme: dark) {
+    .stat-pill {
+        background: rgba(30, 41, 59, 0.7);
+        border: 1px solid rgba(71, 85, 105, 0.5);
+        color: #E2E8F0;
+    }
+    .stat-pill b {
+        color: #F8FAFC !important;
+    }
+}
 
 /* Legend */
 .legend-row {
@@ -140,9 +147,17 @@ section[data-testid="stSidebar"] { display: none; }
     margin-right: 4px;
 }
 
-/* Streamlit multiselect + text_input tweaks */
-div[data-testid="stMultiSelect"] > div,
-div[data-testid="stTextInput"] > div > div {
+/* Fix text color & placeholder contrast across Light & Dark modes */
+div[data-testid="stTextInput"] input {
+    font-size: 13px !important;
+    border-radius: 8px !important;
+    color: inherit !important;
+}
+div[data-testid="stTextInput"] input::placeholder {
+    color: #9CA3AF !important;
+    opacity: 1 !important;
+}
+div[data-testid="stMultiSelect"] > div {
     border-radius: 8px !important;
     font-size: 13px !important;
 }
@@ -186,11 +201,11 @@ total_hubs = df_all["hub"].nunique() if not df_all.empty else 0
 
 st.markdown(f"""
 <div class="nav-bar">
-    <div class="nav-logo">🗺️ Map<span>My</span>Career <span style="color:#6B7280;font-weight:400;font-size:13px;">· Delhi NCR</span></div>
+    <div class="nav-logo">🗺️ Map<span>My</span>Career <span style="color:#6B7280;font-weight:400;font-size:13px;">· India Tech Radar</span></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <span class="nav-badge">🏢 {total_companies} Companies</span>
         <span class="nav-badge">📍 {total_hubs} Tech Hubs</span>
-        <span class="nav-badge">💼 {len(df_all)} Openings</span>
+        <span class="nav-badge">💼 {len(df_all)} Verified Live Openings</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -388,18 +403,25 @@ with tab_analytics:
 with tab_table:
     st.markdown("##### 📋 All Openings")
     if not filtered_df.empty:
-        display_cols = ["company", "title", "city", "hub", "experience_level", "experience_yoe", "job_type", "workplace_model", "salary_range"]
-        display_df = filtered_df[display_cols].rename(columns={
-            "company": "Company",
-            "title": "Role",
-            "city": "City",
-            "hub": "Office / Tech Park",
-            "experience_level": "Level",
-            "experience_yoe": "YoE",
-            "job_type": "Type",
-            "workplace_model": "Workplace",
-            "salary_range": "Salary"
-        })
+        # Determine available columns
+        candidate_cols = [
+            ("company", "Company"),
+            ("title", "Role"),
+            ("standard_level", "Std Level"),
+            ("level_code", "Company Level"),
+            ("city", "City"),
+            ("hub", "Office / Tech Park"),
+            ("experience_level", "Tier"),
+            ("experience_yoe", "YoE"),
+            ("job_type", "Type"),
+            ("workplace_model", "Workplace"),
+            ("salary_range", "Listed Salary"),
+            ("levels_fyi_benchmark", "Levels.fyi Median")
+        ]
+        active_cols = [c for c, _ in candidate_cols if c in filtered_df.columns]
+        rename_dict = {c: label for c, label in candidate_cols if c in filtered_df.columns}
+
+        display_df = filtered_df[active_cols].rename(columns=rename_dict)
         st.dataframe(display_df, hide_index=True, use_container_width=True)
 
         csv = filtered_df.to_csv(index=False).encode("utf-8")

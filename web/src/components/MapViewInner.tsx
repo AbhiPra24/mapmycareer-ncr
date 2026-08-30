@@ -94,8 +94,16 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
   hoveredJob,
   onSelectJob,
 }) => {
-  const defaultCenter: [number, number] = [28.5355, 77.25];
-  const defaultZoom = 10;
+  // Compute center based on jobs
+  const validJobs = jobs.filter((j) => j.lat && j.lon);
+  const defaultCenter: [number, number] =
+    validJobs.length > 0
+      ? [
+          validJobs.reduce((sum, j) => sum + j.lat!, 0) / validJobs.length,
+          validJobs.reduce((sum, j) => sum + j.lon!, 0) / validJobs.length,
+        ]
+      : [20.5937, 78.9629];
+  const defaultZoom = validJobs.length > 0 && Math.abs(validJobs[0].lat! - validJobs[validJobs.length - 1].lat!) > 3 ? 5 : 10;
 
   return (
     <div className="relative h-full w-full overflow-hidden rounded-xl border border-zinc-200 shadow-sm dark:border-zinc-800">

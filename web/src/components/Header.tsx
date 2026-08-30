@@ -16,14 +16,14 @@ export const Header: React.FC<HeaderProps> = ({ totalJobs, filteredCount }) => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-base font-bold tracking-tight text-zinc-900 dark:text-white sm:text-lg">
-              MapMyCareer <span className="text-blue-600 dark:text-blue-400">Delhi NCR</span>
+              MapMyCareer <span className="text-blue-600 dark:text-blue-400">India</span>
             </h1>
             <span className="hidden rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-600 ring-1 ring-inset ring-blue-600/20 dark:bg-blue-950/50 dark:text-blue-400 sm:inline-block">
               Radar v2.0
             </span>
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Interactive Geo-Spatial Job Discovery across Gurgaon, Noida & Delhi
+            Interactive Geo-Spatial Discovery of Verified Live Tech Openings Across India
           </p>
         </div>
       </div>
