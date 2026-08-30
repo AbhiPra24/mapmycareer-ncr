@@ -84,9 +84,9 @@ export function auditAtsScore(text: string, targetSkills: string[] = []): AtsAud
   const passiveFound = WEAK_PASSIVE_PHRASES.filter((phrase) => textLower.includes(phrase));
 
   let verbScore = 5;
-  if (verbsFound.length >= 6 && passiveFound.length === 0) {
+  if (verbsFound.length >= 4 && passiveFound.length === 0) {
     verbScore = 25;
-  } else if (verbsFound.length >= 4) {
+  } else if (verbsFound.length >= 3) {
     verbScore = Math.max(10, 20 - passiveFound.length * 5);
   } else if (verbsFound.length >= 2) {
     verbScore = Math.max(5, 15 - passiveFound.length * 5);
@@ -95,23 +95,18 @@ export function auditAtsScore(text: string, targetSkills: string[] = []): AtsAud
   // 2. Metric Density & Google XYZ (25 pts)
   const lines = cleanText.split('\n');
   const rawBullets = lines
-    .map((l) => l.trim().replace(/^[-•*▸–—]\s*/, ''))
-    .filter((l) => l.length > 20);
+    .filter((l) => {
+      const s = l.trim();
+      return s.length > 20 && (/^[-•*▸–—]\s*/.test(s) || /^\d+\.\s*/.test(s));
+    })
+    .map((l) => l.trim().replace(/^[-•*▸–—]\s*/, '').replace(/^\d+\.\s*/, ''));
 
-  // Filter out categorical skill listings (e.g. "Languages: Python, JS")
-  let bullets = rawBullets.filter((b) => {
-    if (b.slice(0, 35).includes(':')) {
-      const firstWord = b.split(/\s+/)[0]?.toLowerCase().replace(/[^\w]/g, '');
-      if (firstWord && STRONG_ACTION_VERBS.has(firstWord)) {
-        return true;
-      }
-      return false;
-    }
-    return true;
-  });
-
+  // Fallback to lines > 20 that are not headers if no bullet markers
+  let bullets = rawBullets;
   if (bullets.length === 0) {
-    bullets = rawBullets;
+    bullets = lines
+      .map((l) => l.trim().replace(/^[-•*▸–—]\s*/, ''))
+      .filter((l) => l.length > 20 && !l.includes(':') && !l.toUpperCase().includes('SUMMARY') && !l.toUpperCase().includes('EXPERIENCE') && !l.toUpperCase().includes('EDUCATION'));
   }
 
   const bulletEvaluations: BulletEvaluation[] = [];
@@ -188,9 +183,9 @@ export function auditAtsScore(text: string, targetSkills: string[] = []): AtsAud
   const wordCount = words.length;
 
   let brevityScore = 12;
-  if (wordCount >= 300 && wordCount <= 850) {
+  if (wordCount >= 100 && wordCount <= 850) {
     brevityScore = 25;
-  } else if (wordCount >= 200 && wordCount <= 1100) {
+  } else if (wordCount >= 50 && wordCount <= 1100) {
     brevityScore = 20;
   }
 
