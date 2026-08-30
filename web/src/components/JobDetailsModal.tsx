@@ -1,19 +1,39 @@
 import React from 'react';
 import { Job } from '../types/job';
-import { X, Building2, MapPin, Briefcase, IndianRupee, ExternalLink, CheckCircle2, Train } from 'lucide-react';
+import {
+  X,
+  Building2,
+  MapPin,
+  Briefcase,
+  IndianRupee,
+  ExternalLink,
+  CheckCircle2,
+  Zap,
+  FileCode2,
+  MailCheck,
+} from 'lucide-react';
 
 interface JobDetailsModalProps {
   job: Job | null;
   onClose: () => void;
+  onAuditResume?: (job: Job) => void;
+  onGenerateResume?: (job: Job) => void;
+  onVerifyRecruiter?: (job: Job) => void;
 }
 
-export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose }) => {
+export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
+  job,
+  onClose,
+  onAuditResume,
+  onGenerateResume,
+  onVerifyRecruiter,
+}) => {
   if (!job) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
       <div
-        className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
+        className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -61,7 +81,7 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose }
         </div>
 
         {job.skills && job.skills.length > 0 && (
-          <div className="mt-5">
+          <div className="mt-4">
             <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Required Skills</h4>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {job.skills.map((skill, idx) => (
@@ -76,47 +96,43 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose }
           </div>
         )}
 
-        {/* 🎯 One-Click Resume Tailoring & Skill Gap Checker */}
-        <div className="mt-5 rounded-xl border border-zinc-200/80 bg-zinc-50/70 p-3.5 dark:border-zinc-800/80 dark:bg-zinc-800/30">
-          <div className="flex items-center justify-between">
-            <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200">
-              ⚡ Instant Resume Skill Matcher
-            </h4>
-            <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Client-Side Privacy</span>
-          </div>
-          <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
-            Paste your resume text or bullet points to instantly highlight matching skills & identify gaps.
+        {/* 🚀 CareerForge Deterministic Action Utilities Grid */}
+        <div className="mt-5 rounded-xl border border-zinc-200 bg-zinc-50/70 p-3.5 dark:border-zinc-800 dark:bg-zinc-800/30">
+          <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200">
+            ⚡ Career Acceleration Utilities
+          </h4>
+          <p className="mt-0.5 text-[11px] text-zinc-500 dark:text-zinc-400">
+            Tailor your application and verify recruiter outreach with deterministic engines:
           </p>
-          <textarea
-            placeholder="Paste your resume summary / skills here..."
-            rows={2}
-            className="mt-2 w-full rounded-lg border border-zinc-200 bg-white p-2 text-xs text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
-            onChange={(e) => {
-              const text = e.target.value.toLowerCase();
-              const matchedEl = document.getElementById(`matched-skills-${job.id}`);
-              const missingEl = document.getElementById(`missing-skills-${job.id}`);
-              if (matchedEl && missingEl && job.skills) {
-                if (!text.trim()) {
-                  matchedEl.innerHTML = '';
-                  missingEl.innerHTML = '';
-                  return;
-                }
-                const matched = job.skills.filter((s) => text.includes(s.toLowerCase()));
-                const missing = job.skills.filter((s) => !text.includes(s.toLowerCase()));
-                matchedEl.innerHTML = matched.length
-                  ? `✅ Matched (${matched.length}): ` + matched.map(m => `<span class="inline-block rounded bg-emerald-100 dark:bg-emerald-950/60 px-1.5 py-0.5 text-emerald-800 dark:text-emerald-300 font-semibold mr-1">${m}</span>`).join('')
-                  : '⚠️ No direct skill matches detected in pasted text';
-                missingEl.innerHTML = missing.length
-                  ? `💡 Recommended to add (${missing.length}): ` + missing.map(m => `<span class="inline-block rounded bg-amber-100 dark:bg-amber-950/60 px-1.5 py-0.5 text-amber-800 dark:text-amber-300 font-semibold mr-1">${m}</span>`).join('')
-                  : '🎉 100% Skill Coverage!';
-              }
-            }}
-          />
-          <div id={`matched-skills-${job.id}`} className="mt-2 text-[11px] font-medium text-emerald-700 dark:text-emerald-400"></div>
-          <div id={`missing-skills-${job.id}`} className="mt-1 text-[11px] font-medium text-amber-700 dark:text-amber-400"></div>
+
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <button
+              onClick={() => onAuditResume?.(job)}
+              className="flex items-center justify-center gap-1.5 rounded-lg border border-blue-200 bg-white p-2 text-xs font-semibold text-blue-700 shadow-sm transition hover:bg-blue-50 dark:border-blue-900/60 dark:bg-zinc-800 dark:text-blue-300 dark:hover:bg-zinc-700"
+            >
+              <Zap className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+              <span>Audit Resume</span>
+            </button>
+
+            <button
+              onClick={() => onGenerateResume?.(job)}
+              className="flex items-center justify-center gap-1.5 rounded-lg border border-emerald-200 bg-white p-2 text-xs font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50 dark:border-emerald-900/60 dark:bg-zinc-800 dark:text-emerald-300 dark:hover:bg-zinc-700"
+            >
+              <FileCode2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>Generate ATS Resume</span>
+            </button>
+
+            <button
+              onClick={() => onVerifyRecruiter?.(job)}
+              className="flex items-center justify-center gap-1.5 rounded-lg border border-purple-200 bg-white p-2 text-xs font-semibold text-purple-700 shadow-sm transition hover:bg-purple-50 dark:border-purple-900/60 dark:bg-zinc-800 dark:text-purple-300 dark:hover:bg-zinc-700"
+            >
+              <MailCheck className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+              <span>Verify Recruiter</span>
+            </button>
+          </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+        <div className="mt-5 flex items-center justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
           <button
             onClick={onClose}
             className="rounded-lg border border-zinc-200 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800"

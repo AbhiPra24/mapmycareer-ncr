@@ -8,7 +8,10 @@ import { FilterBar } from '../components/FilterBar';
 import { JobCard } from '../components/JobCard';
 import { MapView } from '../components/MapView';
 import { JobDetailsModal } from '../components/JobDetailsModal';
-import { Loader2, AlertCircle, Sparkles } from 'lucide-react';
+import { AtsAuditModal } from '../components/AtsAuditModal';
+import { ResumeBuilderModal } from '../components/ResumeBuilderModal';
+import { RecruiterValidatorModal } from '../components/RecruiterValidatorModal';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 export default function Home() {
   const [allJobs, setAllJobs] = useState<Job[]>([]);
@@ -16,6 +19,16 @@ export default function Home() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [hoveredJob, setHoveredJob] = useState<Job | null>(null);
   const [modalJob, setModalJob] = useState<Job | null>(null);
+
+  // CareerForge Modals State
+  const [isAtsModalOpen, setIsAtsModalOpen] = useState<boolean>(false);
+  const [isResumeBuilderOpen, setIsResumeBuilderOpen] = useState<boolean>(false);
+  const [isRecruiterModalOpen, setIsRecruiterModalOpen] = useState<boolean>(false);
+  const [activeJobContext, setActiveJobContext] = useState<{
+    title: string;
+    company: string;
+    skills: string[];
+  } | null>(null);
 
   const [filters, setFilters] = useState<FilterState>({
     searchQuery: '',
@@ -62,6 +75,37 @@ export default function Home() {
     });
   };
 
+  // Job Modal Action Handlers
+  const handleAuditForJob = (job: Job) => {
+    setActiveJobContext({
+      title: job.title,
+      company: job.company,
+      skills: job.skills || [],
+    });
+    setModalJob(null);
+    setIsAtsModalOpen(true);
+  };
+
+  const handleGenerateForJob = (job: Job) => {
+    setActiveJobContext({
+      title: job.title,
+      company: job.company,
+      skills: job.skills || [],
+    });
+    setModalJob(null);
+    setIsResumeBuilderOpen(true);
+  };
+
+  const handleVerifyRecruiterForJob = (job: Job) => {
+    setActiveJobContext({
+      title: job.title,
+      company: job.company,
+      skills: job.skills || [],
+    });
+    setModalJob(null);
+    setIsRecruiterModalOpen(true);
+  };
+
   if (isLoading) {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center gap-3 bg-zinc-50 dark:bg-zinc-950">
@@ -76,7 +120,22 @@ export default function Home() {
   return (
     <div className="flex h-screen flex-col bg-zinc-100 dark:bg-zinc-950">
       {/* Top Navbar */}
-      <Header totalJobs={allJobs.length} filteredCount={filteredJobs.length} />
+      <Header
+        totalJobs={allJobs.length}
+        filteredCount={filteredJobs.length}
+        onOpenAtsAuditor={() => {
+          setActiveJobContext(null);
+          setIsAtsModalOpen(true);
+        }}
+        onOpenResumeBuilder={() => {
+          setActiveJobContext(null);
+          setIsResumeBuilderOpen(true);
+        }}
+        onOpenRecruiterValidator={() => {
+          setActiveJobContext(null);
+          setIsRecruiterModalOpen(true);
+        }}
+      />
 
       {/* Main Container */}
       <div className="flex flex-1 flex-col gap-3 overflow-hidden p-3 sm:p-4">
@@ -142,8 +201,35 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Details Popup Modal */}
-      <JobDetailsModal job={modalJob} onClose={() => setModalJob(null)} />
+      {/* Job Details Popup Modal */}
+      <JobDetailsModal
+        job={modalJob}
+        onClose={() => setModalJob(null)}
+        onAuditResume={handleAuditForJob}
+        onGenerateResume={handleGenerateForJob}
+        onVerifyRecruiter={handleVerifyRecruiterForJob}
+      />
+
+      {/* CareerForge ATS Auditor Modal */}
+      <AtsAuditModal
+        isOpen={isAtsModalOpen}
+        onClose={() => setIsAtsModalOpen(false)}
+        initialJobContext={activeJobContext}
+      />
+
+      {/* CareerForge Resume Builder Modal */}
+      <ResumeBuilderModal
+        isOpen={isResumeBuilderOpen}
+        onClose={() => setIsResumeBuilderOpen(false)}
+        initialJobContext={activeJobContext}
+      />
+
+      {/* CareerForge Recruiter Radar Modal */}
+      <RecruiterValidatorModal
+        isOpen={isRecruiterModalOpen}
+        onClose={() => setIsRecruiterModalOpen(false)}
+        initialJobContext={activeJobContext}
+      />
     </div>
   );
 }
