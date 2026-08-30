@@ -76,6 +76,46 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose }
           </div>
         )}
 
+        {/* 🎯 One-Click Resume Tailoring & Skill Gap Checker */}
+        <div className="mt-5 rounded-xl border border-zinc-200/80 bg-zinc-50/70 p-3.5 dark:border-zinc-800/80 dark:bg-zinc-800/30">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200">
+              ⚡ Instant Resume Skill Matcher
+            </h4>
+            <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Client-Side Privacy</span>
+          </div>
+          <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
+            Paste your resume text or bullet points to instantly highlight matching skills & identify gaps.
+          </p>
+          <textarea
+            placeholder="Paste your resume summary / skills here..."
+            rows={2}
+            className="mt-2 w-full rounded-lg border border-zinc-200 bg-white p-2 text-xs text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+            onChange={(e) => {
+              const text = e.target.value.toLowerCase();
+              const matchedEl = document.getElementById(`matched-skills-${job.id}`);
+              const missingEl = document.getElementById(`missing-skills-${job.id}`);
+              if (matchedEl && missingEl && job.skills) {
+                if (!text.trim()) {
+                  matchedEl.innerHTML = '';
+                  missingEl.innerHTML = '';
+                  return;
+                }
+                const matched = job.skills.filter((s) => text.includes(s.toLowerCase()));
+                const missing = job.skills.filter((s) => !text.includes(s.toLowerCase()));
+                matchedEl.innerHTML = matched.length
+                  ? `✅ Matched (${matched.length}): ` + matched.map(m => `<span class="inline-block rounded bg-emerald-100 dark:bg-emerald-950/60 px-1.5 py-0.5 text-emerald-800 dark:text-emerald-300 font-semibold mr-1">${m}</span>`).join('')
+                  : '⚠️ No direct skill matches detected in pasted text';
+                missingEl.innerHTML = missing.length
+                  ? `💡 Recommended to add (${missing.length}): ` + missing.map(m => `<span class="inline-block rounded bg-amber-100 dark:bg-amber-950/60 px-1.5 py-0.5 text-amber-800 dark:text-amber-300 font-semibold mr-1">${m}</span>`).join('')
+                  : '🎉 100% Skill Coverage!';
+              }
+            }}
+          />
+          <div id={`matched-skills-${job.id}`} className="mt-2 text-[11px] font-medium text-emerald-700 dark:text-emerald-400"></div>
+          <div id={`missing-skills-${job.id}`} className="mt-1 text-[11px] font-medium text-amber-700 dark:text-amber-400"></div>
+        </div>
+
         <div className="mt-6 flex items-center justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
           <button
             onClick={onClose}

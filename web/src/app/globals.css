@@ -24,3 +24,26 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Ensure form controls, inputs and selects are clearly visible and legible in dark mode */
+@media (prefers-color-scheme: dark) {
+  input[type="text"],
+  input[type="search"],
+  input[type="email"],
+  textarea,
+  select {
+    color: #f4f4f5 !important;
+    background-color: #18181b !important;
+  }
+  
+  input::placeholder,
+  textarea::placeholder {
+    color: #a1a1aa !important;
+    opacity: 1 !important;
+  }
+
+  select option {
+    background-color: #18181b !important;
+    color: #f4f4f5 !important;
+  }
+}

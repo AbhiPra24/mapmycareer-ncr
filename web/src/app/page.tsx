@@ -67,7 +67,7 @@ export default function Home() {
       <div className="flex h-screen w-screen flex-col items-center justify-center gap-3 bg-zinc-50 dark:bg-zinc-950">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
-          Loading Delhi NCR Geo-Spatial Job Radar...
+          Loading India Geo-Spatial Job Radar...
         </p>
       </div>
     );

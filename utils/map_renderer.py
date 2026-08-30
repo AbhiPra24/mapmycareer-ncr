@@ -70,7 +70,9 @@ def _create_job_popup_html_cached(
     job_id: str, title: str, company: str, job_type: str,
     exp_level: str, exp_yoe: str, workplace: str, hub: str,
     city: str, salary: str, apply_url: str, logo_url: str,
-    skills: tuple  # tuple of strings for hashability
+    skills: tuple,  # tuple of strings for hashability
+    std_level: str = "", level_code: str = "", level_name: str = "",
+    benchmark: str = "", levels_url: str = ""
 ) -> str:
     """
     LRU-cached inner implementation of popup HTML generation.
@@ -82,6 +84,39 @@ def _create_job_popup_html_cached(
 
     exp_badge_text = f"{exp_level} ({exp_yoe})" if exp_yoe else f"{exp_level} Level"
 
+    # Levels.fyi Badge Section
+    level_tag_html = ""
+    if level_code or std_level:
+        badge_label = f"{std_level} · {level_code}" if level_code and std_level else (level_code or std_level)
+        level_tag_html = f"""
+        <span style="
+            background-color: #EDE9FE;
+            color: #6D28D9;
+            border: 1px solid #C4B5FD;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 6px;
+        " title="{html.escape(level_name)}">⚡ {html.escape(badge_label)}</span>
+        """
+
+    # Benchmark display if available
+    benchmark_html = ""
+    if benchmark:
+        benchmark_html = f"""
+        <div style="
+            font-size: 10.5px;
+            color: #6B7280;
+            margin-top: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        ">
+            <span>Levels.fyi Median: <b style="color:#111827;">{html.escape(benchmark)}</b></span>
+            {f'<a href="{html.escape(levels_url)}" target="_blank" style="color:#2563EB;text-decoration:none;font-weight:600;font-size:10px;">Compare ↗</a>' if levels_url else ''}
+        </div>
+        """
+
     # Format skills tags
     skills_html = "".join([
         f'<span style="display:inline-block;background:#F3F4F6;color:#374151;font-size:10px;font-weight:500;'
@@ -92,7 +127,7 @@ def _create_job_popup_html_cached(
     html_content = f"""
     <div style="
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        width: 300px;
+        width: 310px;
         padding: 4px;
         color: #1F2937;
         line-height: 1.4;
@@ -110,7 +145,8 @@ def _create_job_popup_html_cached(
                 text-transform: uppercase;
             ">{job_type}</span>
             
-            <div style="display: flex; gap: 4px;">
+            <div style="display: flex; gap: 4px; align-items: center;">
+                {level_tag_html}
                 <span style="
                     background-color: {wp_color}15;
                     color: {wp_color};
@@ -164,14 +200,14 @@ def _create_job_popup_html_cached(
             background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
             border: 1px solid #86EFAC;
             border-radius: 6px;
-            padding: 5px 8px;
+            padding: 6px 8px;
             margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
         ">
-            <span style="font-size: 10px; color: #166534; font-weight: 600; text-transform: uppercase;">Compensation</span>
-            <span style="font-size: 12px; color: #14532D; font-weight: 800;">{salary}</span>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 10px; color: #166534; font-weight: 600; text-transform: uppercase;">Compensation</span>
+                <span style="font-size: 12px; color: #14532D; font-weight: 800;">{salary}</span>
+            </div>
+            {benchmark_html}
         </div>
 
         <!-- Skills list -->
@@ -225,6 +261,11 @@ def create_job_popup_html(job: Dict[str, any]) -> str:
         apply_url=html.escape(str(job.get("apply_url", "https://linkedin.com"))),
         logo_url=html.escape(str(job.get("company_logo", "https://img.icons8.com/color/48/domain--v1.png"))),
         skills=tuple(skills) if isinstance(skills, list) else (),
+        std_level=str(job.get("standard_level", "")),
+        level_code=str(job.get("level_code", "")),
+        level_name=str(job.get("level_name", "")),
+        benchmark=str(job.get("levels_fyi_benchmark", "")),
+        levels_url=str(job.get("levels_fyi_url", "")),
     )
 
 
@@ -270,16 +311,35 @@ def create_company_marker_icon(logo_url: str, company: str, marker_color: str = 
 def build_delhi_ncr_map(
     jobs: List[Dict[str, any]],
     visualization_mode: str = "Interactive Pin Clusters",
-    center_lat: float = 28.5355,
-    center_lon: float = 77.2500,
-    zoom_start: int = 10,
+    center_lat: Optional[float] = None,
+    center_lon: Optional[float] = None,
+    zoom_start: Optional[int] = None,
     enable_jitter: bool = True,
     jitter_amount: float = 0.002
 ) -> folium.Map:
     """
     Builds and returns a configured Folium map with LayerControl, MarkerCluster,
-    and/or HeatMap based on the requested visualization mode.
+    and/or HeatMap based on the requested visualization mode across Indian tech hubs.
     """
+    valid_coords = [(j["lat"], j["lon"]) for j in jobs if j.get("lat") is not None and j.get("lon") is not None]
+
+    if center_lat is None or center_lon is None:
+        if valid_coords:
+            # Check if jobs span multiple distant cities (e.g. NCR + Bengaluru/Hyderabad)
+            lats = [c[0] for c in valid_coords]
+            lons = [c[1] for c in valid_coords]
+            min_lat, max_lat = min(lats), max(lats)
+            min_lon, max_lon = min(lons), max(lons)
+            center_lat = (min_lat + max_lat) / 2.0
+            center_lon = (min_lon + max_lon) / 2.0
+            zoom_start = zoom_start or (5 if (max_lat - min_lat > 3.0) else 10)
+        else:
+            center_lat = 20.5937
+            center_lon = 78.9629
+            zoom_start = zoom_start or 5
+
+    zoom_start = zoom_start or 10
+
     # 1. Base Map with CartoDB Positron
     m = folium.Map(
         location=[center_lat, center_lon],

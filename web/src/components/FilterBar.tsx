@@ -42,13 +42,13 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-12">
         {/* Search input */}
         <div className="relative md:col-span-4">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400 dark:text-zinc-500" />
           <input
             type="text"
             placeholder="Search role, skills (e.g. React, Python), or company..."
             value={filters.searchQuery}
             onChange={(e) => onFilterChange({ ...filters, searchQuery: e.target.value })}
-            className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 pl-9 pr-3 text-xs font-medium text-zinc-800 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 dark:border-zinc-800 dark:bg-zinc-800/50 dark:text-zinc-100 dark:focus:border-blue-400"
+            className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 pl-9 pr-3 text-xs font-medium text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400 dark:focus:border-blue-400"
           />
         </div>
 
@@ -63,11 +63,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 selectedHub: 'All Hubs', // reset hub when city changes
               })
             }
-            className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 px-3 text-xs font-medium text-zinc-800 outline-none transition focus:border-blue-500 focus:bg-white dark:border-zinc-800 dark:bg-zinc-800/50 dark:text-zinc-100"
+            className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 px-3 text-xs font-medium text-zinc-900 outline-none transition focus:border-blue-500 focus:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
           >
-            <option value="All Cities">All NCR Cities</option>
+            <option value="All Cities">All Indian Cities</option>
             {cities.map((city) => (
-              <option key={city} value={city}>
+              <option key={city} value={city} className="dark:bg-zinc-800 dark:text-zinc-100">
                 {city}
               </option>
             ))}
@@ -79,11 +79,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <select
             value={filters.selectedHub}
             onChange={(e) => onFilterChange({ ...filters, selectedHub: e.target.value })}
-            className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 px-3 text-xs font-medium text-zinc-800 outline-none transition focus:border-blue-500 focus:bg-white dark:border-zinc-800 dark:bg-zinc-800/50 dark:text-zinc-100"
+            className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 px-3 text-xs font-medium text-zinc-900 outline-none transition focus:border-blue-500 focus:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
           >
             <option value="All Hubs">All Tech Hubs / Zones</option>
             {hubs.map((hub) => (
-              <option key={hub} value={hub}>
+              <option key={hub} value={hub} className="dark:bg-zinc-800 dark:text-zinc-100">
                 {hub}
               </option>
             ))}
