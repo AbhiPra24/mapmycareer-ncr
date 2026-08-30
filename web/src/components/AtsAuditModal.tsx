@@ -1,18 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AtsAuditReport, auditAtsScore } from '../lib/atsAuditor';
+import { parseResumeFile } from '../lib/resumeParser';
 import {
   X,
   Sparkles,
   CheckCircle2,
   AlertTriangle,
   FileText,
-  TrendingUp,
   Zap,
-  BookOpen,
-  ArrowRight,
-  UploadCloud
+  UploadCloud,
+  FileUp,
+  Loader2,
+  Trash2,
 } from 'lucide-react';
 
 interface AtsAuditModalProps {
@@ -63,6 +64,13 @@ export const AtsAuditModal: React.FC<AtsAuditModalProps> = ({
   const [report, setReport] = useState<AtsAuditReport | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'bullets' | 'skills'>('overview');
 
+  // File Upload State
+  const [loadedFileName, setLoadedFileName] = useState<string | null>(null);
+  const [isParsing, setIsParsing] = useState<boolean>(false);
+  const [parseError, setParseError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     if (initialJobContext?.skills) {
       setTargetSkills(initialJobContext.skills);
@@ -78,6 +86,52 @@ export const AtsAuditModal: React.FC<AtsAuditModalProps> = ({
     const res = auditAtsScore(resumeText, targetSkills);
     setReport(res);
   }, [resumeText, targetSkills]);
+
+  const handleFileUpload = async (file: File) => {
+    if (!file) return;
+    setIsParsing(true);
+    setParseError(null);
+
+    try {
+      const extractedText = await parseResumeFile(file);
+      if (!extractedText.trim()) {
+        throw new Error('No readable text could be extracted from this document.');
+      }
+      setResumeText(extractedText);
+      setLoadedFileName(file.name);
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to parse uploaded file.';
+      setParseError(errorMsg);
+    } finally {
+      setIsParsing(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileUpload(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleClearFile = () => {
+    setLoadedFileName(null);
+    setResumeText(SAMPLE_RESUME);
+    setParseError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -148,17 +202,94 @@ export const AtsAuditModal: React.FC<AtsAuditModalProps> = ({
 
         {/* Main Body */}
         <div className="grid flex-1 grid-cols-1 overflow-hidden lg:grid-cols-12">
-          {/* Left Column: Text Input (5 cols) */}
+          {/* Left Column: File Upload Zone & Text Input (5 cols) */}
           <div className="flex flex-col border-r border-zinc-200 p-4 dark:border-zinc-800 lg:col-span-5">
-            <div className="flex items-center justify-between pb-2">
+            {/* Drag & Drop Upload Zone */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept=".pdf,.docx,.txt,.md,.tex"
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                  handleFileUpload(e.target.files[0]);
+                }
+              }}
+            />
+
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`group flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-3.5 text-center transition ${
+                isDragging
+                  ? 'border-blue-500 bg-blue-50/80 dark:bg-blue-950/50'
+                  : 'border-zinc-300 bg-zinc-50/50 hover:border-blue-400 hover:bg-zinc-100/60 dark:border-zinc-700 dark:bg-zinc-900/40 dark:hover:border-blue-600'
+              }`}
+            >
+              {isParsing ? (
+                <div className="flex items-center gap-2 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Extracting resume text...</span>
+                </div>
+              ) : loadedFileName ? (
+                <div className="flex w-full items-center justify-between px-1">
+                  <div className="flex items-center gap-2 overflow-hidden text-left">
+                    <FileUp className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                    <span className="truncate text-xs font-bold text-zinc-900 dark:text-white">
+                      {loadedFileName}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleClearFile();
+                    }}
+                    className="flex items-center gap-1 rounded bg-zinc-200 px-2 py-0.5 text-[10px] font-bold text-zinc-700 hover:bg-rose-100 hover:text-rose-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-rose-950/60 dark:hover:text-rose-300"
+                    title="Remove file"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    <span>Clear</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2.5">
+                  <UploadCloud className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <div className="text-left">
+                    <div className="text-xs font-bold text-zinc-800 dark:text-zinc-200">
+                      Drop resume or browse file
+                    </div>
+                    <div className="text-[10px] text-zinc-400">
+                      Supports <strong className="text-zinc-600 dark:text-zinc-300">.pdf, .docx, .txt, .md</strong>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Parsing error alert */}
+            {parseError && (
+              <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-rose-50 p-2 text-xs text-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-rose-600" />
+                <span>{parseError}</span>
+              </div>
+            )}
+
+            {/* Textarea Header */}
+            <div className="mt-3 flex items-center justify-between pb-1.5">
               <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">
                 Resume Content (Markdown / Text)
               </span>
               <button
-                onClick={() => setResumeText(SAMPLE_RESUME)}
+                onClick={() => {
+                  setLoadedFileName(null);
+                  setResumeText(SAMPLE_RESUME);
+                }}
                 className="text-[11px] font-semibold text-blue-600 hover:underline dark:text-blue-400"
               >
-                Reset to Sample
+                Reset Sample
               </button>
             </div>
 
@@ -466,7 +597,7 @@ export const AtsAuditModal: React.FC<AtsAuditModalProps> = ({
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center p-8 text-center text-zinc-400">
                 <FileText className="h-10 w-10 text-zinc-300" />
-                <p className="mt-2 text-xs">Paste resume text on the left to start the ATS audit.</p>
+                <p className="mt-2 text-xs">Drop a resume file or paste text on the left to start the ATS audit.</p>
               </div>
             )}
           </div>
