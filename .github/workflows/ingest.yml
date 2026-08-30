@@ -45,7 +45,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/sample_jobs.json web/public/data/jobs.json locations.db README.md
+          git add data/sample_jobs.json web/public/data/jobs.json README.md
           if git diff --staged --quiet; then
             echo "No new jobs or updates to commit."
           else

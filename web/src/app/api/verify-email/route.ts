@@ -1,15 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dns from 'dns/promises';
 import { evaluateEmailClientSide } from '@/lib/emailValidator';
-
-// Simple in-memory cache for domain MX resolution
-const mxCache = new Map<string, { resolves: boolean; mxRecords: string[]; timestamp: number }>();
-const CACHE_TTL_MS = 1000 * 60 * 15; // 15 minutes
+import { getCachedMxRecord, setCachedMxRecord, checkRateLimit } from '@/lib/kvCache';
 
 const BLOCKED_DOMAINS = new Set(['localhost', '127.0.0.1', '0.0.0.0', '169.254.169.254', '::1']);
 
 export async function POST(req: NextRequest) {
   try {
+    // 1. Edge Rate Limiting (30 requests/min per IP)
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'anonymous';
+    const rateLimit = await checkRateLimit(ip, 30, 60);
+
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Maximum 30 verification checks per minute.' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(Math.ceil((rateLimit.reset - Date.now()) / 1000)),
+          },
+        }
+      );
+    }
+
     const body = await req.json();
     const email = typeof body.email === 'string' ? body.email.trim() : '';
 
@@ -17,6 +30,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Email parameter is required.' }, { status: 400 });
     }
 
+    // 2. Client-side syntax audit
     const clientEval = evaluateEmailClientSide(email);
     if (!clientEval.isValidSyntax) {
       return NextResponse.json(clientEval);
@@ -27,7 +41,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(clientEval);
     }
 
-    // SSRF Guard
+    // 3. SSRF Guard
     if (
       BLOCKED_DOMAINS.has(domain) ||
       domain.endsWith('.local') ||
@@ -43,10 +57,9 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Check cache
-    const cached = mxCache.get(domain);
-    const now = Date.now();
-    if (cached && now - cached.timestamp < CACHE_TTL_MS) {
+    // 4. Vercel KV / In-Memory Cache Check (<2ms)
+    const cached = await getCachedMxRecord(domain);
+    if (cached) {
       const warnings = [...clientEval.warnings];
       if (!cached.resolves) {
         warnings.push(`Domain '${domain}' has no active MX/A mail records.`);
@@ -64,7 +77,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // DNS MX Lookup with 2.5s timeout
+    // 5. DNS MX Lookup with 2.5s timeout
     let resolves = false;
     let mxRecords: string[] = [];
 
@@ -81,7 +94,7 @@ export async function POST(req: NextRequest) {
         mxRecords = records.map((r) => `${r.exchange} (pri: ${r.priority})`);
       }
     } catch {
-      // Fallback to checking A/AAAA records
+      // Fallback to checking A records
       try {
         const aLookup = dns.resolve4(domain);
         const aRecords = await aLookup;
@@ -94,8 +107,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Save to cache
-    mxCache.set(domain, { resolves, mxRecords, timestamp: now });
+    // Save to Vercel KV / Memory Cache (1 hr TTL)
+    await setCachedMxRecord(domain, { resolves, mxRecords }, 3600);
 
     const warnings = [...clientEval.warnings];
     if (!resolves) {

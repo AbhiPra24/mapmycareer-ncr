@@ -11,6 +11,7 @@ import { JobDetailsModal } from '../components/JobDetailsModal';
 import { AtsAuditModal } from '../components/AtsAuditModal';
 import { ResumeBuilderModal } from '../components/ResumeBuilderModal';
 import { RecruiterValidatorModal } from '../components/RecruiterValidatorModal';
+import { AnnouncementBanner } from '../components/AnnouncementBanner';
 import { Loader2, AlertCircle } from 'lucide-react';
 
 export default function Home() {
@@ -119,6 +120,9 @@ export default function Home() {
 
   return (
     <div className="flex h-screen flex-col bg-zinc-100 dark:bg-zinc-950">
+      {/* Dynamic Announcement Banner (Vercel Edge Config) */}
+      <AnnouncementBanner />
+
       {/* Top Navbar */}
       <Header
         totalJobs={allJobs.length}
