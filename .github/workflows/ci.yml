@@ -3,8 +3,22 @@ name: CI - Lint, Test & Build
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'data/**'
+      - 'web/public/data/**'
+      - 'README.md'
+      - '.github/workflows/ingest.yml'
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'data/**'
+      - 'web/public/data/**'
+      - 'README.md'
+      - '.github/workflows/ingest.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint-and-typecheck:
