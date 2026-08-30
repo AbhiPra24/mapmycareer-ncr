@@ -350,12 +350,21 @@ export const ROLE_TEMPLATES: Record<string, RoleTemplateDefinition> = {
   }
 };
 
+export interface ResumeProject {
+  name: string;
+  technologies: string;
+  url?: string;
+  bullets: string[];
+}
+
 export interface ResumeData {
   name: string;
   title: string;
   email: string;
   location: string;
   linkedin: string;
+  github?: string;
+  website?: string;
   summary: string;
   skills: { category: string; skills: string }[];
   experience: {
@@ -365,10 +374,12 @@ export interface ResumeData {
     location: string;
     bullets: string[];
   }[];
+  projects?: ResumeProject[];
   education: {
     degree: string;
     school: string;
     dates: string;
+    gpa?: string;
     certifications?: string;
   };
 }
@@ -396,6 +407,16 @@ export function escapeLatex(text: string): string {
 }
 
 export function generateLatexSource(data: ResumeData): string {
+  const contactParts: string[] = [
+    escapeLatex(data.location),
+    escapeLatex(data.email),
+    escapeLatex(data.linkedin),
+  ];
+  if (data.github) contactParts.push(escapeLatex(data.github));
+  if (data.website) contactParts.push(escapeLatex(data.website));
+
+  const headerContact = contactParts.filter(Boolean).join(' \\ \\textbar\\ \\ ');
+
   const skillsLatex = data.skills
     .map((s) => `\\textbf{${escapeLatex(s.category)}:} ${escapeLatex(s.skills)} \\\\`)
     .join('\n');
@@ -412,12 +433,31 @@ ${bulletsStr}
     })
     .join('\n\n');
 
+  const projectsLatex =
+    data.projects && data.projects.length > 0
+      ? `\n\\section*{\\large\\bfseries\\color{primary}\\uppercase{Key Projects}}
+\\vspace{-4pt}\\rule{\\textwidth}{0.8pt}\\vspace{3pt}
+\\small
+` +
+        data.projects
+          .map((p) => {
+            const urlStr = p.url ? `\\hfill \\url{${escapeLatex(p.url)}}` : '';
+            const bulletsStr = p.bullets.map((b) => `\\item ${escapeLatex(b)}`).join('\n');
+            return `\\textbf{${escapeLatex(p.name)}} \\textbar\\ \\textit{${escapeLatex(p.technologies)}} ${urlStr}
+\\begin{itemize}
+${bulletsStr}
+\\end{itemize}`;
+          })
+          .join('\n\n')
+      : '';
+
+  const gpaStr = data.education.gpa ? ` \\textbar\\ \\textbf{GPA:} ${escapeLatex(data.education.gpa)}` : '';
   const eduCert = data.education.certifications
     ? `\n\\vspace{2pt}\n\\textbf{Certifications:} ${escapeLatex(data.education.certifications)}`
     : '';
 
   const eduLatex = `\\textbf{${escapeLatex(data.education.degree)}} \\hfill ${escapeLatex(data.education.dates)} \\\\
-\\textit{${escapeLatex(data.education.school)}}${eduCert}`;
+\\textit{${escapeLatex(data.education.school)}}${gpaStr}${eduCert}`;
 
   return `\\documentclass[10pt,letterpaper]{article}
 \\usepackage[utf8]{inputenc}
@@ -445,7 +485,7 @@ ${bulletsStr}
 \\begin{center}
     {\\LARGE \\textbf{\\color{darkgray} ${escapeLatex(data.name)}}} \\\\ \\vspace{2pt}
     {\\large \\textbf{${escapeLatex(data.title)}}} \\\\ \\vspace{2pt}
-    \\small ${escapeLatex(data.location)} \\ \\textbar\\ \\ ${escapeLatex(data.email)} \\ \\textbar\\ \\ ${escapeLatex(data.linkedin)}
+    \\small ${headerContact}
 \\end{center}
 
 \\vspace{-4pt}
@@ -462,6 +502,7 @@ ${skillsLatex}
 \\vspace{-4pt}\\rule{\\textwidth}{0.8pt}\\vspace{3pt}
 \\small
 ${expLatex}
+${projectsLatex}
 
 \\section*{\\large\\bfseries\\color{primary}\\uppercase{Education \\& Certifications}}
 \\vspace{-4pt}\\rule{\\textwidth}{0.8pt}\\vspace{3pt}
@@ -473,6 +514,7 @@ ${eduLatex}
 }
 
 export function generateMarkdownSource(data: ResumeData): string {
+  const contactParts = [data.location, data.email, data.linkedin, data.github, data.website].filter(Boolean);
   const skillsMd = data.skills.map((s) => `- **${s.category}:** ${s.skills}`).join('\n');
   const expMd = data.experience
     .map((j) => {
@@ -481,11 +523,24 @@ export function generateMarkdownSource(data: ResumeData): string {
     })
     .join('\n\n');
 
+  const projMd =
+    data.projects && data.projects.length > 0
+      ? `\n---\n\n## Key Projects\n` +
+        data.projects
+          .map((p) => {
+            const bullets = p.bullets.map((b) => `  - ${b}`).join('\n');
+            const urlStr = p.url ? ` | [Link](${p.url})` : '';
+            return `### ${p.name} (*${p.technologies}*)${urlStr}\n${bullets}`;
+          })
+          .join('\n\n')
+      : '';
+
+  const gpaMd = data.education.gpa ? ` (GPA: ${data.education.gpa})` : '';
   const certMd = data.education.certifications ? `\n- **Certifications:** ${data.education.certifications}` : '';
 
   return `# ${data.name}
 **${data.title}**  
-*${data.location} | ${data.email} | ${data.linkedin}*
+*${contactParts.join(' | ')}*
 
 ---
 
@@ -500,16 +555,17 @@ ${skillsMd}
 ---
 
 ## Professional Experience
-${expMd}
+${expMd}${projMd}
 
 ---
 
 ## Education & Certifications
-- **${data.education.degree}** -- ${data.education.school} (*${data.education.dates}*)${certMd}
+- **${data.education.degree}** -- ${data.education.school} (*${data.education.dates}*)${gpaMd}${certMd}
 `;
 }
 
 export function generatePlainText(data: ResumeData): string {
+  const contactParts = [data.location, data.email, data.linkedin, data.github, data.website].filter(Boolean);
   const skillsTxt = data.skills.map((s) => `${s.category}: ${s.skills}`).join('\n');
   const expTxt = data.experience
     .map((j) => {
@@ -518,11 +574,24 @@ export function generatePlainText(data: ResumeData): string {
     })
     .join('\n\n');
 
+  const projTxt =
+    data.projects && data.projects.length > 0
+      ? `\n==================================================\nKEY PROJECTS\n==================================================\n` +
+        data.projects
+          .map((p) => {
+            const bullets = p.bullets.map((b) => `  • ${b}`).join('\n');
+            const urlStr = p.url ? ` (${p.url})` : '';
+            return `${p.name.toUpperCase()} [${p.technologies}]${urlStr}\n${bullets}`;
+          })
+          .join('\n\n')
+      : '';
+
+  const gpaTxt = data.education.gpa ? ` | GPA: ${data.education.gpa}` : '';
   const certTxt = data.education.certifications ? `\nCertifications: ${data.education.certifications}` : '';
 
   return `${data.name.toUpperCase()}
 ${data.title}
-${data.location} | ${data.email} | ${data.linkedin}
+${contactParts.join(' | ')}
 
 ==================================================
 PROFESSIONAL SUMMARY
@@ -537,11 +606,12 @@ ${skillsTxt}
 ==================================================
 PROFESSIONAL EXPERIENCE
 ==================================================
-${expTxt}
+${expTxt}${projTxt}
 
 ==================================================
 EDUCATION & CERTIFICATIONS
 ==================================================
-${data.education.degree} -- ${data.education.school} (${data.education.dates})${certTxt}
+${data.education.degree} -- ${data.education.school} (${data.education.dates})${gpaTxt}${certTxt}
 `;
 }
+
