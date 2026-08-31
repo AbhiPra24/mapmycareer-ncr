@@ -17,20 +17,21 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.mapmycareer.online'),
   title: {
-    default: 'MapMyCareer Delhi NCR - Geo-Spatial Job Discovery & Tech Radar',
+    default: 'MapMyCareer - Geo-Spatial Tech Job Discovery & Career Radar',
     template: '%s | MapMyCareer',
   },
   description:
-    'Explore 500+ verified real tech jobs across Gurugram, Noida, and Delhi with interactive map corridors, campus coordinates, commute insights, and salary filters.',
+    'Explore 1,450+ verified real tech jobs across Bengaluru, Delhi NCR, Hyderabad, Pune, Mumbai & major tech hubs with interactive campus coordinates, commute insights, and salary filters.',
   keywords: [
+    'India Tech Jobs',
+    'Bengaluru Software Engineer Jobs',
     'Delhi NCR Tech Jobs',
+    'Hyderabad Tech Openings',
     'Gurgaon Software Engineer Jobs',
     'Noida Developer Jobs',
     'DLF Cyber City Tech Openings',
-    'Golf Course Road Gurgaon Jobs',
-    'Sector 62 Noida IT Jobs',
-    'Noida Expressway Tech Parks',
-    'Aerocity Delhi Tech Jobs',
+    'Outer Ring Road Bangalore Jobs',
+    'HITEC City Hyderabad Jobs',
     'Geospatial Job Radar',
     'MapMyCareer',
     'Tech Jobs Commute Radar',
@@ -54,9 +55,9 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'MapMyCareer Delhi NCR · Geo-Spatial Tech Job Radar',
+    title: 'MapMyCareer · Geo-Spatial Tech Job Discovery & Radar',
     description:
-      'Map-first interactive job discovery for Delhi NCR tech corridors (Gurugram, Noida, Delhi). Explore 500+ verified tech jobs mapped to exact office campuses.',
+      'Map-first interactive job discovery for Indian tech corridors (Bengaluru, Delhi NCR, Hyderabad, Pune, Mumbai). Explore 1,450+ verified tech jobs mapped to exact office campuses.',
     url: 'https://www.mapmycareer.online',
     siteName: 'MapMyCareer',
     locale: 'en_IN',
@@ -72,9 +73,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MapMyCareer Delhi NCR · Geo-Spatial Tech Job Radar',
+    title: 'MapMyCareer · Geo-Spatial Tech Job Discovery & Radar',
     description:
-      'Explore 500+ verified tech jobs mapped to exact office campuses across Gurugram, Noida & Delhi.',
+      'Explore 1,450+ verified tech jobs mapped to exact office campuses across Bengaluru, Delhi NCR, Hyderabad, Pune & Mumbai.',
     images: ['/api/og?title=Geo-Spatial%20Tech%20Job%20Radar&company=India%20Tech%20Hubs&city=Delhi%20NCR%20%7C%20Bengaluru%20%7C%20Hyderabad&hub=DLF%20Cyber%20City%20%7C%20Outer%20Ring%20Road&salary=%E2%82%B925L%20-%20%E2%82%B960L'],
   },
   verification: {
@@ -91,13 +92,13 @@ const jsonLd = {
       url: 'https://www.mapmycareer.online',
       name: 'MapMyCareer',
       description:
-        'Geospatial tech job discovery radar for Delhi NCR (Gurugram, Noida, Delhi).',
+        'Geospatial tech job discovery radar for top tech hubs across India (Bengaluru, Delhi NCR, Hyderabad, Pune, Mumbai).',
       inLanguage: 'en-IN',
     },
     {
       '@type': 'WebApplication',
       '@id': 'https://www.mapmycareer.online/#webapp',
-      name: 'MapMyCareer Delhi NCR Job Radar',
+      name: 'MapMyCareer Tech Job Radar',
       url: 'https://www.mapmycareer.online',
       applicationCategory: 'BusinessApplication',
       operatingSystem: 'All',
@@ -111,7 +112,7 @@ const jsonLd = {
         'Interactive Leaflet Pin Clusters',
         'Hiring Density Heatmaps',
         'Campus & Tech Park Coordinates',
-        '500+ Verified Live Tech Openings in Delhi NCR',
+        '1,450+ Verified Live Tech Openings Across Indian Tech Hubs',
         'Inline Filtering by Stack, Experience, and Work Model',
       ],
     },

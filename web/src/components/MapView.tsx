@@ -20,7 +20,7 @@ const DynamicMap = dynamic(
     loading: () => (
       <div className="flex h-full w-full flex-col items-center justify-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900">
         <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
-        <span className="text-xs font-semibold text-zinc-500">Initializing Delhi NCR Geospatial Engine...</span>
+        <span className="text-xs font-semibold text-zinc-500">Initializing Geospatial Job Radar Engine...</span>
       </div>
     ),
   }
