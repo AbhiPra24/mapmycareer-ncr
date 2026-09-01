@@ -17,6 +17,21 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   hubs,
   onReset,
 }) => {
+  const [localSearch, setLocalSearch] = React.useState(filters.searchQuery);
+
+  React.useEffect(() => {
+    setLocalSearch(filters.searchQuery);
+  }, [filters.searchQuery]);
+
+  React.useEffect(() => {
+    const handler = setTimeout(() => {
+      if (localSearch !== filters.searchQuery) {
+        onFilterChange({ ...filters, searchQuery: localSearch });
+      }
+    }, 150);
+    return () => clearTimeout(handler);
+  }, [localSearch, filters, onFilterChange]);
+
   const experienceOptions = ['Entry', 'Mid', 'Senior', 'Lead'];
   const workplaceOptions = ['Remote', 'Hybrid', 'On-site'];
 
@@ -46,8 +61,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <input
             type="text"
             placeholder="Search role, skills (e.g. React, Python), or company..."
-            value={filters.searchQuery}
-            onChange={(e) => onFilterChange({ ...filters, searchQuery: e.target.value })}
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
             className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 pl-9 pr-3 text-xs font-medium text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400 dark:focus:border-blue-400"
           />
         </div>
