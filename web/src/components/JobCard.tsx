@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { Job } from '../types/job';
 import { getCleanLogoUrl } from '../lib/filterUtils';
-import { MapPin, Building2, Briefcase, IndianRupee, ExternalLink } from 'lucide-react';
+import { MapPin, Building2, Briefcase, IndianRupee, ExternalLink, Bookmark } from 'lucide-react';
 
 interface JobCardProps {
   job: Job;
   isSelected?: boolean;
+  isSaved?: boolean;
   onSelect: (job: Job) => void;
   onHover?: (job: Job | null) => void;
+  onToggleSave?: (job: Job, e: React.MouseEvent) => void;
 }
 
-export const JobCard: React.FC<JobCardProps> = ({ job, isSelected, onSelect, onHover }) => {
+export const JobCard: React.FC<JobCardProps> = ({ job, isSelected, isSaved, onSelect, onHover, onToggleSave }) => {
   const [imgError, setImgError] = useState(false);
 
   const getBadgeColor = (level?: string) => {
@@ -64,15 +66,25 @@ export const JobCard: React.FC<JobCardProps> = ({ job, isSelected, onSelect, onH
               <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400">{job.company}</p>
             </div>
           </div>
-          {job.experience_level && (
-            <span
-              className={`shrink-0 rounded-md px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${getBadgeColor(
-                job.experience_level
-              )}`}
-            >
-              {job.experience_level}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {onToggleSave && (
+              <button
+                onClick={(e) => onToggleSave(job, e)}
+                className={`p-1.5 rounded-md transition ${isSaved ? 'text-rose-500 bg-rose-50 dark:bg-rose-950/30' : 'text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
+              >
+                <Bookmark className="h-4 w-4" fill={isSaved ? 'currentColor' : 'none'} />
+              </button>
+            )}
+            {job.experience_level && (
+              <span
+                className={`shrink-0 rounded-md px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${getBadgeColor(
+                  job.experience_level
+                )}`}
+              >
+                {job.experience_level}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-y-1.5 gap-x-3 text-xs text-zinc-500 dark:text-zinc-400">

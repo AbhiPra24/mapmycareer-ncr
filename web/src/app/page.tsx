@@ -39,7 +39,34 @@ export default function Home() {
     workplaceModels: [],
     minSalaryLPA: 0,
     selectedSkills: [],
+    showSavedOnly: false,
   });
+
+  const [savedJobIds, setSavedJobIds] = useState<Set<string | number>>(new Set());
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('savedJobs');
+      if (saved) {
+        setSavedJobIds(new Set(JSON.parse(saved)));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  const toggleSaveJob = (jobId: string | number) => {
+    setSavedJobIds(prev => {
+      const next = new Set(prev);
+      if (next.has(jobId)) {
+        next.delete(jobId);
+      } else {
+        next.add(jobId);
+      }
+      localStorage.setItem('savedJobs', JSON.stringify(Array.from(next)));
+      return next;
+    });
+  };
 
   // Fetch jobs dataset
   useEffect(() => {
@@ -61,8 +88,8 @@ export default function Home() {
   const { cities, hubs } = useMemo(() => extractUniqueValues(allJobs), [allJobs]);
 
   const filteredJobs = useMemo(() => {
-    return filterJobs(allJobs, filters);
-  }, [allJobs, filters]);
+    return filterJobs(allJobs, filters, savedJobIds);
+  }, [allJobs, filters, savedJobIds]);
 
   const handleResetFilters = () => {
     setFilters({
@@ -179,11 +206,16 @@ export default function Home() {
                     key={job.id}
                     job={job}
                     isSelected={selectedJob?.id === job.id}
+                    isSaved={savedJobIds.has(job.id)}
                     onSelect={(j) => {
                       setSelectedJob(j);
                       setModalJob(j);
                     }}
                     onHover={(j) => setHoveredJob(j)}
+                    onToggleSave={(j, e) => {
+                      e.stopPropagation();
+                      toggleSaveJob(j.id);
+                    }}
                   />
                 ))}
               </div>
@@ -208,7 +240,9 @@ export default function Home() {
       {/* Job Details Popup Modal */}
       <JobDetailsModal
         job={modalJob}
+        isSaved={modalJob ? savedJobIds.has(modalJob.id) : false}
         onClose={() => setModalJob(null)}
+        onToggleSave={() => modalJob && toggleSaveJob(modalJob.id)}
         onAuditResume={handleAuditForJob}
         onGenerateResume={handleGenerateForJob}
         onVerifyRecruiter={handleVerifyRecruiterForJob}

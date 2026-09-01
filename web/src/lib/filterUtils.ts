@@ -47,8 +47,12 @@ export function getCleanLogoUrl(company: string, domain?: string): string | null
   return null;
 }
 
-export function filterJobs(jobs: Job[], filters: FilterState): Job[] {
+export function filterJobs(jobs: Job[], filters: FilterState, savedJobIds?: Set<string | number>): Job[] {
   let result = jobs;
+
+  if (filters.showSavedOnly && savedJobIds) {
+    result = result.filter(j => savedJobIds.has(j.id));
+  }
 
   // 1. Fuzzy Search query
   if (filters.searchQuery && filters.searchQuery.trim()) {

@@ -28,4 +28,5 @@ export interface FilterState {
   workplaceModels: string[];
   minSalaryLPA: number;
   selectedSkills: string[];
+  showSavedOnly?: boolean;
 }

@@ -150,6 +150,21 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           })}
         </div>
 
+        {/* Saved Jobs Filter */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onFilterChange({ ...filters, showSavedOnly: !filters.showSavedOnly })}
+            className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition ${
+              filters.showSavedOnly
+                ? 'bg-rose-500 text-white shadow-sm shadow-rose-500/20'
+                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
+            }`}
+          >
+            <span className="hidden sm:inline">Saved Jobs</span>
+            <span className="sm:hidden">Saved</span>
+          </button>
+        </div>
+
         {/* Min Salary Filter */}
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
