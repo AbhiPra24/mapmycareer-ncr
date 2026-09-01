@@ -39,7 +39,34 @@ export default function Home() {
     workplaceModels: [],
     minSalaryLPA: 0,
     selectedSkills: [],
+    showSavedOnly: false,
   });
+
+  const [savedJobIds, setSavedJobIds] = useState<Set<string | number>>(new Set());
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('savedJobs');
+      if (saved) {
+        setSavedJobIds(new Set(JSON.parse(saved)));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  const toggleSaveJob = (jobId: string | number) => {
+    setSavedJobIds(prev => {
+      const next = new Set(prev);
+      if (next.has(jobId)) {
+        next.delete(jobId);
+      } else {
+        next.add(jobId);
+      }
+      localStorage.setItem('savedJobs', JSON.stringify(Array.from(next)));
+      return next;
+    });
+  };
 
   // Fetch jobs dataset
   useEffect(() => {
@@ -61,8 +88,28 @@ export default function Home() {
   const { cities, hubs } = useMemo(() => extractUniqueValues(allJobs), [allJobs]);
 
   const filteredJobs = useMemo(() => {
-    return filterJobs(allJobs, filters);
-  }, [allJobs, filters]);
+    return filterJobs(allJobs, filters, savedJobIds);
+  }, [allJobs, filters, savedJobIds]);
+
+  const [displayLimit, setDisplayLimit] = useState<number>(40);
+
+  // Reset displayLimit whenever filters change
+  useEffect(() => {
+    setDisplayLimit(40);
+  }, [filters]);
+
+  const displayedJobs = useMemo(() => {
+    return filteredJobs.slice(0, displayLimit);
+  }, [filteredJobs, displayLimit]);
+
+  const handleScrollFeed = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop - clientHeight < 300) {
+      if (displayLimit < filteredJobs.length) {
+        setDisplayLimit((prev) => Math.min(prev + 40, filteredJobs.length));
+      }
+    }
+  };
 
   const handleResetFilters = () => {
     setFilters({
@@ -155,7 +202,10 @@ export default function Home() {
         {/* Split Screen Content: Left Job Feed, Right Geospatial Map */}
         <div className="grid flex-1 grid-cols-1 gap-3 overflow-hidden lg:grid-cols-12">
           {/* Left: Job Cards List */}
-          <div className="flex h-full flex-col overflow-y-auto pr-1 lg:col-span-5 xl:col-span-4">
+          <div
+            onScroll={handleScrollFeed}
+            className="flex h-full flex-col overflow-y-auto pr-1 lg:col-span-5 xl:col-span-4"
+          >
             {filteredJobs.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-white p-8 text-center dark:border-zinc-800 dark:bg-zinc-900/50">
                 <AlertCircle className="h-8 w-8 text-zinc-400" />
@@ -174,18 +224,28 @@ export default function Home() {
               </div>
             ) : (
               <div className="flex flex-col gap-2.5 pb-6">
-                {filteredJobs.map((job) => (
+                {displayedJobs.map((job) => (
                   <JobCard
                     key={job.id}
                     job={job}
                     isSelected={selectedJob?.id === job.id}
+                    isSaved={savedJobIds.has(job.id)}
                     onSelect={(j) => {
                       setSelectedJob(j);
                       setModalJob(j);
                     }}
                     onHover={(j) => setHoveredJob(j)}
+                    onToggleSave={(j, e) => {
+                      e.stopPropagation();
+                      toggleSaveJob(j.id);
+                    }}
                   />
                 ))}
+                {displayLimit < filteredJobs.length && (
+                  <div className="py-2 text-center text-xs text-zinc-400">
+                    Scroll down to load more ({displayedJobs.length} of {filteredJobs.length} loaded)...
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -208,7 +268,9 @@ export default function Home() {
       {/* Job Details Popup Modal */}
       <JobDetailsModal
         job={modalJob}
+        isSaved={modalJob ? savedJobIds.has(modalJob.id) : false}
         onClose={() => setModalJob(null)}
+        onToggleSave={() => modalJob && toggleSaveJob(modalJob.id)}
         onAuditResume={handleAuditForJob}
         onGenerateResume={handleGenerateForJob}
         onVerifyRecruiter={handleVerifyRecruiterForJob}

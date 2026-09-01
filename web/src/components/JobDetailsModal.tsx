@@ -11,11 +11,14 @@ import {
   Zap,
   FileCode2,
   MailCheck,
+  Bookmark,
 } from 'lucide-react';
 
 interface JobDetailsModalProps {
   job: Job | null;
+  isSaved?: boolean;
   onClose: () => void;
+  onToggleSave?: () => void;
   onAuditResume?: (job: Job) => void;
   onGenerateResume?: (job: Job) => void;
   onVerifyRecruiter?: (job: Job) => void;
@@ -23,7 +26,9 @@ interface JobDetailsModalProps {
 
 export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
   job,
+  isSaved,
   onClose,
+  onToggleSave,
   onAuditResume,
   onGenerateResume,
   onVerifyRecruiter,
@@ -31,7 +36,7 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
   if (!job) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
       <div
         className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
         onClick={(e) => e.stopPropagation()}
@@ -43,22 +48,38 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
           <X className="h-5 w-5" />
         </button>
 
-        <div className="flex items-start gap-4">
-          {job.company_logo ? (
-            <img
-              src={job.company_logo}
-              alt={job.company}
-              className="h-14 w-14 rounded-xl border border-zinc-100 object-contain p-1 dark:border-zinc-800 dark:bg-zinc-800"
-            />
-          ) : (
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
-              <Building2 className="h-7 w-7" />
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-4">
+            {job.company_logo ? (
+              <img
+                src={job.company_logo}
+                alt={job.company}
+                className="h-14 w-14 rounded-xl border border-zinc-100 object-contain p-1 dark:border-zinc-800 dark:bg-zinc-800"
+              />
+            ) : (
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                <Building2 className="h-7 w-7" />
+              </div>
+            )}
+            <div>
+              <h2 className="text-lg font-bold text-zinc-900 dark:text-white">{job.title}</h2>
+              <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">{job.company}</p>
             </div>
-          )}
-          <div>
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-white">{job.title}</h2>
-            <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">{job.company}</p>
           </div>
+          
+          {onToggleSave && (
+            <button
+              onClick={onToggleSave}
+              className={`mr-8 p-2 rounded-lg border transition ${
+                isSaved 
+                  ? 'border-rose-200 bg-rose-50 text-rose-600 dark:border-rose-900/50 dark:bg-rose-900/20 dark:text-rose-400' 
+                  : 'border-zinc-200 bg-white text-zinc-400 hover:bg-zinc-50 hover:text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-500 dark:hover:text-zinc-300'
+              }`}
+              title={isSaved ? "Remove from saved" : "Save job"}
+            >
+              <Bookmark className="h-5 w-5" fill={isSaved ? 'currentColor' : 'none'} />
+            </button>
+          )}
         </div>
 
         <div className="mt-5 grid grid-cols-2 gap-3 rounded-xl bg-zinc-50 p-3.5 dark:bg-zinc-800/50">

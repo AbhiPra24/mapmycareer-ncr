@@ -85,6 +85,18 @@ function MapController({
     }
   }, [selectedJob, hoveredJob, map]);
 
+  useEffect(() => {
+    const handleFlyTo = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const { lat, lon, zoom } = customEvent.detail;
+      if (lat && lon) {
+        map.flyTo([lat, lon], zoom || 11, { duration: 0.6 });
+      }
+    };
+    window.addEventListener('flyTo', handleFlyTo);
+    return () => window.removeEventListener('flyTo', handleFlyTo);
+  }, [map]);
+
   return null;
 }
 
@@ -188,6 +200,52 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
           );
         })}
       </MapContainer>
+
+      {/* Map Actions Overlay */}
+      <div className="absolute top-4 right-4 z-[400] flex flex-col gap-2">
+        <button
+          onClick={() => {
+            if ('geolocation' in navigator) {
+              navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                  const { latitude, longitude } = pos.coords;
+                  // we can use a ref or custom event for geolocation
+                  // since we don't have map ref here directly easily, let's use a state or just let the user know
+                  window.dispatchEvent(new CustomEvent('flyTo', { detail: { lat: latitude, lon: longitude, zoom: 12 } }));
+                },
+                (err) => alert('Geolocation error: ' + err.message)
+              );
+            } else {
+              alert('Geolocation is not supported by your browser.');
+            }
+          }}
+          className="rounded-lg border border-zinc-200/80 bg-white/90 px-3 py-1.5 shadow-md backdrop-blur-md text-xs font-bold text-blue-600 hover:bg-blue-50 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-blue-400 dark:hover:bg-zinc-800"
+        >
+          📍 Find jobs near me
+        </button>
+      </div>
+
+      <div className="absolute top-4 left-4 right-32 z-[400] flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        {[
+          { name: 'NCR', coords: [28.5355, 77.3910] },
+          { name: 'Bengaluru', coords: [12.9716, 77.5946] },
+          { name: 'Hyderabad', coords: [17.3850, 78.4867] },
+          { name: 'Pune', coords: [18.5204, 73.8567] },
+          { name: 'Mumbai', coords: [19.0760, 72.8777] },
+          { name: 'Chennai', coords: [13.0827, 80.2707] },
+          { name: 'Kolkata', coords: [22.5726, 88.3639] },
+          { name: 'GIFT City', coords: [23.1600, 72.6845] },
+          { name: 'Kochi', coords: [9.9312, 76.2673] },
+        ].map(city => (
+          <button
+            key={city.name}
+            onClick={() => window.dispatchEvent(new CustomEvent('flyTo', { detail: { lat: city.coords[0], lon: city.coords[1], zoom: 11 } }))}
+            className="whitespace-nowrap rounded-full border border-zinc-200/80 bg-white/90 px-3 py-1 shadow-sm backdrop-blur-md text-[11px] font-bold text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          >
+            {city.name}
+          </button>
+        ))}
+      </div>
 
       {/* Map Legend */}
       <div className="absolute bottom-4 left-4 z-[400] flex items-center gap-3 rounded-lg border border-zinc-200/80 bg-white/90 px-3 py-1.5 shadow-md backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-900/90">
