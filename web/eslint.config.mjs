@@ -20,6 +20,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Playwright runner scripts (Node.js CJS — require() is intentional)
+    "verify_cluster_map.js",
+    "verify_*.js",
   ]),
 ]);
 
