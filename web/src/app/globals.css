@@ -60,3 +60,48 @@ body {
   z-index: 20 !important;
 }
 
+/* ─── Company cluster popup styles ─────────────────────────────────────────── */
+/* Remove the default Leaflet popup tip/arrow for cluster popups */
+.company-cluster-popup .leaflet-popup-tip-container {
+  display: none !important;
+}
+
+/* Clean up popup wrapper */
+.company-cluster-popup .leaflet-popup-content-wrapper {
+  border-radius: 14px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+  padding: 0 !important;
+  border: 1px solid #e4e4e7;
+  overflow: hidden;
+}
+
+/* Make popup content scrollable when many positions */
+.company-cluster-popup .leaflet-popup-content {
+  margin: 0 !important;
+  max-height: 380px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.company-cluster-popup .leaflet-popup-content::-webkit-scrollbar {
+  width: 4px;
+}
+.company-cluster-popup .leaflet-popup-content::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+/* Remove Leaflet default close button from cluster popups */
+.company-cluster-popup .leaflet-popup-close-button {
+  top: 8px !important;
+  right: 8px !important;
+  color: #71717a !important;
+  font-size: 18px !important;
+}
+
+/* Custom company pin — prevent Leaflet from adding its own background */
+.custom-company-cluster-pin {
+  background: none !important;
+  border: none !important;
+}
+
