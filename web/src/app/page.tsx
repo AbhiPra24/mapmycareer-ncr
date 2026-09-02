@@ -285,7 +285,12 @@ export default function Home() {
             <span>Jobs ({filteredJobs.length})</span>
           </button>
           <button
-            onClick={() => setMobileTab('map')}
+            onClick={() => {
+              setMobileTab('map');
+              setTimeout(() => {
+                window.dispatchEvent(new Event('mapInvalidateSize'));
+              }, 50);
+            }}
             className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-all ${
               mobileTab === 'map'
                 ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'

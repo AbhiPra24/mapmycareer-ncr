@@ -33,6 +33,17 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
   onGenerateResume,
   onVerifyRecruiter,
 }) => {
+  React.useEffect(() => {
+    if (!job) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [job, onClose]);
+
   if (!job) return null;
 
   return (

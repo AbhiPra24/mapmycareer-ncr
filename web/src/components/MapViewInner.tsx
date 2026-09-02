@@ -150,7 +150,7 @@ const createClusterIcon = (cluster: CompanyCluster, isActive: boolean) => {
   });
 };
 
-// ─── Map flyTo controller ─────────────────────────────────────────────────────
+// ─── Map flyTo & resize controller ─────────────────────────────────────────────
 function MapController({
   selectedJob,
   hoveredJob,
@@ -159,6 +159,41 @@ function MapController({
   hoveredJob: Job | null;
 }) {
   const map = useMap();
+
+  // Invalidate size on mount, resize, tab switch, and container size changes
+  useEffect(() => {
+    map.invalidateSize();
+
+    // Auto-invalidate size when container becomes visible or resizes
+    const container = map.getContainer();
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && container) {
+      resizeObserver = new ResizeObserver(() => {
+        map.invalidateSize();
+      });
+      resizeObserver.observe(container);
+    }
+
+    const timer1 = setTimeout(() => map.invalidateSize(), 100);
+    const timer2 = setTimeout(() => map.invalidateSize(), 300);
+
+    const handleInvalidate = () => {
+      map.invalidateSize();
+    };
+
+    window.addEventListener('resize', handleInvalidate);
+    window.addEventListener('orientationchange', handleInvalidate);
+    window.addEventListener('mapInvalidateSize', handleInvalidate);
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      if (resizeObserver) resizeObserver.disconnect();
+      window.removeEventListener('resize', handleInvalidate);
+      window.removeEventListener('orientationchange', handleInvalidate);
+      window.removeEventListener('mapInvalidateSize', handleInvalidate);
+    };
+  }, [map]);
 
   useEffect(() => {
     const target = selectedJob || hoveredJob;
@@ -338,8 +373,8 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
         })}
       </MapContainer>
 
-      {/* Cluster count badge overlay */}
-      <div className="absolute bottom-16 sm:bottom-4 right-3 sm:right-4 z-[400] rounded-lg border border-zinc-200/80 bg-white/90 px-2.5 py-1 sm:px-3 sm:py-1.5 shadow-md backdrop-blur-md text-[11px] sm:text-xs font-semibold text-zinc-600 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-zinc-300">
+      {/* Cluster count badge overlay (visible on tablet/desktop) */}
+      <div className="hidden sm:block absolute bottom-4 right-4 z-[400] rounded-lg border border-zinc-200/80 bg-white/90 px-3 py-1.5 shadow-md backdrop-blur-md text-xs font-semibold text-zinc-600 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-zinc-300">
         <span className="text-blue-600 font-bold dark:text-blue-400">{clusters.length}</span> companies ·{' '}
         <span className="text-zinc-800 font-bold dark:text-zinc-200">{validJobs.length}</span> positions
       </div>

@@ -189,6 +189,10 @@ async function test(label, fn) {
 
   // 12. Mobile Tab Switching to Map
   await test('Switching to Map View on mobile activates full-screen map', async () => {
+    // Ensure any open modal is closed first
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+
     await page.evaluate(() => {
       const mapBtn = Array.from(document.querySelectorAll('button')).find(
         (b) => b.textContent && b.textContent.includes('Map View')
