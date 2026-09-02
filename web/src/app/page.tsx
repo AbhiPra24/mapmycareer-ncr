@@ -12,7 +12,7 @@ import { AtsAuditModal } from '../components/AtsAuditModal';
 import { ResumeBuilderModal } from '../components/ResumeBuilderModal';
 import { RecruiterValidatorModal } from '../components/RecruiterValidatorModal';
 import { AnnouncementBanner } from '../components/AnnouncementBanner';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, List, Map } from 'lucide-react';
 
 export default function Home() {
   const [allJobs, setAllJobs] = useState<Job[]>([]);
@@ -20,6 +20,7 @@ export default function Home() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [hoveredJob, setHoveredJob] = useState<Job | null>(null);
   const [modalJob, setModalJob] = useState<Job | null>(null);
+  const [mobileTab, setMobileTab] = useState<'list' | 'map'>('list');
 
   // CareerForge Modals State
   const [isAtsModalOpen, setIsAtsModalOpen] = useState<boolean>(false);
@@ -200,11 +201,13 @@ export default function Home() {
         />
 
         {/* Split Screen Content: Left Job Feed, Right Geospatial Map */}
-        <div className="grid flex-1 grid-cols-1 gap-3 overflow-hidden lg:grid-cols-12">
+        <div className="relative grid flex-1 grid-cols-1 gap-3 overflow-hidden lg:grid-cols-12">
           {/* Left: Job Cards List */}
           <div
             onScroll={handleScrollFeed}
-            className="flex h-full flex-col overflow-y-auto pr-1 lg:col-span-5 xl:col-span-4"
+            className={`h-full flex-col overflow-y-auto pr-1 lg:col-span-5 xl:col-span-4 ${
+              mobileTab === 'list' ? 'flex' : 'hidden lg:flex'
+            }`}
           >
             {filteredJobs.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-white p-8 text-center dark:border-zinc-800 dark:bg-zinc-900/50">
@@ -223,7 +226,7 @@ export default function Home() {
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col gap-2.5 pb-6">
+              <div className="flex flex-col gap-2.5 pb-20 lg:pb-6">
                 {displayedJobs.map((job) => (
                   <JobCard
                     key={job.id}
@@ -251,7 +254,11 @@ export default function Home() {
           </div>
 
           {/* Right: Map Explorer */}
-          <div className="h-[400px] w-full lg:h-full lg:col-span-7 xl:col-span-8">
+          <div
+            className={`h-full w-full lg:col-span-7 xl:col-span-8 ${
+              mobileTab === 'map' ? 'block' : 'hidden lg:block'
+            }`}
+          >
             <MapView
               jobs={filteredJobs}
               selectedJob={selectedJob}
@@ -262,6 +269,32 @@ export default function Home() {
               }}
             />
           </div>
+        </div>
+
+        {/* Mobile Floating View Switcher Pill */}
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1 rounded-full border border-zinc-200/80 bg-zinc-900/90 p-1.5 shadow-2xl backdrop-blur-md dark:border-zinc-700/80 dark:bg-zinc-900/95 lg:hidden">
+          <button
+            onClick={() => setMobileTab('list')}
+            className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-all ${
+              mobileTab === 'list'
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <List className="h-4 w-4" />
+            <span>Jobs ({filteredJobs.length})</span>
+          </button>
+          <button
+            onClick={() => setMobileTab('map')}
+            className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-all ${
+              mobileTab === 'map'
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <Map className="h-4 w-4" />
+            <span>Map View</span>
+          </button>
         </div>
       </div>
 

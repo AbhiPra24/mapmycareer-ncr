@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Compass, Sparkles, Layers, FileCode2, Zap, MailCheck } from 'lucide-react';
+import { Compass, Layers, FileCode2, Zap, MailCheck } from 'lucide-react';
 
 interface HeaderProps {
   totalJobs: number;
@@ -37,8 +37,36 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-3">
-        {/* CareerForge Utility Quick Launchers */}
+      <div className="flex items-center gap-1.5 sm:gap-3">
+        {/* Mobile quick launcher icons (visible on small screens) */}
+        <div className="flex items-center gap-1 md:hidden">
+          <button
+            onClick={onOpenAtsAuditor}
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-200/80 bg-blue-50/70 text-blue-700 transition hover:bg-blue-100 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-300"
+            title="ATS Auditor"
+            aria-label="ATS Auditor"
+          >
+            <Zap className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          </button>
+          <button
+            onClick={onOpenResumeBuilder}
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-emerald-200/80 bg-emerald-50/70 text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300"
+            title="Resume Builder"
+            aria-label="Resume Builder"
+          >
+            <FileCode2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+          </button>
+          <button
+            onClick={onOpenRecruiterValidator}
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-purple-200/80 bg-purple-50/70 text-purple-700 transition hover:bg-purple-100 dark:border-purple-900/60 dark:bg-purple-950/40 dark:text-purple-300"
+            title="Recruiter Radar"
+            aria-label="Recruiter Radar"
+          >
+            <MailCheck className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+          </button>
+        </div>
+
+        {/* Desktop CareerForge Utility Quick Launchers */}
         <div className="hidden items-center gap-1.5 md:flex">
           <button
             onClick={onOpenAtsAuditor}
@@ -69,10 +97,13 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Job Counter Badge */}
-        <div className="flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-medium text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+        <div className="flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-xs font-medium text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 sm:px-3">
           <Layers className="h-3.5 w-3.5 text-blue-500" />
-          <span>
+          <span className="hidden sm:inline">
             Showing <strong className="text-zinc-900 dark:text-white">{filteredCount}</strong> of {totalJobs} jobs
+          </span>
+          <span className="sm:hidden">
+            <strong className="text-zinc-900 dark:text-white">{filteredCount}</strong> jobs
           </span>
         </div>
       </div>

@@ -161,12 +161,53 @@ async function test(label, fn) {
     console.log(`       (modal class: "${modalVisible}")`);
   });
 
-  // 10. Screenshot
-  await test('Screenshot captured for visual review', async () => {
+  // 10. Screenshot Desktop
+  await test('Desktop screenshot captured for visual review', async () => {
     await page.keyboard.press('Escape');
     await page.waitForTimeout(400);
     await page.screenshot({
       path: '/Users/abhipra/Developer/Github/mapmycareer-ncr/web/playwright_cluster_map_verified.png',
+      fullPage: false,
+    });
+  });
+
+  // 11. Mobile Viewport & Switcher Pill Verification
+  await test('Mobile viewport renders floating switcher pill (Jobs vs Map View)', async () => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.waitForTimeout(600);
+
+    // Floating pill switcher is visible on mobile
+    const pillText = await page.evaluate(() => {
+      const btn = Array.from(document.querySelectorAll('button')).find(
+        (b) => b.textContent && b.textContent.includes('Map View')
+      );
+      return btn ? btn.textContent.trim() : null;
+    });
+    if (!pillText) throw new Error('Mobile floating view switcher pill not found');
+    console.log(`       (found mobile pill: "${pillText}")`);
+  });
+
+  // 12. Mobile Tab Switching to Map
+  await test('Switching to Map View on mobile activates full-screen map', async () => {
+    await page.evaluate(() => {
+      const mapBtn = Array.from(document.querySelectorAll('button')).find(
+        (b) => b.textContent && b.textContent.includes('Map View')
+      );
+      if (mapBtn) mapBtn.click();
+    });
+    await page.waitForTimeout(600);
+
+    const mapVisible = await page.evaluate(() => {
+      const map = document.querySelector('.leaflet-container');
+      return map ? !map.closest('.hidden') : false;
+    });
+    if (!mapVisible) throw new Error('Map container is not visible after tapping Map View on mobile');
+  });
+
+  // 13. Mobile Screenshot
+  await test('Mobile screenshot captured for visual review', async () => {
+    await page.screenshot({
+      path: '/Users/abhipra/Developer/Github/mapmycareer-ncr/web/playwright_mobile_verified.png',
       fullPage: false,
     });
   });
