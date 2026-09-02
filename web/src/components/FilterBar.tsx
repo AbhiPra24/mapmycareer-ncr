@@ -1,6 +1,6 @@
 import React from 'react';
 import { FilterState } from '../types/job';
-import { Search, MapPin, Briefcase, SlidersHorizontal, IndianRupee, RotateCcw } from 'lucide-react';
+import { Search, SlidersHorizontal, IndianRupee, RotateCcw } from 'lucide-react';
 
 interface FilterBarProps {
   filters: FilterState;
@@ -18,6 +18,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   onReset,
 }) => {
   const [localSearch, setLocalSearch] = React.useState(filters.searchQuery);
+  const [isMobileExpanded, setIsMobileExpanded] = React.useState(false);
 
   React.useEffect(() => {
     setLocalSearch(filters.searchQuery);
@@ -51,24 +52,52 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     onFilterChange({ ...filters, workplaceModels: updated });
   };
 
+  const activeFiltersCount =
+    (filters.selectedCity !== 'All Cities' ? 1 : 0) +
+    (filters.selectedHub !== 'All Hubs' ? 1 : 0) +
+    filters.experienceLevels.length +
+    filters.workplaceModels.length +
+    (filters.minSalaryLPA > 0 ? 1 : 0) +
+    (filters.showSavedOnly ? 1 : 0);
+
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-3.5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90">
+    <div className="flex flex-col gap-2.5 sm:gap-3 rounded-xl border border-zinc-200 bg-white p-3 sm:p-3.5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90">
       {/* Top Search & Dropdown Row */}
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-12">
-        {/* Search input */}
-        <div className="relative md:col-span-4">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400 dark:text-zinc-500" />
-          <input
-            type="text"
-            placeholder="Search role, skills (e.g. React, Python), or company..."
-            value={localSearch}
-            onChange={(e) => setLocalSearch(e.target.value)}
-            className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 pl-9 pr-3 text-xs font-medium text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400 dark:focus:border-blue-400"
-          />
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-12">
+        {/* Search input + Mobile filter toggle */}
+        <div className="flex items-center gap-2 md:col-span-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400 dark:text-zinc-500" />
+            <input
+              type="text"
+              placeholder="Search role, skills, or company..."
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
+              className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 pl-9 pr-3 text-xs font-medium text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400 dark:focus:border-blue-400"
+            />
+          </div>
+
+          {/* Mobile Filter Expand Toggle */}
+          <button
+            onClick={() => setIsMobileExpanded((prev) => !prev)}
+            className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-semibold sm:hidden transition ${
+              isMobileExpanded || activeFiltersCount > 0
+                ? 'border-blue-500 bg-blue-50 text-blue-600 dark:border-blue-500 dark:bg-blue-950/50 dark:text-blue-400'
+                : 'border-zinc-200 bg-zinc-50 text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
+            }`}
+            title="Toggle filters"
+          >
+            <SlidersHorizontal className="h-3.5 w-3.5" />
+            {activeFiltersCount > 0 && (
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+                {activeFiltersCount}
+              </span>
+            )}
+          </button>
         </div>
 
         {/* City Filter */}
-        <div className="md:col-span-3">
+        <div className={`md:col-span-3 ${isMobileExpanded ? 'block' : 'hidden sm:block'}`}>
           <select
             value={filters.selectedCity}
             onChange={(e) =>
@@ -90,7 +119,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </div>
 
         {/* Hub Filter */}
-        <div className="md:col-span-3">
+        <div className={`md:col-span-3 ${isMobileExpanded ? 'block' : 'hidden sm:block'}`}>
           <select
             value={filters.selectedHub}
             onChange={(e) => onFilterChange({ ...filters, selectedHub: e.target.value })}
@@ -106,7 +135,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </div>
 
         {/* Reset button */}
-        <div className="flex items-center md:col-span-2">
+        <div className={`items-center md:col-span-2 ${isMobileExpanded ? 'flex' : 'hidden sm:flex'}`}>
           <button
             onClick={onReset}
             className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-100 py-2 px-3 text-xs font-medium text-zinc-600 transition hover:bg-zinc-200 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-white"
@@ -118,7 +147,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       </div>
 
       {/* Filter Badges & Sliders Row */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-100 pt-3 dark:border-zinc-800/60">
+      <div className={`flex flex-wrap items-center justify-between gap-3 border-t border-zinc-100 pt-2.5 dark:border-zinc-800/60 ${
+        isMobileExpanded ? 'flex' : 'hidden sm:flex'
+      }`}>
         {/* Experience Pills */}
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">

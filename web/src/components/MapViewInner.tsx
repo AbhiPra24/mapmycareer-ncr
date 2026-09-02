@@ -5,7 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Job } from '../types/job';
-import { ExternalLink, Building2, X, ChevronRight } from 'lucide-react';
+import { ExternalLink, ChevronRight } from 'lucide-react';
 
 interface MapViewInnerProps {
   jobs: Job[];
@@ -150,7 +150,7 @@ const createClusterIcon = (cluster: CompanyCluster, isActive: boolean) => {
   });
 };
 
-// ─── Map flyTo controller ─────────────────────────────────────────────────────
+// ─── Map flyTo & resize controller ─────────────────────────────────────────────
 function MapController({
   selectedJob,
   hoveredJob,
@@ -159,6 +159,41 @@ function MapController({
   hoveredJob: Job | null;
 }) {
   const map = useMap();
+
+  // Invalidate size on mount, resize, tab switch, and container size changes
+  useEffect(() => {
+    map.invalidateSize();
+
+    // Auto-invalidate size when container becomes visible or resizes
+    const container = map.getContainer();
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && container) {
+      resizeObserver = new ResizeObserver(() => {
+        map.invalidateSize();
+      });
+      resizeObserver.observe(container);
+    }
+
+    const timer1 = setTimeout(() => map.invalidateSize(), 100);
+    const timer2 = setTimeout(() => map.invalidateSize(), 300);
+
+    const handleInvalidate = () => {
+      map.invalidateSize();
+    };
+
+    window.addEventListener('resize', handleInvalidate);
+    window.addEventListener('orientationchange', handleInvalidate);
+    window.addEventListener('mapInvalidateSize', handleInvalidate);
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      if (resizeObserver) resizeObserver.disconnect();
+      window.removeEventListener('resize', handleInvalidate);
+      window.removeEventListener('orientationchange', handleInvalidate);
+      window.removeEventListener('mapInvalidateSize', handleInvalidate);
+    };
+  }, [map]);
 
   useEffect(() => {
     const target = selectedJob || hoveredJob;
@@ -297,17 +332,20 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
   const validJobs = jobs.filter((j) => j.lat && j.lon);
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-xl border border-zinc-200 shadow-sm dark:border-zinc-800">
+    <div className="relative h-full w-full overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
       <MapContainer
         center={NCR_CENTER}
         zoom={NCR_ZOOM}
         scrollWheelZoom={true}
         className="h-full w-full"
-        style={{ minHeight: '100%', width: '100%', background: '#09090b' }}
+        style={{ minHeight: '100%', height: '100%', width: '100%', background: '#e5e7eb' }}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          keepBuffer={6}
+          updateWhenIdle={false}
+          updateWhenZooming={true}
         />
 
         <MapController selectedJob={selectedJob} hoveredJob={hoveredJob} />
@@ -338,14 +376,14 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
         })}
       </MapContainer>
 
-      {/* Cluster count badge overlay */}
-      <div className="absolute bottom-4 right-4 z-[400] rounded-lg border border-zinc-200/80 bg-white/90 px-3 py-1.5 shadow-md backdrop-blur-md text-xs font-semibold text-zinc-600 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-zinc-300">
+      {/* Cluster count badge overlay (visible on tablet/desktop) */}
+      <div className="hidden sm:block absolute bottom-4 right-4 z-[400] rounded-lg border border-zinc-200/80 bg-white/90 px-3 py-1.5 shadow-md backdrop-blur-md text-xs font-semibold text-zinc-600 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-zinc-300">
         <span className="text-blue-600 font-bold dark:text-blue-400">{clusters.length}</span> companies ·{' '}
         <span className="text-zinc-800 font-bold dark:text-zinc-200">{validJobs.length}</span> positions
       </div>
 
       {/* Map Actions Overlay */}
-      <div className="absolute top-4 right-4 z-[400] flex flex-col gap-2">
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-[400] flex flex-col gap-2">
         <button
           onClick={() => {
             if ('geolocation' in navigator) {
@@ -362,14 +400,16 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
               alert('Geolocation is not supported by your browser.');
             }
           }}
-          className="rounded-lg border border-zinc-200/80 bg-white/90 px-3 py-1.5 shadow-md backdrop-blur-md text-xs font-bold text-blue-600 hover:bg-blue-50 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-blue-400 dark:hover:bg-zinc-800"
+          className="rounded-lg border border-zinc-200/80 bg-white/90 px-2.5 py-1.5 sm:px-3 text-xs font-bold text-blue-600 shadow-md backdrop-blur-md hover:bg-blue-50 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-blue-400 dark:hover:bg-zinc-800"
+          title="Find jobs near me"
         >
-          📍 Find jobs near me
+          <span className="hidden sm:inline">📍 Find jobs near me</span>
+          <span className="sm:hidden">📍 Near me</span>
         </button>
       </div>
 
       {/* City quick-nav */}
-      <div className="absolute top-4 left-4 right-32 z-[400] flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="absolute top-3 left-3 right-24 sm:top-4 sm:left-4 sm:right-36 z-[400] flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {[
           { name: 'NCR',       coords: [28.5355, 77.3910] },
           { name: 'Bengaluru', coords: [12.9716, 77.5946] },
@@ -388,7 +428,7 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
                 new CustomEvent('flyTo', { detail: { lat: city.coords[0], lon: city.coords[1], zoom: 11 } })
               )
             }
-            className="whitespace-nowrap rounded-full border border-zinc-200/80 bg-white/90 px-3 py-1 shadow-sm backdrop-blur-md text-[11px] font-bold text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            className="whitespace-nowrap rounded-full border border-zinc-200/80 bg-white/90 px-2.5 py-0.5 sm:px-3 sm:py-1 shadow-sm backdrop-blur-md text-[10px] sm:text-[11px] font-bold text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >
             {city.name}
           </button>
@@ -396,7 +436,7 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
       </div>
 
       {/* Map Legend */}
-      <div className="absolute bottom-4 left-4 z-[400] flex items-center gap-3 rounded-lg border border-zinc-200/80 bg-white/90 px-3 py-1.5 shadow-md backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-900/90">
+      <div className="hidden sm:flex absolute bottom-4 left-4 z-[400] items-center gap-3 rounded-lg border border-zinc-200/80 bg-white/90 px-3 py-1.5 shadow-md backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-900/90">
         <span className="text-[10px] font-bold uppercase text-zinc-400">Level:</span>
         <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-700 dark:text-zinc-300">
           <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Entry
