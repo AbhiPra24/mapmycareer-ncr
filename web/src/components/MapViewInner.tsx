@@ -332,17 +332,20 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
   const validJobs = jobs.filter((j) => j.lat && j.lon);
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-xl border border-zinc-200 shadow-sm dark:border-zinc-800">
+    <div className="relative h-full w-full overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
       <MapContainer
         center={NCR_CENTER}
         zoom={NCR_ZOOM}
         scrollWheelZoom={true}
         className="h-full w-full"
-        style={{ minHeight: '100%', width: '100%', background: '#09090b' }}
+        style={{ minHeight: '100%', height: '100%', width: '100%', background: '#e5e7eb' }}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          keepBuffer={6}
+          updateWhenIdle={false}
+          updateWhenZooming={true}
         />
 
         <MapController selectedJob={selectedJob} hoveredJob={hoveredJob} />
