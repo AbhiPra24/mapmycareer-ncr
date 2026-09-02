@@ -289,25 +289,18 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
   // Build company clusters from filtered jobs
   const clusters = React.useMemo(() => buildCompanyClusters(jobs), [jobs]);
 
-  // Compute map center
+  // Always open on NCR (Gurugram / Noida / Delhi corridor) at street level
+  const NCR_CENTER: [number, number] = [28.5355, 77.3910];
+  const NCR_ZOOM = 11;
+
+  // Used for the count badge overlay only
   const validJobs = jobs.filter((j) => j.lat && j.lon);
-  const defaultCenter: [number, number] =
-    validJobs.length > 0
-      ? [
-          validJobs.reduce((sum, j) => sum + j.lat!, 0) / validJobs.length,
-          validJobs.reduce((sum, j) => sum + j.lon!, 0) / validJobs.length,
-        ]
-      : [20.5937, 78.9629];
-  const defaultZoom =
-    validJobs.length > 0 && Math.abs(validJobs[0].lat! - validJobs[validJobs.length - 1].lat!) > 3
-      ? 5
-      : 10;
 
   return (
     <div className="relative h-full w-full overflow-hidden rounded-xl border border-zinc-200 shadow-sm dark:border-zinc-800">
       <MapContainer
-        center={defaultCenter}
-        zoom={defaultZoom}
+        center={NCR_CENTER}
+        zoom={NCR_ZOOM}
         scrollWheelZoom={true}
         className="h-full w-full"
         style={{ minHeight: '100%', width: '100%', background: '#09090b' }}
