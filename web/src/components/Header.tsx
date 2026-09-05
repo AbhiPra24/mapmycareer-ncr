@@ -42,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-1 sm:gap-3">
+      <div className="flex items-center gap-1 sm:gap-3 flex-wrap justify-end">
         {/* Mobile quick launcher icons (visible on small screens) */}
         <div className="flex items-center gap-1 md:hidden">
           {triggerFaq && (
@@ -123,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Social Profile Links (Compact on mobile, fully styled on tablet/desktop) */}
-        <div className="flex items-center gap-0.5 border-r border-zinc-200 pr-1 sm:gap-1 sm:pr-2 dark:border-zinc-800">
+        <div className="flex items-center gap-0.5 border-r border-zinc-200 pr-1 sm:gap-1 sm:pr-2 dark:border-zinc-800 hidden min-[380px]:flex">
           <a
             href="https://github.com/AbhiPra24"
             target="_blank"

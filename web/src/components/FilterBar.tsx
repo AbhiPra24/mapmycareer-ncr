@@ -65,7 +65,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       {/* Top Search & Dropdown Row */}
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-12">
         {/* Search input + Mobile filter toggle */}
-        <div className="flex items-center gap-2 md:col-span-4">
+        <div className="flex flex-col items-stretch gap-2 md:col-span-4 md:flex-row md:items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400 dark:text-zinc-500" />
             <input
@@ -80,7 +80,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           {/* Mobile Filter Expand Toggle */}
           <button
             onClick={() => setIsMobileExpanded((prev) => !prev)}
-            className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-semibold sm:hidden transition ${
+            className={`flex items-center justify-center gap-1.5 rounded-lg border px-2.5 py-2.5 min-h-[44px] text-xs font-semibold sm:hidden transition ${
               isMobileExpanded || activeFiltersCount > 0
                 ? 'border-blue-500 bg-blue-50 text-blue-600 dark:border-blue-500 dark:bg-blue-950/50 dark:text-blue-400'
                 : 'border-zinc-200 bg-zinc-50 text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
@@ -161,7 +161,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               <button
                 key={exp}
                 onClick={() => toggleExperience(exp)}
-                className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
+                className={`rounded-md px-3 py-1.5 min-h-[36px] text-xs font-medium transition ${
                   active
                     ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
                     : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
@@ -184,7 +184,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               <button
                 key={wp}
                 onClick={() => toggleWorkplace(wp)}
-                className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
+                className={`rounded-md px-3 py-1.5 min-h-[36px] text-xs font-medium transition ${
                   active
                     ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/20'
                     : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
@@ -200,7 +200,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => onFilterChange({ ...filters, showSavedOnly: !filters.showSavedOnly })}
-            className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition ${
+            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 min-h-[36px] text-xs font-medium transition ${
               filters.showSavedOnly
                 ? 'bg-rose-500 text-white shadow-sm shadow-rose-500/20'
                 : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'

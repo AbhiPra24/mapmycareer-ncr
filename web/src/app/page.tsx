@@ -243,7 +243,7 @@ export default function Home() {
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col gap-2.5 pb-20 lg:pb-6">
+              <div className="flex flex-col gap-2.5 pb-28 lg:pb-6">
                 {displayedJobs.map((job) => (
                   <JobCard
                     key={job.id}
@@ -271,12 +271,12 @@ export default function Home() {
             )}
           </div>
 
-          {/* Right: Map Explorer (Always mounted to pre-warm tiles & Leaflet on mobile, toggled with visibility) */}
+          {/* Right: Map Explorer — hidden on mobile when list tab is active to prevent accidental scroll into dead space */}
           <div
             className={`h-full w-full lg:col-span-7 xl:col-span-8 ${
               mobileTab === 'map'
                 ? 'block relative'
-                : 'invisible absolute inset-0 pointer-events-none lg:visible lg:relative lg:pointer-events-auto lg:block'
+                : 'hidden lg:block'
             }`}
           >
             <MapView
@@ -291,8 +291,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Mobile Floating View Switcher Pill */}
-        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1 rounded-full border border-zinc-200/80 bg-zinc-900/90 p-1.5 shadow-2xl backdrop-blur-md dark:border-zinc-700/80 dark:bg-zinc-900/95 lg:hidden">
+        {/* Mobile Floating View Switcher Pill — positioned above iOS home indicator */}
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1 rounded-full border border-zinc-200/80 bg-zinc-900/90 p-1.5 shadow-2xl backdrop-blur-md dark:border-zinc-700/80 dark:bg-zinc-900/95 lg:hidden">
           <button
             onClick={() => setMobileTab('list')}
             className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-all ${
