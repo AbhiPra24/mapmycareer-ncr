@@ -228,6 +228,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="preconnect" href="https://tile.openstreetmap.org" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://basemaps.cartocdn.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://tile.openstreetmap.org" />
+        <link rel="dns-prefetch" href="https://basemaps.cartocdn.com" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import { Job, FilterState } from '../types/job';
 import { filterJobs, extractUniqueValues } from '../lib/filterUtils';
 import { Header } from '../components/Header';
@@ -89,9 +89,11 @@ export default function Home() {
 
   const { cities, hubs } = useMemo(() => extractUniqueValues(allJobs), [allJobs]);
 
+  const deferredFilters = useDeferredValue(filters);
+
   const filteredJobs = useMemo(() => {
-    return filterJobs(allJobs, filters, savedJobIds);
-  }, [allJobs, filters, savedJobIds]);
+    return filterJobs(allJobs, deferredFilters, savedJobIds);
+  }, [allJobs, deferredFilters, savedJobIds]);
 
   const [displayLimit, setDisplayLimit] = useState<number>(40);
 
