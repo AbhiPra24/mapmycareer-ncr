@@ -6,6 +6,8 @@ import { notFound } from 'next/navigation';
 import { MapPin, Building2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { Job } from '@/types/job';
 
+import { TECH_CORRIDORS } from '@/lib/corridors';
+
 interface CityPageProps {
   params: Promise<{ city: string }>;
 }
@@ -186,6 +188,31 @@ export default async function CityJobsPage({ params }: CityPageProps) {
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
                 Explore real software engineering, cloud, frontend, and backend positions in {cityDisplayName}. Every role is mapped to physical office coordinates, verified against active applicant tracking systems, and indexed with commute insights.
               </p>
+
+              {/* High-Intent Tech Corridors */}
+              {(() => {
+                const cityCorridors = Object.values(TECH_CORRIDORS).filter(
+                  (c) => c.citySlug.toLowerCase() === city.toLowerCase()
+                );
+                if (cityCorridors.length === 0) return null;
+
+                return (
+                  <div className="mt-4 flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                      Major Corridors:
+                    </span>
+                    {cityCorridors.map((c) => (
+                      <Link
+                        key={c.slug}
+                        href={`/jobs/${city}/${c.slug}`}
+                        className="rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-xs font-semibold text-blue-600 transition hover:border-blue-300 hover:bg-blue-50 dark:border-zinc-800 dark:bg-zinc-800/80 dark:text-blue-400 dark:hover:border-blue-700"
+                      >
+                        {c.displayName} →
+                      </Link>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
             <Link
               href="/"

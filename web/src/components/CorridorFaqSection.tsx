@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { ChevronDown, ChevronUp, HelpCircle, TrendingUp, ShieldCheck } from 'lucide-react';
 
 export const CorridorFaqSection: React.FC = () => {
@@ -124,7 +125,7 @@ export const CorridorFaqSection: React.FC = () => {
                   <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
                 </summary>
                 <p className="mt-2 pl-1 leading-relaxed text-zinc-600 dark:text-zinc-400">
-                  DLF Cyber City and Udyog Vihar Phase 1-4 host the densest cluster of modern React, Next.js, and TypeScript roles in North India, driven by engineering teams at Zomato, MakeMyTrip, Blinkit, and Microsoft IDC.
+                  <Link href="/jobs/gurugram/dlf-cyber-city" className="font-semibold text-blue-600 hover:underline dark:text-blue-400">DLF Cyber City</Link> and Udyog Vihar Phase 1-4 host the densest cluster of modern React, Next.js, and TypeScript roles in North India, driven by engineering teams at Zomato, MakeMyTrip, Blinkit, and Microsoft IDC. Compare with Bengaluru's <Link href="/jobs/bengaluru/outer-ring-road" className="font-semibold text-blue-600 hover:underline dark:text-blue-400">Outer Ring Road</Link> for scale.
                 </p>
               </details>
 

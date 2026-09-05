@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import fs from 'fs';
 import path from 'path';
+import { TECH_CORRIDORS } from '@/lib/corridors';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.mapmycareer.online';
@@ -31,6 +32,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
           lastModified: new Date(),
           changeFrequency: 'daily',
           priority: 0.8,
+        });
+      });
+
+      // High-Intent Corridors
+      Object.values(TECH_CORRIDORS).forEach((corridor) => {
+        entries.push({
+          url: `${baseUrl}/jobs/${corridor.citySlug}/${corridor.slug}`,
+          lastModified: new Date(),
+          changeFrequency: 'daily',
+          priority: 0.9,
         });
       });
     }
