@@ -112,15 +112,17 @@ const jsonLd = {
         '@type': 'Person',
         name: 'Abhinav Prakash',
         jobTitle: 'Founder & Software Engineer',
-        url: 'https://www.linkedin.com/in/abhinav-prakash-dev/',
+        url: 'https://www.linkedin.com/in/abhipra24/',
         sameAs: [
-          'https://www.linkedin.com/in/abhinav-prakash-dev/',
+          'https://www.linkedin.com/in/abhipra24/',
           'https://github.com/AbhiPra24',
+          'https://www.instagram.com/abhipra_',
         ],
       },
       sameAs: [
         'https://github.com/AbhiPra24/mapmycareer-ncr',
-        'https://www.linkedin.com/in/abhinav-prakash-dev/',
+        'https://www.linkedin.com/in/abhipra24/',
+        'https://www.instagram.com/abhipra_',
       ],
       publishingPrinciples: 'https://www.mapmycareer.online/#methodology',
       knowsAbout: [
