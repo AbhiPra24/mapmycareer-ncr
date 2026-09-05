@@ -12,6 +12,7 @@ import { AtsAuditModal } from '../components/AtsAuditModal';
 import { ResumeBuilderModal } from '../components/ResumeBuilderModal';
 import { RecruiterValidatorModal } from '../components/RecruiterValidatorModal';
 import { AnnouncementBanner } from '../components/AnnouncementBanner';
+import { CorridorFaqSection } from '../components/CorridorFaqSection';
 import { Loader2, AlertCircle, List, Map } from 'lucide-react';
 
 export default function Home() {
@@ -155,6 +156,16 @@ export default function Home() {
     setIsRecruiterModalOpen(true);
   };
 
+  const handleScrollToInsights = () => {
+    setMobileTab('list');
+    setTimeout(() => {
+      const el = document.getElementById('corridor-insights-faq');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 50);
+  };
+
   if (isLoading) {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center gap-3 bg-zinc-50 dark:bg-zinc-950">
@@ -187,6 +198,7 @@ export default function Home() {
           setActiveJobContext(null);
           setIsRecruiterModalOpen(true);
         }}
+        onScrollToInsights={handleScrollToInsights}
       />
 
       {/* Main Container */}
@@ -249,6 +261,7 @@ export default function Home() {
                     Scroll down to load more ({displayedJobs.length} of {filteredJobs.length} loaded)...
                   </div>
                 )}
+                <CorridorFaqSection />
               </div>
             )}
           </div>
