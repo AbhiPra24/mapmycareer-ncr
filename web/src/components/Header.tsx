@@ -33,7 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
               Radar v2.0
             </span>
           </div>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="hidden text-xs text-zinc-500 dark:text-zinc-400 sm:block">
             Interactive Geo-Spatial Tech Openings & CareerForge Utility Engines
           </p>
         </div>
@@ -119,8 +119,8 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
 
-        {/* Social Profile Links */}
-        <div className="flex items-center gap-1 border-r border-zinc-200 pr-1.5 sm:pr-2 dark:border-zinc-800">
+        {/* Social Profile Links (Responsive: visible on tablet/desktop, clean on mobile) */}
+        <div className="hidden items-center gap-1 border-r border-zinc-200 pr-1.5 sm:flex sm:pr-2 dark:border-zinc-800">
           <a
             href="https://github.com/AbhiPra24"
             target="_blank"
