@@ -69,11 +69,22 @@ const getLevelColor = (level?: string) => {
   }
 };
 
+export const getCompanyColor = (name: string): string => {
+  if (!name) return '#3b82f6';
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const hue = Math.abs(hash % 360);
+  return `hsl(${hue}, 70%, 42%)`;
+};
+
 // ─── Create Leaflet DivIcon for a cluster ────────────────────────────────────
 const createClusterIcon = (cluster: CompanyCluster, isActive: boolean) => {
   const count   = cluster.jobs.length;
   const size    = isActive ? 44 : 34;
   const initial = cluster.company.charAt(0).toUpperCase();
+  const brandBg = getCompanyColor(cluster.company);
 
   // Dominant experience level (most common in the cluster)
   const levelCounts: Record<string, number> = {};
@@ -87,11 +98,12 @@ const createClusterIcon = (cluster: CompanyCluster, isActive: boolean) => {
   const logoHtml = cluster.company_logo
     ? `<img src="${cluster.company_logo}" alt="${cluster.company}"
           style="width:100%;height:100%;object-fit:contain;padding:2px;border-radius:50%;"
+          onload="if(this.naturalWidth<=16){this.style.display='none';this.nextElementSibling.style.display='flex';}"
           onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
-       <div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;background:#18181b;border-radius:50%;color:white;font-size:11px;font-weight:700;">
+       <div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;background:${brandBg};border-radius:50%;color:white;font-size:${isActive ? '16px' : '13px'};font-weight:800;letter-spacing:-0.5px;text-shadow:0 1px 2px rgba(0,0,0,0.3);">
          ${initial}
        </div>`
-    : `<div style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;background:#18181b;border-radius:50%;color:white;font-size:11px;font-weight:700;">
+    : `<div style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;background:${brandBg};border-radius:50%;color:white;font-size:${isActive ? '16px' : '13px'};font-weight:800;letter-spacing:-0.5px;text-shadow:0 1px 2px rgba(0,0,0,0.3);">
          ${initial}
        </div>`;
 
@@ -180,6 +192,10 @@ function MapController({
 
     const handleInvalidate = () => {
       map.invalidateSize();
+      // If no job is selected/focused, keep the camera centered on Delhi NCR
+      if (!selectedJob && !hoveredJob) {
+        map.setView([28.5355, 77.3910], 11);
+      }
     };
 
     window.addEventListener('resize', handleInvalidate);
@@ -229,19 +245,43 @@ interface CompanyPopupProps {
 const CompanyPopup: React.FC<CompanyPopupProps> = ({ cluster, onSelectJob }) => {
   const [expanded, setExpanded] = useState(false);
   const visibleJobs = expanded ? cluster.jobs : cluster.jobs.slice(0, 5);
+  const brandBg = getCompanyColor(cluster.company);
 
   return (
     <div className="p-1" style={{ minWidth: '240px', maxWidth: '300px' }}>
       {/* Company header */}
       <div className="flex items-center gap-2.5 mb-3">
         {cluster.company_logo ? (
-          <img
-            src={cluster.company_logo}
-            alt={cluster.company}
-            className="h-9 w-9 shrink-0 rounded-lg border border-zinc-100 object-contain p-0.5"
-          />
+          <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white">
+            <img
+              src={cluster.company_logo}
+              alt={cluster.company}
+              className="h-full w-full object-contain p-0.5"
+              onLoad={(e) => {
+                if ((e.currentTarget as HTMLImageElement).naturalWidth <= 16) {
+                  e.currentTarget.style.display = 'none';
+                  const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = 'flex';
+                }
+              }}
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                if (fallback) fallback.style.display = 'flex';
+              }}
+            />
+            <div
+              style={{ display: 'none', backgroundColor: brandBg }}
+              className="h-full w-full items-center justify-center font-bold text-white text-sm"
+            >
+              {cluster.company.charAt(0)}
+            </div>
+          </div>
         ) : (
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-600 font-bold text-sm">
+          <div
+            style={{ backgroundColor: brandBg }}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg font-bold text-white text-sm shadow-sm"
+          >
             {cluster.company.charAt(0)}
           </div>
         )}
@@ -384,8 +424,8 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
         <span className="text-zinc-800 font-bold dark:text-zinc-200">{validJobs.length}</span> positions
       </div>
 
-      {/* Map Actions Overlay */}
-      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-[400] flex flex-col gap-2">
+      {/* Map Actions Overlay (Near me) */}
+      <div className="absolute top-12 right-3 sm:top-3 sm:right-4 z-[400] flex flex-col gap-2">
         <button
           onClick={() => {
             if ('geolocation' in navigator) {
@@ -402,7 +442,7 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
               alert('Geolocation is not supported by your browser.');
             }
           }}
-          className="rounded-lg border border-zinc-200/80 bg-white/90 px-2.5 py-1.5 sm:px-3 text-xs font-bold text-blue-600 shadow-md backdrop-blur-md hover:bg-blue-50 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-blue-400 dark:hover:bg-zinc-800"
+          className="rounded-lg border border-zinc-200/80 bg-white/95 px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs font-bold text-blue-600 shadow-md backdrop-blur-md hover:bg-blue-50 dark:border-zinc-800/80 dark:bg-zinc-900/95 dark:text-blue-400 dark:hover:bg-zinc-800"
           title="Find jobs near me"
         >
           <span className="hidden sm:inline">📍 Find jobs near me</span>
@@ -411,7 +451,7 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
       </div>
 
       {/* City quick-nav */}
-      <div className="absolute top-3 left-3 right-24 sm:top-4 sm:left-4 sm:right-36 z-[400] flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-hide">
+      <div className="absolute top-2.5 left-2.5 right-2.5 sm:top-3 sm:left-4 sm:right-36 z-[400] flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {[
           { name: 'NCR',       coords: [28.5355, 77.3910] },
           { name: 'Bengaluru', coords: [12.9716, 77.5946] },
