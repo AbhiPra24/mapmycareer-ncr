@@ -141,7 +141,7 @@ export const CorridorFaqSection: React.FC = () => {
           </div>
 
           {/* Question 4: E-E-A-T Verification Methodology */}
-          <aside className="rounded-lg border border-blue-100 bg-blue-50/60 p-3 dark:border-blue-900/40 dark:bg-blue-950/20">
+          <aside id="methodology" className="rounded-lg border border-blue-100 bg-blue-50/60 p-3 dark:border-blue-900/40 dark:bg-blue-950/20">
             <div className="flex items-start gap-2">
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
               <div className="space-y-1">
