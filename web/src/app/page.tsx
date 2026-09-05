@@ -13,6 +13,7 @@ import { ResumeBuilderModal } from '../components/ResumeBuilderModal';
 import { RecruiterValidatorModal } from '../components/RecruiterValidatorModal';
 import { AnnouncementBanner } from '../components/AnnouncementBanner';
 import { CorridorFaqSection } from '../components/CorridorFaqSection';
+import { CorridorFaqModal } from '../components/CorridorFaqModal';
 import { Loader2, AlertCircle, List, Map } from 'lucide-react';
 
 export default function Home() {
@@ -27,6 +28,7 @@ export default function Home() {
   const [isAtsModalOpen, setIsAtsModalOpen] = useState<boolean>(false);
   const [isResumeBuilderOpen, setIsResumeBuilderOpen] = useState<boolean>(false);
   const [isRecruiterModalOpen, setIsRecruiterModalOpen] = useState<boolean>(false);
+  const [isFaqModalOpen, setIsFaqModalOpen] = useState<boolean>(false);
   const [activeJobContext, setActiveJobContext] = useState<{
     title: string;
     company: string;
@@ -201,6 +203,7 @@ export default function Home() {
           setIsRecruiterModalOpen(true);
         }}
         onScrollToInsights={handleScrollToInsights}
+        onOpenFaqModal={() => setIsFaqModalOpen(true)}
       />
 
       {/* Main Container */}
@@ -348,6 +351,12 @@ export default function Home() {
         isOpen={isRecruiterModalOpen}
         onClose={() => setIsRecruiterModalOpen(false)}
         initialJobContext={activeJobContext}
+      />
+
+      {/* Corridor Insights & Tech Career FAQ Modal */}
+      <CorridorFaqModal
+        isOpen={isFaqModalOpen}
+        onClose={() => setIsFaqModalOpen(false)}
       />
     </div>
   );

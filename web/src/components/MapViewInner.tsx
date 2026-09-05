@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Job } from '../types/job';
+import { getCleanLogoUrl } from '../lib/filterUtils';
 import { ExternalLink, ChevronRight } from 'lucide-react';
 
 interface MapViewInnerProps {
@@ -45,7 +46,7 @@ export function buildCompanyClusters(jobs: Job[]): CompanyCluster[] {
       map.set(key, {
         key,
         company: job.company,
-        company_logo: job.company_logo,
+        company_logo: job.company_logo || getCleanLogoUrl(job.company, job.company_domain) || undefined,
         company_domain: job.company_domain,
         lat: job.lat,
         lon: job.lon,
@@ -337,6 +338,7 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
         center={NCR_CENTER}
         zoom={NCR_ZOOM}
         scrollWheelZoom={true}
+        preferCanvas={true}
         className="h-full w-full"
         style={{ minHeight: '100%', height: '100%', width: '100%', background: '#e5e7eb' }}
       >
