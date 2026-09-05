@@ -138,7 +138,12 @@ export const RecruiterValidatorModal: React.FC<RecruiterValidatorModalProps> = (
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="recruiter-validator-title"
+    >
       <div
         className="relative flex h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
         onClick={(e) => e.stopPropagation()}
@@ -151,7 +156,7 @@ export const RecruiterValidatorModal: React.FC<RecruiterValidatorModalProps> = (
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-zinc-900 dark:text-white sm:text-lg">
+                <h2 id="recruiter-validator-title" className="text-base font-bold text-zinc-900 dark:text-white sm:text-lg">
                   Recruiter Radar & Email Deliverability Engine
                 </h2>
                 <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-bold text-purple-700 ring-1 ring-inset ring-purple-600/20 dark:bg-purple-950 dark:text-purple-300">

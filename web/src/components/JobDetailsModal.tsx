@@ -47,13 +47,19 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
   if (!job) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-3 sm:p-4 backdrop-blur-sm">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 sm:p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="job-details-title"
+    >
       <div
         className="relative max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-4 sm:p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
+          aria-label="Close job details dialog"
           className="absolute right-4 top-4 rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
         >
           <X className="h-5 w-5" />
@@ -73,7 +79,7 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
               </div>
             )}
             <div>
-              <h2 className="text-lg font-bold text-zinc-900 dark:text-white">{job.title}</h2>
+              <h2 id="job-details-title" className="text-lg font-bold text-zinc-900 dark:text-white">{job.title}</h2>
               <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">{job.company}</p>
             </div>
           </div>

@@ -151,7 +151,12 @@ export const AtsAuditModal: React.FC<AtsAuditModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ats-audit-title"
+    >
       <div
         className="relative flex h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
         onClick={(e) => e.stopPropagation()}
@@ -164,7 +169,7 @@ export const AtsAuditModal: React.FC<AtsAuditModalProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-zinc-900 dark:text-white sm:text-lg">
+                <h2 id="ats-audit-title" className="text-base font-bold text-zinc-900 dark:text-white sm:text-lg">
                   Deterministic ATS Heuristic Auditor
                 </h2>
                 <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 ring-1 ring-inset ring-blue-600/20 dark:bg-blue-950 dark:text-blue-300">
