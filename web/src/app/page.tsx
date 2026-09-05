@@ -271,10 +271,12 @@ export default function Home() {
             )}
           </div>
 
-          {/* Right: Map Explorer */}
+          {/* Right: Map Explorer (Always mounted to pre-warm tiles & Leaflet on mobile, toggled with visibility) */}
           <div
             className={`h-full w-full lg:col-span-7 xl:col-span-8 ${
-              mobileTab === 'map' ? 'block' : 'hidden lg:block'
+              mobileTab === 'map'
+                ? 'block relative'
+                : 'invisible absolute inset-0 pointer-events-none lg:visible lg:relative lg:pointer-events-auto lg:block'
             }`}
           >
             <MapView

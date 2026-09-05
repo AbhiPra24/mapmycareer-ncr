@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Job } from '../types/job';
@@ -163,19 +163,22 @@ const createClusterIcon = (cluster: CompanyCluster, isActive: boolean) => {
   });
 };
 
-// ─── Map flyTo & resize controller ─────────────────────────────────────────────
+// ─── Map flyTo & resize controller with Viewport Bounds Tracking ──────────────
 function MapController({
   selectedJob,
   hoveredJob,
+  onBoundsChange,
 }: {
   selectedJob: Job | null;
   hoveredJob: Job | null;
+  onBoundsChange: (bounds: L.LatLngBounds) => void;
 }) {
   const map = useMap();
 
   // Invalidate size on mount, resize, tab switch, and container size changes
   useEffect(() => {
     map.invalidateSize();
+    onBoundsChange(map.getBounds());
 
     // Auto-invalidate size when container becomes visible or resizes
     const container = map.getContainer();
@@ -183,12 +186,19 @@ function MapController({
     if (typeof ResizeObserver !== 'undefined' && container) {
       resizeObserver = new ResizeObserver(() => {
         map.invalidateSize();
+        onBoundsChange(map.getBounds());
       });
       resizeObserver.observe(container);
     }
 
-    const timer1 = setTimeout(() => map.invalidateSize(), 100);
-    const timer2 = setTimeout(() => map.invalidateSize(), 300);
+    const timer1 = setTimeout(() => {
+      map.invalidateSize();
+      onBoundsChange(map.getBounds());
+    }, 100);
+    const timer2 = setTimeout(() => {
+      map.invalidateSize();
+      onBoundsChange(map.getBounds());
+    }, 300);
 
     const handleInvalidate = () => {
       map.invalidateSize();
@@ -196,6 +206,7 @@ function MapController({
       if (!selectedJob && !hoveredJob) {
         map.setView([28.5355, 77.3910], 11);
       }
+      onBoundsChange(map.getBounds());
     };
 
     window.addEventListener('resize', handleInvalidate);
@@ -210,7 +221,17 @@ function MapController({
       window.removeEventListener('orientationchange', handleInvalidate);
       window.removeEventListener('mapInvalidateSize', handleInvalidate);
     };
-  }, [map]);
+  }, [map, onBoundsChange, selectedJob, hoveredJob]);
+
+  // Update bounds on moveend and zoomend
+  useMapEvents({
+    moveend: () => {
+      onBoundsChange(map.getBounds());
+    },
+    zoomend: () => {
+      onBoundsChange(map.getBounds());
+    },
+  });
 
   useEffect(() => {
     const target = selectedJob || hoveredJob;
@@ -363,11 +384,39 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
   onSelectJob,
 }) => {
   // Build company clusters from filtered jobs
-  const clusters = React.useMemo(() => buildCompanyClusters(jobs), [jobs]);
+  const clusters = useMemo(() => buildCompanyClusters(jobs), [jobs]);
 
   // Always open on NCR (Gurugram / Noida / Delhi corridor) at street level
   const NCR_CENTER: [number, number] = [28.5355, 77.3910];
   const NCR_ZOOM = 11;
+
+  // Track map viewport bounds for aggressive marker pruning
+  const [currentBounds, setCurrentBounds] = useState<L.LatLngBounds | null>(null);
+
+  const handleBoundsChange = useCallback((bounds: L.LatLngBounds) => {
+    setCurrentBounds(bounds);
+  }, []);
+
+  // Prune markers outside viewport bounds (with 35% margin so panning remains smooth)
+  const visibleClusters = useMemo(() => {
+    if (!currentBounds) {
+      // Default initial view: Delhi NCR region (~1,100 markers instead of 4,700+)
+      return clusters.filter((c) => {
+        const inNcr = c.lat >= 28.0 && c.lat <= 29.1 && c.lon >= 76.5 && c.lon <= 77.9;
+        const isSelected = selectedJob && c.jobs.some((j) => j.id === selectedJob.id);
+        const isHovered = hoveredJob && c.jobs.some((j) => j.id === hoveredJob.id);
+        return inNcr || isSelected || isHovered;
+      });
+    }
+
+    const paddedBounds = currentBounds.pad(0.35);
+    return clusters.filter((c) => {
+      if (paddedBounds.contains([c.lat, c.lon])) return true;
+      if (selectedJob && c.jobs.some((j) => j.id === selectedJob.id)) return true;
+      if (hoveredJob && c.jobs.some((j) => j.id === hoveredJob.id)) return true;
+      return false;
+    });
+  }, [clusters, currentBounds, selectedJob, hoveredJob]);
 
   // Used for the count badge overlay only
   const validJobs = jobs.filter((j) => j.lat && j.lon);
@@ -385,14 +434,19 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          keepBuffer={6}
-          updateWhenIdle={false}
-          updateWhenZooming={true}
+          subdomains={['a', 'b', 'c']}
+          keepBuffer={4}
+          updateWhenIdle={true}
+          updateWhenZooming={false}
         />
 
-        <MapController selectedJob={selectedJob} hoveredJob={hoveredJob} />
+        <MapController
+          selectedJob={selectedJob}
+          hoveredJob={hoveredJob}
+          onBoundsChange={handleBoundsChange}
+        />
 
-        {clusters.map((cluster) => {
+        {visibleClusters.map((cluster) => {
           // A cluster is "active" if the selected/hovered job belongs to it
           const isActive =
             (selectedJob && cluster.jobs.some((j) => j.id === selectedJob.id)) ||
