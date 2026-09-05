@@ -31,7 +31,7 @@ export function AnnouncementBanner({
       <button
         onClick={() => setIsOpen(false)}
         aria-label="Dismiss banner"
-        className="rounded-md p-1 text-blue-400 transition hover:bg-blue-900/50 hover:text-white"
+        className="rounded-md p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-blue-400 transition hover:bg-blue-900/50 hover:text-white"
       >
         <X className="h-3.5 w-3.5" />
       </button>

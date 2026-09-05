@@ -422,7 +422,7 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
   const validJobs = jobs.filter((j) => j.lat && j.lon);
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="relative h-full w-full overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 select-none">
       <MapContainer
         center={NCR_CENTER}
         zoom={NCR_ZOOM}
@@ -505,7 +505,7 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
       </div>
 
       {/* City quick-nav */}
-      <div className="absolute top-2.5 left-2.5 right-2.5 sm:top-3 sm:left-4 sm:right-36 z-[400] flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-hide">
+      <div className="absolute top-2.5 left-2.5 right-14 sm:top-3 sm:left-4 sm:right-36 z-[400] flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {[
           { name: 'NCR',       coords: [28.5355, 77.3910] },
           { name: 'Bengaluru', coords: [12.9716, 77.5946] },

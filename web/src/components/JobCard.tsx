@@ -135,7 +135,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job, isSelected, isSaved, onSe
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-1 rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-100 dark:bg-blue-950/50 dark:text-blue-400 dark:hover:bg-blue-900/60"
+            className="flex items-center gap-1 rounded-md bg-blue-50 px-2.5 py-2 min-h-[44px] text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-100 dark:bg-blue-950/50 dark:text-blue-400 dark:hover:bg-blue-900/60"
           >
             <span>Apply</span>
             <ExternalLink className="h-3 w-3" />

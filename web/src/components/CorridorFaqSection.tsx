@@ -63,28 +63,28 @@ export const CorridorFaqSection: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
                   <tr className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30">
-                    <td className="px-3 py-2 font-medium text-zinc-900 dark:text-white">Entry (0-2 YOE)</td>
-                    <td className="px-3 py-2">₹10 - ₹18 LPA</td>
-                    <td className="px-3 py-2">₹12 - ₹22 LPA</td>
-                    <td className="px-3 py-2 text-zinc-500 dark:text-zinc-400">Fintech, E-commerce, SaaS</td>
+                    <td className="px-2 py-1.5 font-medium text-zinc-900 dark:text-white">Entry (0-2 YOE)</td>
+                    <td className="px-2 py-1.5">₹10 - ₹18 LPA</td>
+                    <td className="px-2 py-1.5">₹12 - ₹22 LPA</td>
+                    <td className="px-2 py-1.5 text-zinc-500 dark:text-zinc-400">Fintech, E-commerce, SaaS</td>
                   </tr>
                   <tr className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30">
-                    <td className="px-3 py-2 font-medium text-zinc-900 dark:text-white">Mid-Level (3-6 YOE)</td>
-                    <td className="px-3 py-2">₹22 - ₹38 LPA</td>
-                    <td className="px-3 py-2">₹24 - ₹42 LPA</td>
-                    <td className="px-3 py-2 text-zinc-500 dark:text-zinc-400">BigTech, Cloud Platforms, AI/ML</td>
+                    <td className="px-2 py-1.5 font-medium text-zinc-900 dark:text-white">Mid-Level (3-6 YOE)</td>
+                    <td className="px-2 py-1.5">₹22 - ₹38 LPA</td>
+                    <td className="px-2 py-1.5">₹24 - ₹42 LPA</td>
+                    <td className="px-2 py-1.5 text-zinc-500 dark:text-zinc-400">BigTech, Cloud Platforms, AI/ML</td>
                   </tr>
                   <tr className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30">
-                    <td className="px-3 py-2 font-medium text-zinc-900 dark:text-white">Senior / Staff (7-11 YOE)</td>
-                    <td className="px-3 py-2">₹42 - ₹75 LPA</td>
-                    <td className="px-3 py-2">₹45 - ₹80 LPA</td>
-                    <td className="px-3 py-2 text-zinc-500 dark:text-zinc-400">Enterprise Systems, GCCs</td>
+                    <td className="px-2 py-1.5 font-medium text-zinc-900 dark:text-white">Senior / Staff (7-11 YOE)</td>
+                    <td className="px-2 py-1.5">₹42 - ₹75 LPA</td>
+                    <td className="px-2 py-1.5">₹45 - ₹80 LPA</td>
+                    <td className="px-2 py-1.5 text-zinc-500 dark:text-zinc-400">Enterprise Systems, GCCs</td>
                   </tr>
                   <tr className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30">
-                    <td className="px-3 py-2 font-medium text-zinc-900 dark:text-white">Principal / Lead (12+ YOE)</td>
-                    <td className="px-3 py-2">₹70 - ₹1.3 Cr</td>
-                    <td className="px-3 py-2">₹75 - ₹1.4 Cr</td>
-                    <td className="px-3 py-2 text-zinc-500 dark:text-zinc-400">Global Capability Centers & VC tech</td>
+                    <td className="px-2 py-1.5 font-medium text-zinc-900 dark:text-white">Principal / Lead (12+ YOE)</td>
+                    <td className="px-2 py-1.5">₹70 - ₹1.3 Cr</td>
+                    <td className="px-2 py-1.5">₹75 - ₹1.4 Cr</td>
+                    <td className="px-2 py-1.5 text-zinc-500 dark:text-zinc-400">Global Capability Centers & VC tech</td>
                   </tr>
                 </tbody>
               </table>

@@ -146,7 +146,7 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
           <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
             <button
               onClick={() => onAuditResume?.(job)}
-              className="flex items-center justify-center gap-1.5 rounded-lg border border-blue-200 bg-white p-2 text-xs font-semibold text-blue-700 shadow-sm transition hover:bg-blue-50 dark:border-blue-900/60 dark:bg-zinc-800 dark:text-blue-300 dark:hover:bg-zinc-700"
+              className="flex items-center justify-center gap-1.5 rounded-lg border border-blue-200 bg-white py-3 px-2 text-xs font-semibold text-blue-700 shadow-sm transition hover:bg-blue-50 dark:border-blue-900/60 dark:bg-zinc-800 dark:text-blue-300 dark:hover:bg-zinc-700"
             >
               <Zap className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
               <span>Audit Resume</span>
@@ -154,7 +154,7 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
 
             <button
               onClick={() => onGenerateResume?.(job)}
-              className="flex items-center justify-center gap-1.5 rounded-lg border border-emerald-200 bg-white p-2 text-xs font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50 dark:border-emerald-900/60 dark:bg-zinc-800 dark:text-emerald-300 dark:hover:bg-zinc-700"
+              className="flex items-center justify-center gap-1.5 rounded-lg border border-emerald-200 bg-white py-3 px-2 text-xs font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50 dark:border-emerald-900/60 dark:bg-zinc-800 dark:text-emerald-300 dark:hover:bg-zinc-700"
             >
               <FileCode2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
               <span>Generate ATS Resume</span>
@@ -162,7 +162,7 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
 
             <button
               onClick={() => onVerifyRecruiter?.(job)}
-              className="flex items-center justify-center gap-1.5 rounded-lg border border-purple-200 bg-white p-2 text-xs font-semibold text-purple-700 shadow-sm transition hover:bg-purple-50 dark:border-purple-900/60 dark:bg-zinc-800 dark:text-purple-300 dark:hover:bg-zinc-700"
+              className="flex items-center justify-center gap-1.5 rounded-lg border border-purple-200 bg-white py-3 px-2 text-xs font-semibold text-purple-700 shadow-sm transition hover:bg-purple-50 dark:border-purple-900/60 dark:bg-zinc-800 dark:text-purple-300 dark:hover:bg-zinc-700"
             >
               <MailCheck className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
               <span>Verify Recruiter</span>
@@ -170,7 +170,7 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
           </div>
         </div>
 
-        <div className="mt-5 flex items-center justify-end gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+        <div className="mt-5 flex items-center justify-end gap-3 border-t border-zinc-100 pt-4 pb-4 dark:border-zinc-800">
           <button
             onClick={onClose}
             className="rounded-lg border border-zinc-200 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800"
