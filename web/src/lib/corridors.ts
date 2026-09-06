@@ -10,6 +10,9 @@ export interface CorridorConfig {
   metroLines: string[];
   primaryTowers: string[];
   avgSalaryRange: string;
+  postalCode?: string;
+  streetAddress?: string;
+  addressRegion?: string;
   description: string;
   faqSnippet: {
     question: string;
@@ -30,6 +33,9 @@ export const TECH_CORRIDORS: Record<string, CorridorConfig> = {
     metroLines: ['Rapid Metro (Cyber City & Moulsari Ave Stations)', 'Delhi Metro Yellow Line (Sikanderpur Interchange)'],
     primaryTowers: ['Building 8A/8B/8C', 'Building 10A/10B/10C', 'Building 14', 'Infinity Towers', 'Cyber Hub SEZ'],
     avgSalaryRange: '₹14L - ₹48L',
+    streetAddress: 'DLF Cyber City, Phase 2 & 3',
+    postalCode: '122002',
+    addressRegion: 'Haryana',
     description: 'Premier Northern India tech corridor hosting multinational technology centers, enterprise SaaS headquarters, and fintech engineering hubs in Gurugram.',
     faqSnippet: {
       question: 'How to get a software engineering job in DLF Cyber City?',
@@ -48,6 +54,9 @@ export const TECH_CORRIDORS: Record<string, CorridorConfig> = {
     metroLines: ['Upcoming Namma Metro Blue Line (ORR-Airport corridor)', 'Direct BMTC Vajra AC feeder buses'],
     primaryTowers: ['Prestige Tech Park', 'Ecospace Business Park', 'Cessna Business Park', 'Embassy TechVillage', 'Bagmane Constellation'],
     avgSalaryRange: '₹18L - ₹65L',
+    streetAddress: 'Outer Ring Road, Bellandur / Marathahalli',
+    postalCode: '560103',
+    addressRegion: 'Karnataka',
     description: 'The highest concentration of tier-1 software companies, global capability centers (GCCs), and deep-tech unicorns in India.',
     faqSnippet: {
       question: 'What is the average tech salary along Bangalore Outer Ring Road (ORR)?',
@@ -66,6 +75,9 @@ export const TECH_CORRIDORS: Record<string, CorridorConfig> = {
     metroLines: ['Namma Metro Purple Line (Whitefield Kadugodi & Hopefarm Channasandra)'],
     primaryTowers: ['International Tech Park Bangalore (ITPB)', 'Sigma Tech Park', 'Brigade Tech Park', 'EPIP Zone'],
     avgSalaryRange: '₹15L - ₹52L',
+    streetAddress: 'ITPB Road, Whitefield',
+    postalCode: '560066',
+    addressRegion: 'Karnataka',
     description: 'Heritage IT corridor with world-class tech parks and seamless Purple Line metro connectivity to central Bengaluru.',
     faqSnippet: {
       question: 'How accessible is Whitefield for daily tech commutes?',
@@ -84,6 +96,9 @@ export const TECH_CORRIDORS: Record<string, CorridorConfig> = {
     metroLines: ['Hyderabad Metro Blue Line (Raidurg & Hitec City Stations)'],
     primaryTowers: ['Mindspace IT Park', 'Knowledge City (Salarpuria Sattva)', 'Cyber Towers', 'Financial District Nanakramguda', 'Amazon Campus'],
     avgSalaryRange: '₹14L - ₹50L',
+    streetAddress: 'HITEC City Main Road, Madhapur',
+    postalCode: '500081',
+    addressRegion: 'Telangana',
     description: 'The epicenter of Hyderabad tech growth, housing major hyperscalers, US product GCCs, and enterprise software giants.',
     faqSnippet: {
       question: 'Why are tech companies moving to Hyderabad HITEC City and Financial District?',
@@ -102,6 +117,9 @@ export const TECH_CORRIDORS: Record<string, CorridorConfig> = {
     metroLines: ['Delhi Metro Blue Line (Noida Electronic City & Sector 62 Stations)', 'Aqua Line Metro'],
     primaryTowers: ['Stellar IT Park', 'Candor Techspace (Sec 135)', 'Logix Cyber Park', 'Advant Navis Business Park'],
     avgSalaryRange: '₹11L - ₹38L',
+    streetAddress: 'Sector 62 / Noida Expressway',
+    postalCode: '201309',
+    addressRegion: 'Uttar Pradesh',
     description: 'North India major software services and enterprise consulting hub with direct metro connectivity into central Delhi.',
     faqSnippet: {
       question: 'What tech roles dominate Noida Sector 62?',
@@ -120,6 +138,9 @@ export const TECH_CORRIDORS: Record<string, CorridorConfig> = {
     metroLines: ['Upcoming Pune Metro Line 3 (Hinjawadi to Shivajinagar)'],
     primaryTowers: ['Rajiv Gandhi Infotech Park Phase 1-3', 'Quadron Business Park', 'Embassy TechZone'],
     avgSalaryRange: '₹12L - ₹42L',
+    streetAddress: 'Rajiv Gandhi Infotech Park, Hinjawadi',
+    postalCode: '411057',
+    addressRegion: 'Maharashtra',
     description: 'Pune primary automotive tech, fintech engineering, and software R&D hub spread across scenic rolling hills.',
     faqSnippet: {
       question: 'What is the living cost vs tech salary trade-off in Pune Hinjawadi?',
@@ -138,6 +159,9 @@ export const TECH_CORRIDORS: Record<string, CorridorConfig> = {
     metroLines: ['Mumbai Metro Line 3 (Aqua Line - BKC Station)', 'Western & Central Suburban Railway'],
     primaryTowers: ['Maker Maxity', 'The Capital BKC', 'Hiranandani Business Park Powai', 'Nirlon Knowledge Park Goregaon'],
     avgSalaryRange: '₹18L - ₹60L',
+    streetAddress: 'Bandra Kurla Complex, Bandra East',
+    postalCode: '400051',
+    addressRegion: 'Maharashtra',
     description: 'India premier financial tech capital, hosting investment banking engineering desks, quant hedge funds, and top-tier fintech unicorns.',
     faqSnippet: {
       question: 'Which tech sectors pay the highest compensation in Mumbai BKC?',
@@ -156,6 +180,9 @@ export const TECH_CORRIDORS: Record<string, CorridorConfig> = {
     metroLines: ['Delhi Metro Airport Express Line (Delhi Aerocity Station)', 'Magenta Line Interchange'],
     primaryTowers: ['Worldmark 1, 2 & 3 Aerocity', 'Okhla NSIC Phase 3 Tech Hub', 'Barakhamba Corporate Towers'],
     avgSalaryRange: '₹16L - ₹55L',
+    streetAddress: 'Asset Area 4, Hospitality District, Aerocity',
+    postalCode: '110037',
+    addressRegion: 'Delhi',
     description: 'High-end corporate software headquarters, global strategy tech centers, and analytics consulting offices adjoining IGI Airport.',
     faqSnippet: {
       question: 'Why do multinational tech leaders choose Aerocity Worldmark?',
