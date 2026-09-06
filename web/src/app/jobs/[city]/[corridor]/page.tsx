@@ -170,8 +170,10 @@ export default async function CorridorJobsPage({ params }: CorridorPageProps) {
               '@type': 'Place',
               address: {
                 '@type': 'PostalAddress',
+                streetAddress: job.hub || config.streetAddress || config.primaryTowers[0] || `${config.displayName} Tech Corridor`,
                 addressLocality: config.displayName,
-                addressRegion: config.cityDisplayName,
+                addressRegion: config.addressRegion || config.cityDisplayName,
+                postalCode: config.postalCode || '110001',
                 addressCountry: 'IN',
               },
               geo: {

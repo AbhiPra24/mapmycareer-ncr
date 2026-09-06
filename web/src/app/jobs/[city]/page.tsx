@@ -8,6 +8,29 @@ import { Job } from '@/types/job';
 
 import { TECH_CORRIDORS } from '@/lib/corridors';
 
+interface CityMetadata {
+  postalCode: string;
+  addressRegion: string;
+  streetAddress: string;
+}
+
+const CITY_METADATA: Record<string, CityMetadata> = {
+  bengaluru: { postalCode: '560103', addressRegion: 'Karnataka', streetAddress: 'Outer Ring Road & Whitefield Tech Corridors' },
+  gurugram: { postalCode: '122002', addressRegion: 'Haryana', streetAddress: 'DLF Cyber City, Phase 2 & Sector 44' },
+  noida: { postalCode: '201301', addressRegion: 'Uttar Pradesh', streetAddress: 'Sector 62 & Noida Expressway Tech Corridor' },
+  hyderabad: { postalCode: '500081', addressRegion: 'Telangana', streetAddress: 'HITEC City & Gachibowli Financial District' },
+  pune: { postalCode: '411057', addressRegion: 'Maharashtra', streetAddress: 'Rajiv Gandhi Infotech Park, Hinjawadi' },
+  mumbai: { postalCode: '400051', addressRegion: 'Maharashtra', streetAddress: 'Bandra Kurla Complex (BKC) & Powai' },
+  delhi: { postalCode: '110037', addressRegion: 'Delhi', streetAddress: 'Aerocity Worldmark & Okhla Tech Zone' },
+  chennai: { postalCode: '600096', addressRegion: 'Tamil Nadu', streetAddress: 'OMR IT Corridor, Sholinganallur' },
+  kochi: { postalCode: '682030', addressRegion: 'Kerala', streetAddress: 'Infopark Kakkanad' },
+  ahmedabad: { postalCode: '382355', addressRegion: 'Gujarat', streetAddress: 'GIFT City & SG Highway' },
+  kolkata: { postalCode: '700091', addressRegion: 'West Bengal', streetAddress: 'Sector V, Salt Lake' },
+  chandigarh: { postalCode: '160019', addressRegion: 'Chandigarh', streetAddress: 'Rajiv Gandhi Chandigarh Technology Park' },
+  coimbatore: { postalCode: '641014', addressRegion: 'Tamil Nadu', streetAddress: 'TIDEL Park, Peelamedu' },
+  thiruvananthapuram: { postalCode: '695581', addressRegion: 'Kerala', streetAddress: 'Technopark Campus, Kazhakoottam' },
+};
+
 interface CityPageProps {
   params: Promise<{ city: string }>;
 }
@@ -98,6 +121,12 @@ export default async function CityJobsPage({ params }: CityPageProps) {
     notFound();
   }
 
+  const meta = CITY_METADATA[city.toLowerCase()] || {
+    postalCode: '110001',
+    addressRegion: cityDisplayName,
+    streetAddress: `${cityDisplayName} Tech Hubs & Innovation Parks`,
+  };
+
   // Top 10 sample jobs for Rich JobPosting Schema
   const structuredJobSchema = {
     '@context': 'https://schema.org',
@@ -122,8 +151,10 @@ export default async function CityJobsPage({ params }: CityPageProps) {
           '@type': 'Place',
           address: {
             '@type': 'PostalAddress',
+            streetAddress: job.hub || meta.streetAddress,
             addressLocality: cityDisplayName,
-            addressRegion: cityDisplayName,
+            addressRegion: meta.addressRegion || cityDisplayName,
+            postalCode: meta.postalCode,
             addressCountry: 'IN',
           },
           geo: {
