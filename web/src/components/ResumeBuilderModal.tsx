@@ -1637,7 +1637,7 @@ export const ResumeBuilderModal: React.FC<ResumeBuilderModalProps> = ({
                                 <h1 className="text-xl font-black tracking-tight text-zinc-900">
                           {resumeData.name}
                         </h1>
-                        <p className="resume-title mt-0.5 text-xs font-bold text-emerald-700">
+                        <p className="resume-title mt-0.5 text-xs font-bold">
                           {resumeData.title}
                         </p>
                         <p className="mt-1 text-[11px] text-zinc-600">
@@ -1656,10 +1656,10 @@ export const ResumeBuilderModal: React.FC<ResumeBuilderModalProps> = ({
                       {/* Summary */}
                       {resumeData.summary && (
                         <div className="mt-3.5">
-                          <h2 className="resume-section-title text-[11px] font-black uppercase tracking-wider text-zinc-900">
+                          <h2 className="resume-section-title text-[11px] font-black uppercase tracking-wider">
                             Professional Summary
                           </h2>
-                          <div className="mt-0.5 h-[1px] w-full bg-zinc-200" />
+                          <div className="resume-section-divider mt-0.5 h-[1.5px] w-full bg-zinc-200" />
                           <p className="mt-1.5 text-xs leading-relaxed text-zinc-700">
                             <FormattedText text={resumeData.summary} />
                           </p>
@@ -1669,10 +1669,10 @@ export const ResumeBuilderModal: React.FC<ResumeBuilderModalProps> = ({
                       {/* Skills */}
                       {resumeData.skills && resumeData.skills.length > 0 && (
                         <div className="mt-4">
-                          <h2 className="resume-section-title text-[11px] font-black uppercase tracking-wider text-zinc-900">
+                          <h2 className="resume-section-title text-[11px] font-black uppercase tracking-wider">
                             Technical Skills
                           </h2>
-                          <div className="mt-0.5 h-[1px] w-full bg-zinc-200" />
+                          <div className="resume-section-divider mt-0.5 h-[1.5px] w-full bg-zinc-200" />
                           <div className="mt-1.5 flex flex-col gap-1 text-xs">
                             {resumeData.skills.map((s, idx) => (
                               <div key={idx} className="text-zinc-700">
@@ -1689,10 +1689,10 @@ export const ResumeBuilderModal: React.FC<ResumeBuilderModalProps> = ({
                       {/* Experience */}
                       {resumeData.experience && resumeData.experience.length > 0 && (
                         <div className="mt-4">
-                          <h2 className="resume-section-title text-[11px] font-black uppercase tracking-wider text-zinc-900">
+                          <h2 className="resume-section-title text-[11px] font-black uppercase tracking-wider">
                             Professional Experience
                           </h2>
-                          <div className="mt-0.5 h-[1px] w-full bg-zinc-200" />
+                          <div className="resume-section-divider mt-0.5 h-[1.5px] w-full bg-zinc-200" />
                           <div className="mt-2.5 flex flex-col gap-3.5">
                             {resumeData.experience.map((job, idx) => {
                               const cleanCompany = (job.company || '').replace(/^company(?:\s*name)?$/i, '').trim();
@@ -1739,10 +1739,10 @@ export const ResumeBuilderModal: React.FC<ResumeBuilderModalProps> = ({
                       {/* Projects */}
                       {resumeData.projects && resumeData.projects.length > 0 && (
                         <div className="mt-4">
-                          <h2 className="resume-section-title text-[11px] font-black uppercase tracking-wider text-zinc-900">
+                          <h2 className="resume-section-title text-[11px] font-black uppercase tracking-wider">
                             Key Projects
                           </h2>
-                          <div className="mt-0.5 h-[1px] w-full bg-zinc-200" />
+                          <div className="resume-section-divider mt-0.5 h-[1.5px] w-full bg-zinc-200" />
                           <div className="mt-2.5 flex flex-col gap-3">
                             {resumeData.projects.map((proj, idx) => (
                               <div key={idx} className="flex flex-col gap-0.5 text-xs">
@@ -1786,10 +1786,10 @@ export const ResumeBuilderModal: React.FC<ResumeBuilderModalProps> = ({
                         resumeData.education?.school ||
                         resumeData.education?.certifications) && (
                         <div className="mt-4">
-                          <h2 className="resume-section-title text-[11px] font-black uppercase tracking-wider text-zinc-900">
+                          <h2 className="resume-section-title text-[11px] font-black uppercase tracking-wider">
                             Education & Certifications
                           </h2>
-                          <div className="mt-0.5 h-[1px] w-full bg-zinc-200" />
+                          <div className="resume-section-divider mt-0.5 h-[1.5px] w-full bg-zinc-200" />
                           <div className="mt-1.5 text-xs">
                             {resumeData.education.degrees && resumeData.education.degrees.length > 0 ? (
                               <div className="space-y-2">
@@ -1857,10 +1857,10 @@ export const ResumeBuilderModal: React.FC<ResumeBuilderModalProps> = ({
                           .filter((a) => a.bullets.length > 0 || (a.category && !/^(?:key\s+|notable\s+|major\s+)?(?:achievements?|accomplishments?)$/i.test(a.category.trim())))
                           .length > 0 && (
                         <div className="mt-4">
-                          <h2 className="resume-section-title text-[11px] font-black uppercase tracking-wider text-zinc-900">
+                          <h2 className="resume-section-title text-[11px] font-black uppercase tracking-wider">
                             Achievements
                           </h2>
-                          <div className="mt-0.5 h-[1px] w-full bg-zinc-200" />
+                          <div className="resume-section-divider mt-0.5 h-[1.5px] w-full bg-zinc-200" />
                           <div className="mt-1.5 space-y-2 text-xs">
                             {resumeData.achievements
                               .filter((a) => !/^(?:interests?|hobbies|activities)$/i.test(a.category || ''))
@@ -1870,7 +1870,7 @@ export const ResumeBuilderModal: React.FC<ResumeBuilderModalProps> = ({
                                 return (
                                   <div key={aIdx} className="space-y-1">
                                     {ach.category && !isSelfHeader && (
-                                      <h3 className="text-[11px] font-bold text-zinc-800 tracking-wide uppercase">
+                                      <h3 className="resume-subsection-title text-[11px] font-bold tracking-wide uppercase">
                                         <FormattedText text={ach.category} />
                                       </h3>
                                     )}
@@ -1894,10 +1894,10 @@ export const ResumeBuilderModal: React.FC<ResumeBuilderModalProps> = ({
                       {resumeData.achievements &&
                         resumeData.achievements.filter((a) => /^(?:interests?|hobbies|activities)$/i.test(a.category || '')).length > 0 && (
                         <div className="mt-4">
-                          <h2 className="resume-section-title text-[11px] font-black uppercase tracking-wider text-zinc-900">
+                          <h2 className="resume-section-title text-[11px] font-black uppercase tracking-wider">
                             Interests
                           </h2>
-                          <div className="mt-0.5 h-[1px] w-full bg-zinc-200" />
+                          <div className="resume-section-divider mt-0.5 h-[1.5px] w-full bg-zinc-200" />
                           <div className="mt-1.5 space-y-1 text-xs">
                             {resumeData.achievements
                               .filter((a) => /^(?:interests?|hobbies|activities)$/i.test(a.category || ''))
@@ -2020,20 +2020,42 @@ export const ResumeBuilderModal: React.FC<ResumeBuilderModalProps> = ({
                           title={pal.name}
                           className={`p-1.5 rounded-lg border flex flex-col items-center gap-1 transition ${
                             isSelected
-                              ? 'border-emerald-500 bg-emerald-50/40 dark:border-emerald-500 dark:bg-emerald-950/20 ring-1 ring-emerald-500'
+                              ? 'bg-zinc-50 dark:bg-zinc-800'
                               : 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-800'
                           }`}
+                          style={
+                            isSelected
+                              ? { borderColor: pal.primary, boxShadow: `0 0 0 1.5px ${pal.primary}` }
+                              : undefined
+                          }
                         >
                           <div className="flex items-center gap-1">
-                            <span className="w-3 h-3 rounded-full shadow-xs" style={{ backgroundColor: pal.primary }} />
-                            <span className="w-3 h-3 rounded-full shadow-xs" style={{ backgroundColor: pal.accent }} />
+                            <span className="w-3.5 h-3.5 rounded-full shadow-xs ring-1 ring-black/10" style={{ backgroundColor: pal.primary }} />
+                            <span className="w-3.5 h-3.5 rounded-full shadow-xs ring-1 ring-black/10" style={{ backgroundColor: pal.accent }} />
                           </div>
-                          <span className="text-[9px] font-medium text-zinc-600 dark:text-zinc-400 text-center leading-tight truncate w-full">
+                          <span
+                            className="text-[9px] font-medium text-center leading-tight truncate w-full"
+                            style={isSelected ? { color: pal.primary, fontWeight: 700 } : undefined}
+                          >
                             {pal.name}
                           </span>
                         </button>
                       );
                     })}
+                  </div>
+
+                  {/* Custom Color Picker */}
+                  <div className="mt-2 flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50/60 px-2.5 py-1.5 dark:border-zinc-800 dark:bg-zinc-800/40">
+                    <span className="text-[10px] font-semibold text-zinc-600 dark:text-zinc-400">Custom Accent</span>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="color"
+                        value={selectedPalette.startsWith('#') ? selectedPalette : (RESUME_COLOR_PALETTES.find((p) => p.id === selectedPalette)?.primary || '#0d9488')}
+                        onChange={(e) => setSelectedPalette(e.target.value)}
+                        className="h-5 w-7 cursor-pointer rounded border-0 bg-transparent p-0"
+                        title="Pick custom color"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -2044,7 +2066,7 @@ export const ResumeBuilderModal: React.FC<ResumeBuilderModalProps> = ({
                   </span>
                   <select
                     value={selectedTheme}
-                    onChange={(e) => setSelectedTheme(e.target.value)}
+                    onChange={(e) => handleThemeChange(e.target.value)}
                     className="w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
                   >
                     {Object.values(RESUME_THEMES).map((t) => (

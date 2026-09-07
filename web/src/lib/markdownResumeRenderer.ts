@@ -167,7 +167,7 @@ export function renderMarkdownToResumeHtml(markdown: string): string {
           );
         } else {
           htmlParts.push(
-            `<p class="resume-title mt-0.5 text-xs font-bold text-emerald-700">${formatInlineMarkdown(line)}</p>`
+            `<p class="resume-title mt-0.5 text-xs font-bold">${formatInlineMarkdown(line)}</p>`
           );
         }
         continue;
@@ -186,7 +186,7 @@ export function renderMarkdownToResumeHtml(markdown: string): string {
       currentSection = sectionTitle.toUpperCase();
       htmlParts.push(
         `<div class="resume-section mt-4 text-left">
-          <h2 class="resume-section-title text-[11px] font-black uppercase tracking-wider text-zinc-900 border-b border-zinc-200 pb-0.5 mb-1.5 text-left">
+          <h2 class="resume-section-title text-[11px] font-black uppercase tracking-wider pb-0.5 mb-1.5 text-left">
             ${escapeHtml(sectionTitle)}
           </h2>`
       );
@@ -216,7 +216,7 @@ export function renderMarkdownToResumeHtml(markdown: string): string {
         );
       } else {
         htmlParts.push(
-          `<h3 class="text-xs font-bold text-zinc-900 mt-2 mb-0.5 text-left">${formatInlineMarkdown(subText)}</h3>`
+          `<h3 class="resume-subsection-title text-xs font-bold mt-2 mb-0.5 text-left">${formatInlineMarkdown(subText)}</h3>`
         );
       }
       continue;
@@ -246,7 +246,7 @@ export function renderMarkdownToResumeHtml(markdown: string): string {
       currentSection = headerCheck.title.toUpperCase();
       htmlParts.push(
         `<div class="resume-section mt-4 text-left">
-          <h2 class="resume-section-title text-[11px] font-black uppercase tracking-wider text-zinc-900 border-b border-zinc-200 pb-0.5 mb-1.5 text-left">
+          <h2 class="resume-section-title text-[11px] font-black uppercase tracking-wider pb-0.5 mb-1.5 text-left">
             ${escapeHtml(headerCheck.title.toUpperCase())}
           </h2>`
       );
@@ -258,7 +258,7 @@ export function renderMarkdownToResumeHtml(markdown: string): string {
       closeListIfOpen();
       closeHeaderIfOpen();
       htmlParts.push(
-        `<h3 class="text-xs font-bold text-zinc-900 mt-3 mb-1 text-left uppercase tracking-wide">
+        `<h3 class="resume-subsection-title text-xs font-bold mt-3 mb-1 text-left uppercase tracking-wide">
           ${formatInlineMarkdown(headerCheck.title)}
         </h3>`
       );

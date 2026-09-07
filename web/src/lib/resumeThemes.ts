@@ -323,55 +323,55 @@ export const RESUME_COLOR_PALETTES: ResumeColorPalette[] = [
     id: 'modern-teal',
     name: 'Teal & Emerald',
     primary: '#0d9488',
-    heading: '#111827',
+    heading: '#0f766e',
     accent: '#059669',
-    text: '#374151',
-    link: '#0f766e',
+    text: '#1f2937',
+    link: '#0d9488',
   },
   {
     id: 'classic-navy',
     name: 'Navy & Blue',
-    primary: '#1e3a8a',
-    heading: '#0f172a',
+    primary: '#1e40af',
+    heading: '#1e3a8a',
     accent: '#2563eb',
-    text: '#334155',
+    text: '#1e293b',
     link: '#1d4ed8',
   },
   {
     id: 'charcoal-slate',
     name: 'Executive Charcoal',
-    primary: '#1f2937',
-    heading: '#111827',
-    accent: '#4b5563',
-    text: '#374151',
+    primary: '#334155',
+    heading: '#0f172a',
+    accent: '#475569',
+    text: '#1e293b',
     link: '#2563eb',
   },
   {
     id: 'crimson-ruby',
     name: 'Crimson & Rose',
-    primary: '#9f1239',
-    heading: '#1c1917',
+    primary: '#be123c',
+    heading: '#9f1239',
     accent: '#e11d48',
-    text: '#292524',
+    text: '#1c1917',
     link: '#be123c',
   },
   {
     id: 'royal-purple',
     name: 'Royal Violet',
-    primary: '#581c87',
-    heading: '#1e1b4b',
+    primary: '#6d28d9',
+    heading: '#581c87',
     accent: '#7c3aed',
-    text: '#312e81',
-    link: '#6d28d9',
+    text: '#1e1b4b',
+    link: '#7c3aed',
   },
   {
     id: 'monochrome',
     name: 'Pure Monochrome',
-    primary: '#000000',
-    heading: '#000000',
+    primary: '#18181b',
+    heading: '#09090b',
     accent: '#52525b',
-    text: '#27272a',
-    link: '#18181b',
+    text: '#18181b',
+    link: '#09090b',
   },
 ];
 
@@ -388,7 +388,23 @@ export function compileResumeStylesheet(
 ): string {
   const theme = RESUME_THEMES[themeId] || RESUME_THEMES[DEFAULT_THEME_ID];
   const typeface = RESUME_TYPEFACES.find((t) => t.id === typefaceId) || RESUME_TYPEFACES[0];
-  const palette = RESUME_COLOR_PALETTES.find((p) => p.id === paletteId) || RESUME_COLOR_PALETTES[0];
+  
+  // Support either predefined palette ID or raw hex color like #1e40af
+  let palette = RESUME_COLOR_PALETTES.find((p) => p.id === paletteId);
+  if (!palette && paletteId && paletteId.startsWith('#')) {
+    palette = {
+      id: 'custom',
+      name: 'Custom',
+      primary: paletteId,
+      heading: paletteId,
+      accent: paletteId,
+      text: '#1f2937',
+      link: paletteId,
+    };
+  }
+  if (!palette) {
+    palette = RESUME_COLOR_PALETTES[0];
+  }
 
   const fontImport = typeface.googleFont
     ? `@import url('https://fonts.googleapis.com/css2?family=${typeface.googleFont}&display=swap');`
@@ -435,39 +451,61 @@ ${fontImport}
   }
 }
 
-/* Base Typography & Color Application */
+/* Theme Default Rules */
+${theme.defaultCss}
+
+/* User Custom CSS Overrides */
+${customCss}
+
+/* Active Palette & Typography Application (Applied with top specificity to guarantee color responsiveness) */
 .resume-preview {
   font-family: var(--resume-font) !important;
   color: var(--resume-text) !important;
   box-sizing: border-box;
   text-align: left !important;
 }
-.resume-preview h1, .resume-preview h2, .resume-preview h3, .resume-preview h4 {
+
+.resume-preview h1,
+.resume-preview .resume-header h1 {
   color: var(--resume-heading) !important;
 }
-.resume-preview a {
-  color: var(--resume-link) !important;
-}
-.resume-preview hr {
-  border-color: #e5e7eb;
-}
 
-.resume-header {
-  text-align: center !important;
-}
-
-.resume-header .resume-title {
+.resume-preview .resume-title,
+.resume-preview .resume-header .resume-title {
   color: var(--resume-primary) !important;
 }
 
-.resume-section {
-  text-align: left !important;
+.resume-preview h2,
+.resume-preview .resume-section-title {
+  color: var(--resume-primary) !important;
+  border-bottom: 2px solid var(--resume-primary) !important;
+  padding-bottom: 2px !important;
 }
 
-.resume-section-title {
-  color: var(--resume-heading) !important;
-  border-bottom-color: var(--resume-primary) !important;
-  text-align: left !important;
+.resume-preview .resume-section-divider {
+  background-color: var(--resume-primary) !important;
+  height: 2px !important;
+}
+
+.resume-preview h3,
+.resume-preview .resume-subsection-title {
+  color: var(--resume-accent) !important;
+}
+
+.resume-preview strong.resume-skill-badge,
+.resume-preview .resume-skill-badge {
+  color: var(--resume-primary) !important;
+}
+
+.resume-preview a,
+.resume-preview .resume-link {
+  color: var(--resume-link) !important;
+}
+
+.resume-preview hr {
+  border: none !important;
+  border-top: 1.5px solid var(--resume-primary) !important;
+  opacity: 0.5 !important;
 }
 
 /* Layout & Alignment Primitives (Print & Screen Safe) */
@@ -509,12 +547,7 @@ ${fontImport}
   display: list-item !important;
   list-style-type: disc !important;
   text-align: left !important;
+  color: var(--resume-text) !important;
 }
-
-/* Theme Default Rules */
-${theme.defaultCss}
-
-/* User Custom CSS Overrides */
-${customCss}
   `.trim();
 }
