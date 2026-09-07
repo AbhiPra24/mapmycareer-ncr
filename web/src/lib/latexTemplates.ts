@@ -366,6 +366,7 @@ export interface ResumeData {
   name: string;
   title: string;
   email: string;
+  phone?: string;
   location: string;
   linkedin: string;
   github?: string;
@@ -420,6 +421,7 @@ export function escapeLatex(text: string): string {
 
 export function generateLatexSource(data: ResumeData): string {
   const contactParts: string[] = [
+    escapeLatex(data.phone || ''),
     escapeLatex(data.location),
     escapeLatex(data.email),
     escapeLatex(data.linkedin),
@@ -548,7 +550,7 @@ ${achievementsLatex}
 }
 
 export function generateMarkdownSource(data: ResumeData): string {
-  const contactParts = [data.location, data.email, data.linkedin, data.github, data.website].filter(Boolean);
+  const contactParts = [data.phone, data.location, data.email, data.linkedin, data.github, data.website].filter(Boolean);
   const skillsMd = data.skills.map((s) => `- **${s.category}:** ${s.skills}`).join('\n');
   const expMd = data.experience
     .map((j) => {
@@ -640,7 +642,7 @@ ${eduItemsMd}${certMd}${achievementsMd}${interestsMd}
 }
 
 export function generatePlainText(data: ResumeData): string {
-  const contactParts = [data.location, data.email, data.linkedin, data.github, data.website].filter(Boolean);
+  const contactParts = [data.phone, data.location, data.email, data.linkedin, data.github, data.website].filter(Boolean);
   const skillsTxt = data.skills.map((s) => `${s.category}: ${s.skills}`).join('\n');
   const expTxt = data.experience
     .map((j) => {

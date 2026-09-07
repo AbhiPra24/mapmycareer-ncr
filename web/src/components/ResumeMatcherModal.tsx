@@ -6,7 +6,6 @@ import { parseResumeFile } from '../lib/resumeParser';
 import { extractCandidateProfile, rankJobsByResume } from '../lib/resumeMatcher';
 import {
   X,
-  Sparkles,
   UploadCloud,
   FileText,
   Loader2,
@@ -15,8 +14,6 @@ import {
   CheckCircle2,
   Target,
   ArrowRight,
-  Briefcase,
-  Layers,
   Plus,
 } from 'lucide-react';
 

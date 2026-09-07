@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   ROLE_TEMPLATES,
   ResumeData,
-  ResumeProject,
   generateLatexSource,
   generateMarkdownSource,
   generatePlainText,
@@ -13,7 +12,6 @@ import { STRONG_ACTION_VERBS, WEAK_PASSIVE_PHRASES, METRIC_REGEX } from '../lib/
 import {
   RESUME_THEMES,
   compileResumeStylesheet,
-  DEFAULT_THEME_ID,
   RESUME_TYPEFACES,
   DEFAULT_TYPEFACE_ID,
   FontCategory,
@@ -38,15 +36,11 @@ import {
   FolderGit2,
   Wrench,
   FileEdit,
-  Layers,
-  ChevronDown,
-  ChevronUp,
   Printer,
   Palette,
   Code,
   FileText,
   Download,
-  Sliders,
   Maximize2,
   Minimize2,
   ZoomIn,
@@ -245,7 +239,7 @@ export const ResumeBuilderModal: React.FC<ResumeBuilderModalProps> = ({
 
   const loadTemplateDefaults = (roleKey: string) => {
     const tmpl = ROLE_TEMPLATES[roleKey] || ROLE_TEMPLATES.swe;
-    let skillsCopy = JSON.parse(JSON.stringify(tmpl.defaultSkills));
+    const skillsCopy = JSON.parse(JSON.stringify(tmpl.defaultSkills));
     if (initialJobContext?.skills && initialJobContext.skills.length > 0) {
       const topSkills = initialJobContext.skills.slice(0, 6).join(', ');
       skillsCopy[0] = {

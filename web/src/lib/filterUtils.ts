@@ -35,7 +35,7 @@ export function getCleanLogoUrl(company: string, domain?: string): string | null
   
   if (!company) return null;
   // Clean company name to extract domain candidate
-  let cleanName = company.toLowerCase()
+  const cleanName = company.toLowerCase()
     .replace(/\s*\(.*?\)/g, '')
     .replace(/\b(pvt|ltd|limited|inc|technologies|solutions|services|corp|corporation|llc|india)\b/g, '')
     .trim()
