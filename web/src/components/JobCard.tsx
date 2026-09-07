@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
-import { Job } from '../types/job';
+import { Job, JobMatchResult } from '../types/job';
 import { getCleanLogoUrl } from '../lib/filterUtils';
-import { MapPin, Building2, Briefcase, IndianRupee, ExternalLink, Bookmark } from 'lucide-react';
+import { MapPin, Building2, Briefcase, IndianRupee, ExternalLink, Bookmark, Target } from 'lucide-react';
 
 interface JobCardProps {
   job: Job;
   isSelected?: boolean;
   isSaved?: boolean;
+  matchResult?: JobMatchResult;
   onSelect: (job: Job) => void;
   onHover?: (job: Job | null) => void;
   onToggleSave?: (job: Job, e: React.MouseEvent) => void;
 }
 
-export const JobCard: React.FC<JobCardProps> = ({ job, isSelected, isSaved, onSelect, onHover, onToggleSave }) => {
+export const JobCard: React.FC<JobCardProps> = ({ job, isSelected, isSaved, matchResult, onSelect, onHover, onToggleSave }) => {
   const [imgError, setImgError] = useState(false);
 
   const getBadgeColor = (level?: string) => {
@@ -67,22 +68,40 @@ export const JobCard: React.FC<JobCardProps> = ({ job, isSelected, isSaved, onSe
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <div className="flex flex-col items-end gap-1">
+              {matchResult && (
+                <span
+                  className={`flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold ring-1 ring-inset ${
+                    matchResult.matchScore >= 70
+                      ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/30 dark:bg-emerald-950/60 dark:text-emerald-300'
+                      : matchResult.matchScore >= 50
+                      ? 'bg-blue-50 text-blue-700 ring-blue-600/30 dark:bg-blue-950/60 dark:text-blue-300'
+                      : 'bg-amber-50 text-amber-700 ring-amber-600/30 dark:bg-amber-950/60 dark:text-amber-300'
+                  }`}
+                  title={`Skills: ${matchResult.skillsScore}%, Title: ${matchResult.titleScore}%, Exp: ${matchResult.experienceScore}%`}
+                >
+                  <Target className="h-3 w-3" />
+                  <span>{matchResult.matchScore}% Match</span>
+                </span>
+              )}
+              {job.experience_level && (
+                <span
+                  className={`shrink-0 rounded-md px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${getBadgeColor(
+                    job.experience_level
+                  )}`}
+                >
+                  {job.experience_level}
+                </span>
+              )}
+            </div>
             {onToggleSave && (
               <button
                 onClick={(e) => onToggleSave(job, e)}
+                aria-label={isSaved ? 'Remove from saved jobs' : 'Save job'}
                 className={`p-1.5 rounded-md transition ${isSaved ? 'text-rose-500 bg-rose-50 dark:bg-rose-950/30' : 'text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
               >
                 <Bookmark className="h-4 w-4" fill={isSaved ? 'currentColor' : 'none'} />
               </button>
-            )}
-            {job.experience_level && (
-              <span
-                className={`shrink-0 rounded-md px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${getBadgeColor(
-                  job.experience_level
-                )}`}
-              >
-                {job.experience_level}
-              </span>
             )}
           </div>
         </div>
@@ -108,17 +127,26 @@ export const JobCard: React.FC<JobCardProps> = ({ job, isSelected, isSaved, onSe
 
         {job.skills && job.skills.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1">
-            {job.skills.slice(0, 4).map((skill, idx) => (
-              <span
-                key={idx}
-                className="rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
-              >
-                {skill}
-              </span>
-            ))}
-            {job.skills.length > 4 && (
+            {job.skills.slice(0, 5).map((skill, idx) => {
+              const isMatched = matchResult?.matchedSkills.some(
+                (ms) => ms.toLowerCase() === skill.toLowerCase()
+              );
+              return (
+                <span
+                  key={idx}
+                  className={`rounded-md px-2 py-0.5 text-[11px] font-medium transition ${
+                    isMatched
+                      ? 'bg-emerald-100 font-semibold text-emerald-800 ring-1 ring-emerald-500/30 dark:bg-emerald-950/80 dark:text-emerald-300'
+                      : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300'
+                  }`}
+                >
+                  {isMatched && '✓ '}{skill}
+                </span>
+              );
+            })}
+            {job.skills.length > 5 && (
               <span className="rounded-md bg-zinc-50 px-1.5 py-0.5 text-[10px] text-zinc-400 dark:bg-zinc-800/50">
-                +{job.skills.length - 4}
+                +{job.skills.length - 5}
               </span>
             )}
           </div>

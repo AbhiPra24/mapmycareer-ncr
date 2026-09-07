@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { auditAtsScore } from '../atsAuditor';
+import { auditAtsScore, generateAtsFixPrompt } from '../atsAuditor';
 
 describe('AtsAuditor Engine', () => {
   it('should score high for a strong, quantified, multi-section resume', () => {
@@ -87,5 +87,26 @@ EDUCATION: B.Tech (2020)
 
     expect(report.roleKeywordsMatched).toEqual(['React', 'TypeScript']);
     expect(report.roleKeywordsMissing).toEqual(['Docker', 'Kubernetes']);
+  });
+
+  it('should generate an actionable AI fix prompt for flagged bullets and keywords', () => {
+    const resume = `Alex Rivera
+Developer
+EXPERIENCE:
+- Responsible for fixing bugs and assisting in test cases.
+- Handled frontend UI tasks.
+`;
+    const report = auditAtsScore(resume, ['React', 'TypeScript']);
+    const prompt = generateAtsFixPrompt(report, {
+      title: 'Senior Frontend Engineer',
+      company: 'TechCorp',
+      skills: ['React', 'TypeScript'],
+    });
+
+    expect(prompt).toContain('Senior Frontend Engineer at TechCorp');
+    expect(prompt).toContain('FLAGGED BULLETS REQUIRING REWRITES');
+    expect(prompt).toContain('Responsible for fixing bugs');
+    expect(prompt).toContain('Google XYZ');
+    expect(prompt).toContain('PASSIVE / WEAK PHRASES TO ELIMINATE');
   });
 });

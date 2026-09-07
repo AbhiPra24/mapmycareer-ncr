@@ -234,3 +234,70 @@ export function auditAtsScore(text: string, targetSkills: string[] = []): AtsAud
     roleKeywordsMissing: missingKeywords,
   };
 }
+
+export interface AtsFixPromptContext {
+  title?: string;
+  company?: string;
+  skills?: string[];
+}
+
+/**
+ * Deterministically generates an optimized LLM prompt containing
+ * all weak bullets, missing keywords, and structural fixes from the ATS audit.
+ */
+export function generateAtsFixPrompt(
+  report: AtsAuditReport,
+  context?: AtsFixPromptContext | null
+): string {
+  const weakBullets = report.bulletEvaluations.filter((b) => b.status !== 'Optimal');
+  const targetRole = context?.title ? `${context.title}${context.company ? ` at ${context.company}` : ''}` : 'Target Tech Role';
+  const missingKeywords = report.roleKeywordsMissing && report.roleKeywordsMissing.length > 0
+    ? report.roleKeywordsMissing
+    : context?.skills || [];
+
+  let prompt = `You are a Principal Tech Recruiter and FAANG Resume Optimization specialist.
+
+I have run an automated ATS Heuristic Audit on my resume (Current ATS Score: ${report.totalScore}/100). Please help me rewrite the flagged weak bullet points and address the ATS defects using Google's XYZ formula:
+"Accomplished [X], as measured by [Y], by doing [Z]"
+
+---
+### 🎯 TARGET POSITION:
+- **Role**: ${targetRole}
+${missingKeywords.length > 0 ? `- **Missing Keywords to Naturally Integrate**: ${missingKeywords.join(', ')}` : ''}
+
+---
+### 🚩 FLAGGED BULLETS REQUIRING REWRITES (${weakBullets.length} items):
+`;
+
+  if (weakBullets.length > 0) {
+    weakBullets.forEach((item, idx) => {
+      prompt += `\n${idx + 1}. **Original Bullet**: "${item.bullet}"\n   - **Defect**: ${item.status}\n   - **Recommendation**: ${item.suggestion}\n`;
+    });
+  } else {
+    prompt += `\n(All scanned bullets met core heuristics. Provide alternative high-impact versions with stronger executive phrasing).\n`;
+  }
+
+  if (report.passivePhrasesFound.length > 0) {
+    prompt += `\n---
+### ⚠️ PASSIVE / WEAK PHRASES TO ELIMINATE:
+${report.passivePhrasesFound.map((p) => `- "${p}"`).join('\n')}
+`;
+  }
+
+  if (report.missingSections.length > 0) {
+    prompt += `\n---
+### 📑 MISSING STANDARD SECTIONS:
+- Please outline starter bullet points for missing sections: ${report.missingSections.join(', ')}
+`;
+  }
+
+  prompt += `
+---
+### ✍️ REWRITE REQUIREMENTS:
+1. **Google XYZ Structure**: Every rewritten bullet must start with a past-tense strong action verb (e.g. *Architected, Spearheaded, Optimized, Engineered, Accelerated*) and quantify the impact.
+2. **Realistic Metric Placeholders**: Where exact data is needed, insert clear bracketed placeholders like \`[reduced P99 latency by 35%]\`, \`[scaled throughput to 10M+ daily events]\`, or \`[saved $120k/yr in cloud spend]\`.
+3. **Format**: Provide 2 alternative strong versions for each flagged bullet so I can choose the one matching my actual experience.
+4. Keep bullets concise, dense, and tailored to ATS parsers.`;
+
+  return prompt.trim();
+}

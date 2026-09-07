@@ -357,6 +357,11 @@ export interface ResumeProject {
   bullets: string[];
 }
 
+export interface ResumeAchievement {
+  category?: string;
+  bullets: string[];
+}
+
 export interface ResumeData {
   name: string;
   title: string;
@@ -381,7 +386,14 @@ export interface ResumeData {
     dates: string;
     gpa?: string;
     certifications?: string;
+    degrees?: {
+      degree: string;
+      school: string;
+      dates: string;
+      gpa?: string;
+    }[];
   };
+  achievements?: ResumeAchievement[];
 }
 
 export function escapeLatex(text: string): string {
@@ -456,8 +468,29 @@ ${bulletsStr}
     ? `\n\\vspace{2pt}\n\\textbf{Certifications:} ${escapeLatex(data.education.certifications)}`
     : '';
 
-  const eduLatex = `\\textbf{${escapeLatex(data.education.degree)}} \\hfill ${escapeLatex(data.education.dates)} \\\\
-\\textit{${escapeLatex(data.education.school)}}${gpaStr}${eduCert}`;
+  const eduLatex =
+    data.education.degrees && data.education.degrees.length > 0
+      ? data.education.degrees
+          .map((deg) => {
+            const g = deg.gpa ? ` \\textbar\\ \\textbf{GPA:} ${escapeLatex(deg.gpa)}` : '';
+            return `\\textbf{${escapeLatex(deg.degree)}} \\hfill ${escapeLatex(deg.dates)} \\\\\n\\textit{${escapeLatex(deg.school)}}${g}`;
+          })
+          .join('\n\\vspace{4pt}\n') + eduCert
+      : `\\textbf{${escapeLatex(data.education.degree)}} \\hfill ${escapeLatex(data.education.dates)} \\\\\n\\textit{${escapeLatex(data.education.school)}}${gpaStr}${eduCert}`;
+
+  const achievementsLatex =
+    data.achievements && data.achievements.length > 0
+      ? `\n\\section*{\\large\\bfseries\\color{primary}\\uppercase{Key Achievements}}\n\\vspace{-4pt}\\rule{\\textwidth}{0.8pt}\\vspace{3pt}\n\\small\n` +
+        data.achievements
+          .map((ach) => {
+            const catStr = ach.category ? `\\textbf{${escapeLatex(ach.category)}}\\\\\n` : '';
+            const bullets = ach.bullets
+              .map((b) => `  \\item ${escapeLatex(b)}`)
+              .join('\n');
+            return `${catStr}\\begin{itemize}[leftmargin=*,noitemsep,topsep=1pt]\n${bullets}\n\\end{itemize}`;
+          })
+          .join('\n\\vspace{4pt}\n')
+      : '';
 
   return `\\documentclass[10pt,letterpaper]{article}
 \\usepackage[utf8]{inputenc}
@@ -508,6 +541,7 @@ ${projectsLatex}
 \\vspace{-4pt}\\rule{\\textwidth}{0.8pt}\\vspace{3pt}
 \\small
 ${eduLatex}
+${achievementsLatex}
 
 \\end{document}
 `;
@@ -538,6 +572,47 @@ export function generateMarkdownSource(data: ResumeData): string {
   const gpaMd = data.education.gpa ? ` (GPA: ${data.education.gpa})` : '';
   const certMd = data.education.certifications ? `\n- **Certifications:** ${data.education.certifications}` : '';
 
+  const eduItemsMd =
+    data.education.degrees && data.education.degrees.length > 0
+      ? data.education.degrees
+          .map((d) => {
+            const schoolStr = d.school ? ` -- ${d.school}` : '';
+            const datesStr = d.dates ? ` (*${d.dates}*)` : '';
+            const dGpa = d.gpa ? ` (GPA: ${d.gpa})` : '';
+            return `- **${d.degree}**${schoolStr}${datesStr}${dGpa}`;
+          })
+          .join('\n')
+      : `- **${data.education.degree}**${data.education.school ? ` -- ${data.education.school}` : ''}${data.education.dates ? ` (*${data.education.dates}*)` : ''}${gpaMd}`;
+
+  const nonInterests = (data.achievements || []).filter(
+    (a) => !/^(?:interests?|hobbies|activities)$/i.test(a.category || '')
+  );
+  const interests = (data.achievements || []).filter(
+    (a) => /^(?:interests?|hobbies|activities)$/i.test(a.category || '')
+  );
+
+  const achievementsMd =
+    nonInterests.length > 0
+      ? `\n\n---\n\n## Key Achievements\n` +
+        nonInterests
+          .filter((ach) => ach.bullets.length > 0)
+          .map((ach) => {
+            const isSelf = /^(?:key\s+|notable\s+|major\s+)?(?:achievements?|accomplishments?)$/i.test(ach.category || '');
+            const catStr = ach.category && !isSelf ? `### ${ach.category}\n` : '';
+            const bullets = ach.bullets.map((b) => `- ${b}`).join('\n');
+            return `${catStr}${bullets}`;
+          })
+          .join('\n\n')
+      : '';
+
+  const interestsMd =
+    interests.length > 0
+      ? `\n\n---\n\n## Interests\n` +
+        interests
+          .flatMap((item) => item.bullets.map((b) => `- ${b}`))
+          .join('\n')
+      : '';
+
   return `# ${data.name}
 **${data.title}**  
 *${contactParts.join(' | ')}*
@@ -560,7 +635,7 @@ ${expMd}${projMd}
 ---
 
 ## Education & Certifications
-- **${data.education.degree}** -- ${data.education.school} (*${data.education.dates}*)${gpaMd}${certMd}
+${eduItemsMd}${certMd}${achievementsMd}${interestsMd}
 `;
 }
 
@@ -589,6 +664,28 @@ export function generatePlainText(data: ResumeData): string {
   const gpaTxt = data.education.gpa ? ` | GPA: ${data.education.gpa}` : '';
   const certTxt = data.education.certifications ? `\nCertifications: ${data.education.certifications}` : '';
 
+  const eduSection =
+    data.education.degrees && data.education.degrees.length > 0
+      ? data.education.degrees
+          .map((deg) => {
+            const g = deg.gpa ? ` | GPA: ${deg.gpa}` : '';
+            return `${deg.degree} -- ${deg.school} (${deg.dates})${g}`;
+          })
+          .join('\n') + certTxt
+      : `${data.education.degree} -- ${data.education.school} (${data.education.dates})${gpaTxt}${certTxt}`;
+
+  const achievementsTxt =
+    data.achievements && data.achievements.length > 0
+      ? `\n==================================================\nKEY ACHIEVEMENTS\n==================================================\n` +
+        data.achievements
+          .map((ach) => {
+            const catStr = ach.category ? `${ach.category.toUpperCase()}\n` : '';
+            const bullets = ach.bullets.map((b) => `  • ${b}`).join('\n');
+            return `${catStr}${bullets}`;
+          })
+          .join('\n\n')
+      : '';
+
   return `${data.name.toUpperCase()}
 ${data.title}
 ${contactParts.join(' | ')}
@@ -611,7 +708,7 @@ ${expTxt}${projTxt}
 ==================================================
 EDUCATION & CERTIFICATIONS
 ==================================================
-${data.education.degree} -- ${data.education.school} (${data.education.dates})${gpaTxt}${certTxt}
+${eduSection}${achievementsTxt}
 `;
 }
 

@@ -1,9 +1,11 @@
 import React from 'react';
-import { Compass, Layers, FileCode2, Zap, MailCheck, BookOpen } from 'lucide-react';
+import { Compass, Layers, FileCode2, Zap, MailCheck, BookOpen, Target } from 'lucide-react';
 
 interface HeaderProps {
   totalJobs: number;
   filteredCount: number;
+  hasActiveResumeMatch?: boolean;
+  onOpenResumeMatcher?: () => void;
   onOpenAtsAuditor?: () => void;
   onOpenResumeBuilder?: () => void;
   onOpenRecruiterValidator?: () => void;
@@ -14,6 +16,8 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   totalJobs,
   filteredCount,
+  hasActiveResumeMatch,
+  onOpenResumeMatcher,
   onOpenAtsAuditor,
   onOpenResumeBuilder,
   onOpenRecruiterValidator,
@@ -93,6 +97,19 @@ export const Header: React.FC<HeaderProps> = ({
               <span>Corridor Insights & FAQ</span>
             </button>
           )}
+
+          <button
+            onClick={onOpenResumeMatcher}
+            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold shadow-sm transition ${
+              hasActiveResumeMatch
+                ? 'border border-blue-500 bg-blue-600 text-white shadow-blue-500/20'
+                : 'border border-indigo-200/80 bg-indigo-50/70 text-indigo-700 hover:bg-indigo-100 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-300 dark:hover:bg-indigo-900/50'
+            }`}
+            title="Upload or paste resume to find and rank matching jobs"
+          >
+            <Target className={`h-3.5 w-3.5 ${hasActiveResumeMatch ? 'text-white' : 'text-indigo-600 dark:text-indigo-400'}`} />
+            <span>{hasActiveResumeMatch ? 'Resume Match Active' : 'Match Resume'}</span>
+          </button>
 
           <button
             onClick={onOpenAtsAuditor}
