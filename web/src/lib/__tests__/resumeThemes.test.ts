@@ -32,4 +32,36 @@ describe('Resume Themes Engine', () => {
     const css = compileResumeStylesheet('non_existent_theme');
     expect(css).toContain('Modern Minimalist');
   });
+
+  describe('Custom CSS Sanitization & Safety', () => {
+    it('should neutralize closing </style> and script injection attempts in custom CSS', () => {
+      const maliciousCss = '</style><script>alert("xss")</script>';
+      const compiled = compileResumeStylesheet('modern', maliciousCss);
+
+      expect(compiled).not.toContain('</style>');
+      expect(compiled).not.toContain('<script>');
+      expect(compiled).not.toContain('</script>');
+    });
+
+    it('should neutralize javascript: URLs and expressions in custom CSS', () => {
+      const maliciousCss = `
+        .resume-preview {
+          background-image: url(javascript:alert(1));
+          width: expression(alert('ie_xss'));
+        }
+      `;
+      const compiled = compileResumeStylesheet('modern', maliciousCss);
+
+      expect(compiled).not.toContain('javascript:');
+      expect(compiled).not.toContain('expression(');
+    });
+
+    it('should neutralize external @import rules in custom CSS', () => {
+      const importCss = '@import url("https://evil.com/malicious.css");';
+      const compiled = compileResumeStylesheet('modern', importCss);
+
+      expect(compiled).not.toContain('@import url("https://evil.com');
+      expect(compiled).toContain('/* @import disallowed */');
+    });
+  });
 });

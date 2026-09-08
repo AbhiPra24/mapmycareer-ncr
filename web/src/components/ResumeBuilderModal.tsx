@@ -20,6 +20,7 @@ import {
 } from '../lib/resumeThemes';
 import { parseMarkdownToResumeData, sanitizeResumeData } from '../lib/markdownResumeParser';
 import { renderMarkdownToResumeHtml } from '../lib/markdownResumeRenderer';
+import { exportResumePdf } from '../lib/pdfExporter';
 import {
   X,
   FileCode2,
@@ -381,69 +382,24 @@ export const ResumeBuilderModal: React.FC<ResumeBuilderModalProps> = ({
 
   const handleExportPdf = () => {
     if (typeof window === 'undefined') return;
-    setExportingPdf(true);
 
     const printDoc = document.getElementById('resume-print-document');
-    if (!printDoc) {
-      setExportingPdf(false);
-      return;
-    }
+    if (!printDoc) return;
 
-    const htmlContent = printDoc.innerHTML;
     const compiledCss = compileResumeStylesheet(selectedTheme, customCss, selectedTypeface, selectedPalette);
 
-    // Collect all head stylesheets so Tailwind utility classes (flex, spacing, colors) render in print iframe
-    const headStyles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
-      .map((node) => node.outerHTML)
-      .join('\n');
-
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = 'none';
-    document.body.appendChild(iframe);
-
-    const iframeDoc = iframe.contentWindow?.document;
-    if (!iframeDoc) {
-      document.body.removeChild(iframe);
-      setExportingPdf(false);
-      return;
-    }
-
-    iframeDoc.open();
-    iframeDoc.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>${resumeData ? `${resumeData.name.replace(/\\s+/g, '_')}_Resume` : 'Resume'}</title>
-          <meta charset="utf-8" />
-          ${headStyles}
-          <style>
-            ${compiledCss}
-          </style>
-        </head>
-        <body style="background-color: #ffffff; margin: 0; padding: 0;">
-          <div class="resume-preview ${RESUME_THEMES[selectedTheme]?.containerClass || ''}" style="background-color: #ffffff; color: #1f2937;">
-            ${htmlContent}
-          </div>
-        </body>
-      </html>
-    `);
-    iframeDoc.close();
-
-    setTimeout(() => {
-      iframe.contentWindow?.focus();
-      iframe.contentWindow?.print();
-      setExportingPdf(false);
-      setTimeout(() => {
-        if (document.body.contains(iframe)) {
-          document.body.removeChild(iframe);
-        }
-      }, 2000);
-    }, 400);
+    exportResumePdf({
+      element: printDoc,
+      title: resumeData ? resumeData.name : 'Resume',
+      compiledCss,
+      containerClass: RESUME_THEMES[selectedTheme]?.containerClass || '',
+      onStart: () => setExportingPdf(true),
+      onFinish: () => setExportingPdf(false),
+      onError: (err) => {
+        console.error('PDF export failed:', err);
+        setExportingPdf(false);
+      },
+    });
   };
 
   const handleClearResume = () => {

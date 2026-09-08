@@ -120,11 +120,13 @@ export default function Home() {
           return match ? match.matchScore >= matchThreshold : false;
         })
         .sort((a, b) => {
-          const scoreA = jobMatchMap.get(a.id)?.matchScore || 0;
-          const scoreB = jobMatchMap.get(b.id)?.matchScore || 0;
+          const matchA = jobMatchMap.get(a.id);
+          const matchB = jobMatchMap.get(b.id);
+          const scoreA = matchA?.matchScore || 0;
+          const scoreB = matchB?.matchScore || 0;
           if (scoreB !== scoreA) return scoreB - scoreA;
-          const matchedCountA = jobMatchMap.get(a.id)?.matchedSkills.length || 0;
-          const matchedCountB = jobMatchMap.get(b.id)?.matchedSkills.length || 0;
+          const matchedCountA = matchA?.matchedSkills.length || 0;
+          const matchedCountB = matchB?.matchedSkills.length || 0;
           return matchedCountB - matchedCountA;
         });
     }

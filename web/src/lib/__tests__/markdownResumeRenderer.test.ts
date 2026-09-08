@@ -193,4 +193,65 @@ Cricket, Reading, Open Source AI Agents
     const matches = html.match(/ACHIEVEMENTS/gi) || [];
     expect(matches.length).toBe(1);
   });
+
+  describe('Security & XSS Neutralization', () => {
+    it('should strictly neutralize img tag injection and onerror event handlers', () => {
+      const maliciousPayload = '"><img src=x onerror=alert(1)>';
+      const formatted = formatInlineMarkdown(maliciousPayload);
+      expect(formatted).not.toContain('<img');
+      expect(formatted).not.toContain('onerror=');
+      expect(formatted).toContain('&lt;img');
+
+      const renderedHtml = renderMarkdownToResumeHtml(`
+# Jane Doe
+${maliciousPayload}
+## Experience
+- ${maliciousPayload}
+      `);
+      expect(renderedHtml).not.toContain('<img');
+      expect(renderedHtml).not.toContain('onerror=alert');
+    });
+
+    it('should neutralize javascript: and data: pseudo-protocols in links', () => {
+      const jsLink = '[Click Me](javascript:alert(1))';
+      const dataLink = '[Click Me](data:text/html,<script>alert(1)</script>)';
+      const vbLink = '[Click Me](vbscript:msgbox(1))';
+      const safeLink = '[LinkedIn](https://linkedin.com/in/test)';
+
+      const formattedJs = formatInlineMarkdown(jsLink);
+      expect(formattedJs).not.toContain('href="javascript:');
+      expect(formattedJs).not.toContain('javascript:alert(1)');
+
+      const formattedData = formatInlineMarkdown(dataLink);
+      expect(formattedData).not.toContain('href="data:');
+
+      const formattedVb = formatInlineMarkdown(vbLink);
+      expect(formattedVb).not.toContain('href="vbscript:');
+
+      const formattedSafe = formatInlineMarkdown(safeLink);
+      expect(formattedSafe).toContain('href="https://linkedin.com/in/test"');
+      expect(formattedSafe).toContain('rel="noopener noreferrer"');
+    });
+
+    it('should escape raw script tags and dangerous HTML in resume content', () => {
+      const mdWithScript = `
+# Attacker <script>alert("hacked")</script>
+## Skills
+- <script>document.location="http://evil.com"</script>
+- Normal Skill
+`;
+      const html = renderMarkdownToResumeHtml(mdWithScript);
+      expect(html).not.toContain('<script>');
+      expect(html).not.toContain('</script>');
+      expect(html).toContain('&lt;script&gt;');
+    });
+
+    it('should neutralize malicious payload inside link labels and URLs', () => {
+      const payload = '[<script>alert(1)</script>](https://example.com)';
+      const formatted = formatInlineMarkdown(payload);
+      expect(formatted).not.toContain('<script>');
+      expect(formatted).toContain('&lt;script&gt;');
+      expect(formatted).toContain('href="https://example.com"');
+    });
+  });
 });

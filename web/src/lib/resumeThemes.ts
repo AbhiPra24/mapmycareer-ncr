@@ -378,6 +378,28 @@ export const RESUME_COLOR_PALETTES: ResumeColorPalette[] = [
 export const DEFAULT_COLOR_PALETTE_ID = 'modern-teal';
 
 /**
+ * Sanitizes user-provided custom CSS to prevent XSS breakout from <style> blocks
+ * or script execution via CSS expressions/behaviors.
+ */
+export function sanitizeCustomCss(css: string): string {
+  if (!css) return '';
+  return css
+    // Disallow closing style or script tags that could break out of <style> context
+    .replace(/<\/style/gi, '')
+    .replace(/<\/?script/gi, '')
+    .replace(/[<>]/g, '')
+    // Disallow javascript: URLs in CSS
+    .replace(/javascript\s*:/gi, '')
+    // Disallow legacy IE expression()
+    .replace(/expression\s*\(/gi, '')
+    // Disallow external imports
+    .replace(/@import\b/gi, '/* @import disallowed */')
+    // Disallow behavior and moz-binding
+    .replace(/behavior\s*:/gi, '')
+    .replace(/-moz-binding\s*:/gi, '');
+}
+
+/**
  * Compile theme and custom CSS into a unified stylesheet string
  */
 export function compileResumeStylesheet(
@@ -409,6 +431,8 @@ export function compileResumeStylesheet(
   const fontImport = typeface.googleFont
     ? `@import url('https://fonts.googleapis.com/css2?family=${typeface.googleFont}&display=swap');`
     : '';
+
+  const safeCustomCss = sanitizeCustomCss(customCss);
 
   return `
 /* Font Import */
@@ -455,7 +479,7 @@ ${fontImport}
 ${theme.defaultCss}
 
 /* User Custom CSS Overrides */
-${customCss}
+${safeCustomCss}
 
 /* Active Palette & Typography Application (Applied with top specificity to guarantee color responsiveness) */
 .resume-preview {

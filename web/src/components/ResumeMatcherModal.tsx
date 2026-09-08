@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Job, CandidateProfile } from '../types/job';
 import { parseResumeFile } from '../lib/resumeParser';
 import { extractCandidateProfile, rankJobsByResume } from '../lib/resumeMatcher';
@@ -108,8 +108,6 @@ export const ResumeMatcherModal: React.FC<ResumeMatcherModalProps> = ({
     setProfile(extracted);
   }, [resumeText]);
 
-  if (!isOpen) return null;
-
   const handleFileUpload = async (file: File) => {
     if (!file) return;
     setIsParsing(true);
@@ -167,14 +165,18 @@ export const ResumeMatcherModal: React.FC<ResumeMatcherModalProps> = ({
     });
   };
 
-  // Preview match results
-  const previewMatches = profile ? rankJobsByResume(jobs, profile, threshold) : [];
+  // Preview match results (memoized to prevent heavy re-ranking during typing or UI re-renders)
+  const previewMatches = useMemo(() => {
+    return profile ? rankJobsByResume(jobs, profile, threshold) : [];
+  }, [jobs, profile, threshold]);
 
   const handleApply = () => {
     if (!profile) return;
     onApplyProfile(profile, threshold);
     onClose();
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">

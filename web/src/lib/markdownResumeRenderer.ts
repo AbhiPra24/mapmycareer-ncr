@@ -1,8 +1,24 @@
 /**
- * Universal Markdown to Resume HTML Renderer
- * Translates raw Markdown directly into styled, ATS-compliant resume HTML.
- * Preserves 100% of user text: zero trimming, zero arbitrary deletions, and zero injected template data.
- * Supports any standard or custom section headers (## Core Competencies, ## Achievements, ## Volunteer Work, etc.)
+ * ATS Markdown Resume Contract & Format Specification:
+ * - Document Header:
+ *   # Full Name
+ *   Subtitle / Desired Role (or **Subtitle**)
+ *   Email | Phone | Location | LinkedIn | GitHub | Portfolio
+ * - Major Sections:
+ *   --- (horizontal rule separator)
+ *   ## Section Name (e.g. Professional Summary, Technical Skills, Professional Experience, Key Projects, Education, Key Achievements)
+ * - Experience / Project items:
+ *   ### Role | Company
+ *   *Dates | Location*
+ *   - Bullet points starting with action verbs and quantifiable metrics
+ * - Key Projects:
+ *   ### Project Name (*Technologies*) | [Link](https://...)
+ *   - Bullet points
+ * - Inline formatting:
+ *   **bold** for emphasis, *italic* for dates/locations, `code` for skills/badges, [label](url) for verified links
+ * - Security Contract:
+ *   All user-supplied text is treated as untrusted. Raw HTML is strictly escaped (&lt;, &gt;, &quot;, &#039;, &amp;).
+ *   Only safe protocols (https, http, mailto, tel) are permitted in links. Executable scripts, arbitrary tags, and event handlers are neutralized.
  */
 
 export function escapeHtml(str: string): string {
@@ -14,27 +30,72 @@ export function escapeHtml(str: string): string {
     .replace(/'/g, '&#039;');
 }
 
+export function sanitizeLinkUrl(rawUrl: string): { safeUrl: string; isValid: boolean } {
+  if (!rawUrl) return { safeUrl: '#', isValid: false };
+
+  // Decode basic HTML entities to detect obfuscated protocols like javascript:
+  let decoded = rawUrl
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&amp;/g, '&')
+    .replace(/&#(\d+);?/g, (_, dec) => String.fromCharCode(parseInt(dec, 10)))
+    .replace(/&#x([0-9a-f]+);?/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .trim();
+
+  // Strip control characters & whitespace
+  decoded = decoded.replace(/[\x00-\x1f\x7f-\x9f\s]/g, '');
+
+  // Strictly allow only https, http, mailto, tel protocols
+  const isSafeProtocol = /^(?:https?:\/\/|mailto:[^\s"'>]+|tel:[^\s"'>]+)/i.test(decoded);
+  if (!isSafeProtocol) {
+    return { safeUrl: '#', isValid: false };
+  }
+
+  // Reject dangerous characters that could break out of attributes
+  const clean = decoded.replace(/["'<>]/g, '');
+  return { safeUrl: clean, isValid: true };
+}
+
+export function sanitizeResumeHtml(html: string): string {
+  if (!html) return '';
+  return html
+    // Strip script tags
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    // Strip forbidden execution tags
+    .replace(/<\/?(?:script|iframe|object|embed|form|input|textarea|button)\b[^>]*>/gi, '')
+    // Strip inline event handlers: onclick, onerror, onload, onmouseover, etc.
+    .replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+    // Strip javascript: in any attribute
+    .replace(/(href|src)\s*=\s*["']\s*javascript:[^"']*["']/gi, '$1="#"');
+}
+
 export function formatInlineMarkdown(text: string): string {
   if (!text) return '';
 
-  let html = text;
+  // 1. Pre-escape all raw HTML so untrusted tags cannot execute
+  let html = escapeHtml(text);
 
-  // 1. Links: [label](url)
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, label, url) => {
-    const safeUrl = url.replace(/["'<>]/g, '');
-    const safeLabel = label;
-    return `<a href="${safeUrl}" target="_blank" rel="noreferrer" class="text-blue-600 hover:underline resume-link">${safeLabel}</a>`;
+  // Neutralize inline event handler signatures even within escaped text
+  html = html.replace(/\bon\w+\s*=/gi, 'data-sanitized=');
+
+  // 2. Links: [label](url)
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, label, rawUrl) => {
+    const { safeUrl, isValid } = sanitizeLinkUrl(rawUrl);
+    if (!isValid) {
+      return label;
+    }
+    return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline resume-link">${label}</a>`;
   });
 
-  // 2. Bold: **text** or __text__
+  // 3. Bold: **text** or __text__
   html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   html = html.replace(/__([^_]+)__/g, '<strong>$1</strong>');
 
-  // 3. Italic: *text* or _text_ (excluding inside words or after bullet markers)
+  // 4. Italic: *text* or _text_ (excluding inside words or after bullet markers)
   html = html.replace(/(^|[^\w*])\*([^*]+)\*([^\w*]|$)/g, '$1<em>$2</em>$3');
   html = html.replace(/(^|[^\w_])_([^_]+)_([^\w_]|$)/g, '$1<em>$2</em>$3');
 
-  // 4. Code / badge: `text`
+  // 5. Code / badge: `text`
   html = html.replace(/`([^`]+)`/g, '<code class="rounded bg-zinc-100 dark:bg-zinc-800 px-1 py-0.5 text-[10px] font-mono text-zinc-800 dark:text-zinc-200">$1</code>');
 
   return html;
@@ -319,5 +380,5 @@ export function renderMarkdownToResumeHtml(markdown: string): string {
   closeHeaderIfOpen();
   closeSectionIfOpen();
 
-  return htmlParts.join('\n');
+  return sanitizeResumeHtml(htmlParts.join('\n'));
 }
