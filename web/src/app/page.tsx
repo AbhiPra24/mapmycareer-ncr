@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
-import { Job, FilterState } from '../types/job';
+import { Job, FilterState, CandidateProfile, JobMatchResult } from '../types/job';
 import { filterJobs, extractUniqueValues } from '../lib/filterUtils';
+import { scoreJobMatch } from '../lib/resumeMatcher';
 import { Header } from '../components/Header';
 import { FilterBar } from '../components/FilterBar';
 import { JobCard } from '../components/JobCard';
@@ -11,10 +12,11 @@ import { JobDetailsModal } from '../components/JobDetailsModal';
 import { AtsAuditModal } from '../components/AtsAuditModal';
 import { ResumeBuilderModal } from '../components/ResumeBuilderModal';
 import { RecruiterValidatorModal } from '../components/RecruiterValidatorModal';
+import { ResumeMatcherModal } from '../components/ResumeMatcherModal';
 import { AnnouncementBanner } from '../components/AnnouncementBanner';
 import { CorridorFaqSection } from '../components/CorridorFaqSection';
 import { CorridorFaqModal } from '../components/CorridorFaqModal';
-import { Loader2, AlertCircle, List, Map } from 'lucide-react';
+import { Loader2, AlertCircle, List, Map as MapIcon, Target, Sparkles, X } from 'lucide-react';
 
 export default function Home() {
   const [allJobs, setAllJobs] = useState<Job[]>([]);
@@ -29,6 +31,9 @@ export default function Home() {
   const [isResumeBuilderOpen, setIsResumeBuilderOpen] = useState<boolean>(false);
   const [isRecruiterModalOpen, setIsRecruiterModalOpen] = useState<boolean>(false);
   const [isFaqModalOpen, setIsFaqModalOpen] = useState<boolean>(false);
+  const [isResumeMatcherOpen, setIsResumeMatcherOpen] = useState<boolean>(false);
+  const [activeResumeProfile, setActiveResumeProfile] = useState<CandidateProfile | null>(null);
+  const [matchThreshold, setMatchThreshold] = useState<number>(35);
   const [activeJobContext, setActiveJobContext] = useState<{
     title: string;
     company: string;
@@ -93,9 +98,41 @@ export default function Home() {
 
   const deferredFilters = useDeferredValue(filters);
 
+  // Compute match results for all jobs when activeResumeProfile changes
+  const jobMatchMap = useMemo(() => {
+    const map = new Map<number | string, JobMatchResult>();
+    if (!activeResumeProfile) return map;
+    allJobs.forEach((job) => {
+      const result = scoreJobMatch(job, activeResumeProfile);
+      map.set(job.id, result);
+    });
+    return map;
+  }, [allJobs, activeResumeProfile]);
+
   const filteredJobs = useMemo(() => {
-    return filterJobs(allJobs, deferredFilters, savedJobIds);
-  }, [allJobs, deferredFilters, savedJobIds]);
+    let result = filterJobs(allJobs, deferredFilters, savedJobIds);
+
+    // If resume match profile is active, filter by threshold and sort by matchScore
+    if (activeResumeProfile) {
+      result = result
+        .filter((job) => {
+          const match = jobMatchMap.get(job.id);
+          return match ? match.matchScore >= matchThreshold : false;
+        })
+        .sort((a, b) => {
+          const matchA = jobMatchMap.get(a.id);
+          const matchB = jobMatchMap.get(b.id);
+          const scoreA = matchA?.matchScore || 0;
+          const scoreB = matchB?.matchScore || 0;
+          if (scoreB !== scoreA) return scoreB - scoreA;
+          const matchedCountA = matchA?.matchedSkills.length || 0;
+          const matchedCountB = matchB?.matchedSkills.length || 0;
+          return matchedCountB - matchedCountA;
+        });
+    }
+
+    return result;
+  }, [allJobs, deferredFilters, savedJobIds, activeResumeProfile, jobMatchMap, matchThreshold]);
 
   const [displayLimit, setDisplayLimit] = useState<number>(40);
 
@@ -190,6 +227,8 @@ export default function Home() {
       <Header
         totalJobs={allJobs.length}
         filteredCount={filteredJobs.length}
+        hasActiveResumeMatch={Boolean(activeResumeProfile)}
+        onOpenResumeMatcher={() => setIsResumeMatcherOpen(true)}
         onOpenAtsAuditor={() => {
           setActiveJobContext(null);
           setIsAtsModalOpen(true);
@@ -208,6 +247,45 @@ export default function Home() {
 
       {/* Main Container */}
       <div className="flex flex-1 flex-col gap-3 overflow-hidden p-3 sm:p-4">
+        {/* Active Resume Match Banner */}
+        {activeResumeProfile && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-200 bg-blue-50/80 px-4 py-2.5 text-xs shadow-sm dark:border-blue-900/60 dark:bg-blue-950/40">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm">
+                <Target className="h-4 w-4" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-blue-950 dark:text-blue-100">
+                    Active Resume Radar: {activeResumeProfile.detectedTrack}
+                  </span>
+                  <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                    {activeResumeProfile.seniority}
+                  </span>
+                </div>
+                <p className="text-[11px] text-blue-800/80 dark:text-blue-300">
+                  {activeResumeProfile.skills.length} skills extracted ({activeResumeProfile.skills.slice(0, 5).join(', ')}{activeResumeProfile.skills.length > 5 ? '...' : ''}) • Ranked by match score (≥{matchThreshold}%)
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsResumeMatcherOpen(true)}
+                className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700"
+              >
+                Adjust Match Profile
+              </button>
+              <button
+                onClick={() => setActiveResumeProfile(null)}
+                className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-600 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Filter Bar */}
         <FilterBar
           filters={filters}
@@ -233,14 +311,26 @@ export default function Home() {
                   No matching jobs found
                 </h3>
                 <p className="mt-1 text-xs text-zinc-500">
-                  Try relaxing your salary or experience filters to see more opportunities.
+                  {activeResumeProfile
+                    ? 'Try lowering the minimum match threshold in the Resume Matcher or clearing some search filters.'
+                    : 'Try relaxing your salary or experience filters to see more opportunities.'}
                 </p>
-                <button
-                  onClick={handleResetFilters}
-                  className="mt-4 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-100 dark:bg-blue-950 dark:text-blue-400"
-                >
-                  Clear all filters
-                </button>
+                <div className="mt-4 flex gap-2">
+                  {activeResumeProfile && (
+                    <button
+                      onClick={() => setIsResumeMatcherOpen(true)}
+                      className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+                    >
+                      Adjust Threshold
+                    </button>
+                  )}
+                  <button
+                    onClick={handleResetFilters}
+                    className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-100 dark:bg-blue-950 dark:text-blue-400"
+                  >
+                    Clear all filters
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="flex flex-col gap-2.5 pb-28 lg:pb-6">
@@ -250,6 +340,7 @@ export default function Home() {
                     job={job}
                     isSelected={selectedJob?.id === job.id}
                     isSaved={savedJobIds.has(job.id)}
+                    matchResult={activeResumeProfile ? jobMatchMap.get(job.id) : undefined}
                     onSelect={(j) => {
                       setSelectedJob(j);
                       setModalJob(j);
@@ -317,7 +408,7 @@ export default function Home() {
                 : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            <Map className="h-4 w-4" />
+            <MapIcon className="h-4 w-4" />
             <span>Map View</span>
           </button>
         </div>
@@ -327,11 +418,28 @@ export default function Home() {
       <JobDetailsModal
         job={modalJob}
         isSaved={modalJob ? savedJobIds.has(modalJob.id) : false}
+        matchResult={activeResumeProfile && modalJob ? jobMatchMap.get(modalJob.id) : undefined}
         onClose={() => setModalJob(null)}
         onToggleSave={() => modalJob && toggleSaveJob(modalJob.id)}
         onAuditResume={handleAuditForJob}
         onGenerateResume={handleGenerateForJob}
         onVerifyRecruiter={handleVerifyRecruiterForJob}
+      />
+
+      {/* Resume Matcher Radar Modal */}
+      <ResumeMatcherModal
+        isOpen={isResumeMatcherOpen}
+        onClose={() => setIsResumeMatcherOpen(false)}
+        jobs={allJobs}
+        activeProfile={activeResumeProfile}
+        minThreshold={matchThreshold}
+        onApplyProfile={(prof, thresh) => {
+          setActiveResumeProfile(prof);
+          setMatchThreshold(thresh);
+        }}
+        onClearProfile={() => {
+          setActiveResumeProfile(null);
+        }}
       />
 
       {/* CareerForge ATS Auditor Modal */}

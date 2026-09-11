@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { AtsAuditReport, auditAtsScore } from '../lib/atsAuditor';
+import { AtsAuditReport, auditAtsScore, generateAtsFixPrompt } from '../lib/atsAuditor';
 import { parseResumeFile } from '../lib/resumeParser';
 import {
   X,
@@ -14,6 +14,9 @@ import {
   FileUp,
   Loader2,
   Trash2,
+  Copy,
+  Check,
+  Wand2,
 } from 'lucide-react';
 
 interface AtsAuditModalProps {
@@ -62,7 +65,8 @@ export const AtsAuditModal: React.FC<AtsAuditModalProps> = ({
   const [resumeText, setResumeText] = useState<string>(SAMPLE_RESUME);
   const [targetSkills, setTargetSkills] = useState<string[]>(initialJobContext?.skills || []);
   const [report, setReport] = useState<AtsAuditReport | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'bullets' | 'skills'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'bullets' | 'skills' | 'prompt'>('overview');
+  const [copiedPrompt, setCopiedPrompt] = useState<boolean>(false);
 
   // File Upload State
   const [loadedFileName, setLoadedFileName] = useState<string | null>(null);
@@ -130,6 +134,20 @@ export const AtsAuditModal: React.FC<AtsAuditModalProps> = ({
     setParseError(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  const handleCopyPrompt = async () => {
+    if (!report) return;
+    const prompt = generateAtsFixPrompt(report, initialJobContext);
+    try {
+      await navigator.clipboard.writeText(prompt);
+      setCopiedPrompt(true);
+      setTimeout(() => setCopiedPrompt(false), 2500);
+    } catch {
+      // Fallback
+      setCopiedPrompt(true);
+      setTimeout(() => setCopiedPrompt(false), 2500);
     }
   };
 
@@ -343,7 +361,24 @@ export const AtsAuditModal: React.FC<AtsAuditModalProps> = ({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      onClick={handleCopyPrompt}
+                      className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700 active:scale-95 dark:bg-blue-500 dark:hover:bg-blue-600"
+                      title="Copy AI prompt to rewrite flagged items in ChatGPT/Claude/Gemini"
+                    >
+                      {copiedPrompt ? (
+                        <>
+                          <Check className="h-3.5 w-3.5 text-white" />
+                          <span>Copied Prompt!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-3.5 w-3.5 text-yellow-300" />
+                          <span>Copy AI Fix Prompt</span>
+                        </>
+                      )}
+                    </button>
                     <div className="rounded-lg bg-zinc-100 px-3 py-1.5 text-center dark:bg-zinc-800">
                       <div className="text-[10px] uppercase font-bold text-zinc-400">Quantified</div>
                       <div className="text-xs font-bold text-zinc-900 dark:text-white">
@@ -442,7 +477,7 @@ export const AtsAuditModal: React.FC<AtsAuditModalProps> = ({
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-zinc-200 text-xs font-semibold dark:border-zinc-800">
+                <div className="flex flex-wrap border-b border-zinc-200 text-xs font-semibold dark:border-zinc-800">
                   <button
                     onClick={() => setActiveTab('overview')}
                     className={`border-b-2 px-4 py-2 transition ${
@@ -475,11 +510,35 @@ export const AtsAuditModal: React.FC<AtsAuditModalProps> = ({
                       Target Role Keywords ({report.roleKeywordsMatched?.length || 0}/{targetSkills.length})
                     </button>
                   )}
+                  <button
+                    onClick={() => setActiveTab('prompt')}
+                    className={`flex items-center gap-1.5 border-b-2 px-4 py-2 transition ${
+                      activeTab === 'prompt'
+                        ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+                        : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                    }`}
+                  >
+                    <Sparkles className="h-3.5 w-3.5 text-blue-500" />
+                    <span>AI Fix Prompt</span>
+                  </button>
                 </div>
 
                 {/* Tab 1: Actionable Recommendations */}
                 {activeTab === 'overview' && (
                   <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50/70 p-3 text-xs dark:border-blue-900/60 dark:bg-blue-950/30">
+                      <div className="flex items-center gap-2 text-blue-950 dark:text-blue-200">
+                        <Sparkles className="h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
+                        <span>Generate a tailored AI prompt loaded with these fixes for ChatGPT / Claude / Gemini.</span>
+                      </div>
+                      <button
+                        onClick={() => setActiveTab('prompt')}
+                        className="shrink-0 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-blue-700"
+                      >
+                        View AI Prompt
+                      </button>
+                    </div>
+
                     {report.recommendations.length > 0 ? (
                       report.recommendations.map((rec, idx) => (
                         <div
@@ -519,6 +578,19 @@ export const AtsAuditModal: React.FC<AtsAuditModalProps> = ({
                 {/* Tab 2: Bullet-by-Bullet Analysis */}
                 {activeTab === 'bullets' && (
                   <div className="flex flex-col gap-2.5">
+                    <div className="flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50/70 p-3 text-xs dark:border-blue-900/60 dark:bg-blue-950/30">
+                      <div className="flex items-center gap-2 text-blue-950 dark:text-blue-200">
+                        <Sparkles className="h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
+                        <span>Copy a prompt pre-populated with these flagged bullets for instant rewriting.</span>
+                      </div>
+                      <button
+                        onClick={handleCopyPrompt}
+                        className="shrink-0 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-blue-700"
+                      >
+                        {copiedPrompt ? 'Copied!' : 'Copy Fix Prompt'}
+                      </button>
+                    </div>
+
                     {report.bulletEvaluations.map((item, idx) => (
                       <div
                         key={idx}
@@ -595,6 +667,47 @@ export const AtsAuditModal: React.FC<AtsAuditModalProps> = ({
                           <span className="text-xs text-amber-700">100% target keywords covered!</span>
                         )}
                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab 4: AI Fix Prompt Generator */}
+                {activeTab === 'prompt' && (
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2 rounded-xl border border-blue-200 bg-blue-50/60 p-4 dark:border-blue-900/60 dark:bg-blue-950/30">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          <h4 className="text-xs font-bold text-blue-950 dark:text-blue-100">
+                            Pre-Formulated AI Fix Prompt
+                          </h4>
+                        </div>
+                        <button
+                          onClick={handleCopyPrompt}
+                          className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
+                        >
+                          {copiedPrompt ? (
+                            <>
+                              <Check className="h-3.5 w-3.5 text-white" />
+                              <span>Copied to Clipboard!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="h-3.5 w-3.5" />
+                              <span>Copy Prompt</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <p className="text-[11px] text-blue-900/80 dark:text-blue-300">
+                        This prompt is deterministically compiled with all flagged bullets ({report.bulletEvaluations.filter((b) => b.status !== 'Optimal').length} items), missing keywords, and Google XYZ constraints. Paste it directly into ChatGPT, Claude, Gemini, or DeepSeek.
+                      </p>
+                    </div>
+
+                    <div className="relative rounded-xl border border-zinc-200 bg-zinc-950 p-4 font-mono text-[11px] leading-relaxed text-zinc-100 dark:border-zinc-800">
+                      <pre className="whitespace-pre-wrap">
+                        {generateAtsFixPrompt(report, initialJobContext)}
+                      </pre>
                     </div>
                   </div>
                 )}
