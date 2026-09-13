@@ -1,5 +1,5 @@
 import React from 'react';
-import { Job } from '../types/job';
+import { Job, JobMatchResult } from '../types/job';
 import {
   X,
   Building2,
@@ -12,11 +12,14 @@ import {
   FileCode2,
   MailCheck,
   Bookmark,
+  Target,
+  AlertCircle,
 } from 'lucide-react';
 
 interface JobDetailsModalProps {
   job: Job | null;
   isSaved?: boolean;
+  matchResult?: JobMatchResult;
   onClose: () => void;
   onToggleSave?: () => void;
   onAuditResume?: (job: Job) => void;
@@ -27,6 +30,7 @@ interface JobDetailsModalProps {
 export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
   job,
   isSaved,
+  matchResult,
   onClose,
   onToggleSave,
   onAuditResume,
@@ -117,6 +121,73 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
             <span>{job.experience_yoe || job.experience_level}</span>
           </div>
         </div>
+
+        {/* Resume Match Alignment Radar */}
+        {matchResult && (
+          <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50/60 p-3.5 dark:border-blue-900/60 dark:bg-blue-950/30">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Target className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <h4 className="text-xs font-bold text-blue-950 dark:text-blue-200">
+                  Resume Alignment Radar
+                </h4>
+              </div>
+              <span
+                className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                  matchResult.matchScore >= 70
+                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                    : matchResult.matchScore >= 50
+                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
+                    : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                }`}
+              >
+                {matchResult.matchScore}% Match
+              </span>
+            </div>
+
+            <div className="mt-2.5 grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <span className="text-[10px] font-bold uppercase text-emerald-700 dark:text-emerald-400">
+                  Matched Skills ({matchResult.matchedSkills.length})
+                </span>
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {matchResult.matchedSkills.length > 0 ? (
+                    matchResult.matchedSkills.map((s, i) => (
+                      <span
+                        key={i}
+                        className="rounded bg-emerald-100/80 px-2 py-0.5 text-[11px] font-medium text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-200"
+                      >
+                        ✓ {s}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-[11px] text-zinc-400">None</span>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[10px] font-bold uppercase text-amber-700 dark:text-amber-400">
+                  Missing Gaps ({matchResult.missingSkills.length})
+                </span>
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {matchResult.missingSkills.length > 0 ? (
+                    matchResult.missingSkills.map((s, i) => (
+                      <span
+                        key={i}
+                        className="rounded bg-amber-100/80 px-2 py-0.5 text-[11px] font-medium text-amber-800 dark:bg-amber-950/80 dark:text-amber-200"
+                      >
+                        • {s}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400">All skills covered!</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {job.skills && job.skills.length > 0 && (
           <div className="mt-4">
