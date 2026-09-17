@@ -42,4 +42,14 @@ describe('AtsAuditModal Component', () => {
     expect(screen.getByText(/Auditing for:/i)).toBeInTheDocument();
     expect(screen.getByText('Senior Backend Engineer')).toBeInTheDocument();
   });
+
+  it('should switch to AI Fix Prompt tab and display generated prompt', () => {
+    render(<AtsAuditModal isOpen={true} onClose={vi.fn()} />);
+
+    const promptTab = screen.getByText('AI Fix Prompt');
+    fireEvent.click(promptTab);
+
+    expect(screen.getByText('Pre-Formulated AI Fix Prompt')).toBeInTheDocument();
+    expect(screen.getByText(/You are a Principal Tech Recruiter/i)).toBeInTheDocument();
+  });
 });

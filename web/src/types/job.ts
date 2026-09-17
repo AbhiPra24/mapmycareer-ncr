@@ -68,3 +68,24 @@ export interface FilterState {
  */
 export type ReadonlyFilterState = Readonly<FilterState>;
 
+export interface CandidateProfile {
+  skills: string[];
+  seniority: 'Entry' | 'Mid' | 'Senior' | 'Lead' | 'Any';
+  detectedTrack?: string;
+  yoeEstimate?: number;
+  rawText?: string;
+}
+
+export interface JobMatchResult {
+  jobId: number | string;
+  matchScore: number;          // 0 to 100
+  skillsScore: number;         // 0 to 100
+  titleScore: number;          // 0 to 100
+  experienceScore: number;     // 0 to 100
+  matchedSkills: string[];
+  missingSkills: string[];
+}
+
+export interface MatchedJob extends Job {
+  matchResult?: JobMatchResult;
+}
