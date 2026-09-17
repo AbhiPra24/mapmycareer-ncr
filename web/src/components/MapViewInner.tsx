@@ -7,6 +7,7 @@ import 'leaflet/dist/leaflet.css';
 import { Job } from '../types/job';
 import { getCleanLogoUrl } from '../lib/filterUtils';
 import { ExternalLink, ChevronRight } from 'lucide-react';
+import { useSuperclusterWorker } from '../hooks/useSuperclusterWorker';
 
 interface MapViewInnerProps {
   jobs: Job[];
@@ -171,14 +172,14 @@ function MapController({
 }: {
   selectedJob: Job | null;
   hoveredJob: Job | null;
-  onBoundsChange: (bounds: L.LatLngBounds) => void;
+  onBoundsChange: (bounds: L.LatLngBounds, zoom?: number) => void;
 }) {
   const map = useMap();
 
   // Invalidate size on mount, resize, tab switch, and container size changes
   useEffect(() => {
     map.invalidateSize();
-    onBoundsChange(map.getBounds());
+    onBoundsChange(map.getBounds(), map.getZoom());
 
     // Auto-invalidate size when container becomes visible or resizes
     const container = map.getContainer();
@@ -186,18 +187,18 @@ function MapController({
     if (typeof ResizeObserver !== 'undefined' && container) {
       resizeObserver = new ResizeObserver(() => {
         map.invalidateSize();
-        onBoundsChange(map.getBounds());
+        onBoundsChange(map.getBounds(), map.getZoom());
       });
       resizeObserver.observe(container);
     }
 
     const timer1 = setTimeout(() => {
       map.invalidateSize();
-      onBoundsChange(map.getBounds());
+      onBoundsChange(map.getBounds(), map.getZoom());
     }, 100);
     const timer2 = setTimeout(() => {
       map.invalidateSize();
-      onBoundsChange(map.getBounds());
+      onBoundsChange(map.getBounds(), map.getZoom());
     }, 300);
 
     const handleInvalidate = () => {
@@ -206,7 +207,7 @@ function MapController({
       if (!selectedJob && !hoveredJob) {
         map.setView([28.5355, 77.3910], 11);
       }
-      onBoundsChange(map.getBounds());
+      onBoundsChange(map.getBounds(), map.getZoom());
     };
 
     window.addEventListener('resize', handleInvalidate);
@@ -226,10 +227,10 @@ function MapController({
   // Update bounds on moveend and zoomend
   useMapEvents({
     moveend: () => {
-      onBoundsChange(map.getBounds());
+      onBoundsChange(map.getBounds(), map.getZoom());
     },
     zoomend: () => {
-      onBoundsChange(map.getBounds());
+      onBoundsChange(map.getBounds(), map.getZoom());
     },
   });
 
@@ -376,6 +377,111 @@ const CompanyPopup: React.FC<CompanyPopupProps> = ({ cluster, onSelectJob }) => 
   );
 };
 
+// ─── Supercluster HTML Icons ──────────────────────────────────────────────────
+const createSuperclusterIcon = (count: number) => {
+  let size = 36;
+  let bgGradient = 'from-blue-600 to-indigo-600';
+  let ringColor = 'ring-blue-300/40';
+
+  if (count >= 1000) {
+    size = 48;
+    bgGradient = 'from-purple-600 to-indigo-700';
+    ringColor = 'ring-purple-300/40';
+  } else if (count >= 100) {
+    size = 42;
+    bgGradient = 'from-blue-700 to-blue-900';
+    ringColor = 'ring-blue-400/40';
+  }
+
+  const formattedCount = count >= 1000 ? `${(count / 1000).toFixed(1)}k` : count;
+
+  const html = `
+    <div style="width: ${size}px; height: ${size}px;" class="flex items-center justify-center rounded-full bg-gradient-to-br ${bgGradient} text-white font-bold text-xs shadow-lg ring-4 ${ringColor} backdrop-blur-sm transition-transform active:scale-95 cursor-pointer">
+      <span>${formattedCount}</span>
+    </div>
+  `;
+
+  return L.divIcon({
+    html,
+    className: 'custom-supercluster-pin',
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
+};
+
+// ─── Supercluster Markers Renderer ──────────────────────────────────────────
+function SuperclusterRenderer({
+  clusters,
+  companyClusterMap,
+  selectedJob,
+  hoveredJob,
+  onSelectJob,
+}: {
+  clusters: import('../types/geo').ClusterFeature[];
+  companyClusterMap: Map<string, CompanyCluster>;
+  selectedJob: Job | null;
+  hoveredJob: Job | null;
+  onSelectJob: (job: Job) => void;
+}) {
+  const map = useMap();
+
+  return (
+    <>
+      {clusters.map((feature) => {
+        const [lng, lat] = feature.geometry.coordinates;
+        const isCluster = feature.properties.cluster;
+
+        if (isCluster) {
+          const clusterId = feature.properties.cluster_id;
+          const pointCount = feature.properties.point_count;
+
+          return (
+            <Marker
+              key={`sc-cluster-${clusterId}`}
+              position={[lat, lng]}
+              icon={createSuperclusterIcon(pointCount)}
+              eventHandlers={{
+                click: () => {
+                  map.setView([lat, lng], Math.min(map.getZoom() + 2, 18), {
+                    animate: true,
+                  });
+                },
+              }}
+            />
+          );
+        }
+
+        // Single company cluster point (resolved by ID from worker)
+        const pointId = feature.properties.id;
+        const companyCluster = companyClusterMap.get(pointId);
+        if (!companyCluster) return null;
+
+        const isActive =
+          (selectedJob && companyCluster.jobs.some((j) => String(j.id) === String(selectedJob.id))) ||
+          (hoveredJob && companyCluster.jobs.some((j) => String(j.id) === String(hoveredJob.id))) ||
+          false;
+
+        const icon = createClusterIcon(companyCluster, isActive);
+
+        return (
+          <Marker
+            key={`company-${companyCluster.key}`}
+            position={[lat, lng]}
+            icon={icon}
+          >
+            <Popup
+              className="custom-leaflet-popup company-cluster-popup"
+              maxHeight={420}
+            >
+              <CompanyPopup cluster={companyCluster} onSelectJob={onSelectJob} />
+            </Popup>
+          </Marker>
+        );
+      })}
+    </>
+  );
+}
+
 // ─── Main MapViewInner component ──────────────────────────────────────────────
 export const MapViewInner: React.FC<MapViewInnerProps> = ({
   jobs,
@@ -384,39 +490,54 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
   onSelectJob,
 }) => {
   // Build company clusters from filtered jobs
-  const clusters = useMemo(() => buildCompanyClusters(jobs), [jobs]);
+  const companyClusters = useMemo(() => buildCompanyClusters(jobs), [jobs]);
+
+  // Lookup map to quickly hydrate leaf features returned by Supercluster
+  const companyClusterMap = useMemo(() => {
+    const map = new Map<string, CompanyCluster>();
+    for (const c of companyClusters) {
+      map.set(c.key, c);
+    }
+    return map;
+  }, [companyClusters]);
+
+  // Prepare compact tuples [id, lat, lng, levelIndex] for off-thread Supercluster indexing
+  const compactPoints = useMemo<import('../types/geo').CompactJobTuple[]>(() => {
+    const LEVEL_MAP: Record<string, number> = {
+      entry: 0,
+      mid: 1,
+      senior: 2,
+      lead: 3,
+    };
+
+    return companyClusters.map((c) => {
+      const topLevel = c.jobs[0]?.experience_level?.toLowerCase() || '';
+      const levelCode = LEVEL_MAP[topLevel] ?? 4;
+      return [c.key, c.lat, c.lon, levelCode];
+    });
+  }, [companyClusters]);
+
+  // Web Worker hook managing off-thread clustering
+  const { clusters, updateBoundingBox } = useSuperclusterWorker({
+    points: compactPoints,
+  });
 
   // Always open on NCR (Gurugram / Noida / Delhi corridor) at street level
   const NCR_CENTER: [number, number] = [28.5355, 77.3910];
   const NCR_ZOOM = 11;
 
-  // Track map viewport bounds for aggressive marker pruning
-  const [currentBounds, setCurrentBounds] = useState<L.LatLngBounds | null>(null);
-
-  const handleBoundsChange = useCallback((bounds: L.LatLngBounds) => {
-    setCurrentBounds(bounds);
-  }, []);
-
-  // Prune markers outside viewport bounds (with 35% margin so panning remains smooth)
-  const visibleClusters = useMemo(() => {
-    if (!currentBounds) {
-      // Default initial view: Delhi NCR region (~1,100 markers instead of 4,700+)
-      return clusters.filter((c) => {
-        const inNcr = c.lat >= 28.0 && c.lat <= 29.1 && c.lon >= 76.5 && c.lon <= 77.9;
-        const isSelected = selectedJob && c.jobs.some((j) => j.id === selectedJob.id);
-        const isHovered = hoveredJob && c.jobs.some((j) => j.id === hoveredJob.id);
-        return inNcr || isSelected || isHovered;
-      });
-    }
-
-    const paddedBounds = currentBounds.pad(0.35);
-    return clusters.filter((c) => {
-      if (paddedBounds.contains([c.lat, c.lon])) return true;
-      if (selectedJob && c.jobs.some((j) => j.id === selectedJob.id)) return true;
-      if (hoveredJob && c.jobs.some((j) => j.id === hoveredJob.id)) return true;
-      return false;
-    });
-  }, [clusters, currentBounds, selectedJob, hoveredJob]);
+  const handleBoundsChange = useCallback((bounds: L.LatLngBounds, currentZoom?: number) => {
+    const bbox: import('../types/geo').BBox = [
+      bounds.getWest(),
+      bounds.getSouth(),
+      bounds.getEast(),
+      bounds.getNorth(),
+    ];
+    const zoom = typeof currentZoom === 'number'
+      ? currentZoom
+      : Math.round(Math.log2(360 / (bounds.getEast() - bounds.getWest())));
+    updateBoundingBox(bbox, zoom);
+  }, [updateBoundingBox]);
 
   // Used for the count badge overlay only
   const validJobs = jobs.filter((j) => j.lat && j.lon);
@@ -446,35 +567,18 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
           onBoundsChange={handleBoundsChange}
         />
 
-        {visibleClusters.map((cluster) => {
-          // A cluster is "active" if the selected/hovered job belongs to it
-          const isActive =
-            (selectedJob && cluster.jobs.some((j) => j.id === selectedJob.id)) ||
-            (hoveredJob && cluster.jobs.some((j) => j.id === hoveredJob.id)) ||
-            false;
-
-          const icon = createClusterIcon(cluster, isActive);
-
-          return (
-            <Marker
-              key={cluster.key}
-              position={[cluster.lat, cluster.lon]}
-              icon={icon}
-            >
-              <Popup
-                className="custom-leaflet-popup company-cluster-popup"
-                maxHeight={420}
-              >
-                <CompanyPopup cluster={cluster} onSelectJob={onSelectJob} />
-              </Popup>
-            </Marker>
-          );
-        })}
+        <SuperclusterRenderer
+          clusters={clusters}
+          companyClusterMap={companyClusterMap}
+          selectedJob={selectedJob}
+          hoveredJob={hoveredJob}
+          onSelectJob={onSelectJob}
+        />
       </MapContainer>
 
       {/* Cluster count badge overlay (visible on tablet/desktop) */}
       <div className="hidden sm:block absolute bottom-4 right-4 z-[400] rounded-lg border border-zinc-200/80 bg-white/90 px-3 py-1.5 shadow-md backdrop-blur-md text-xs font-semibold text-zinc-600 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-zinc-300">
-        <span className="text-blue-600 font-bold dark:text-blue-400">{clusters.length}</span> companies ·{' '}
+        <span className="text-blue-600 font-bold dark:text-blue-400">{companyClusters.length}</span> companies ·{' '}
         <span className="text-zinc-800 font-bold dark:text-zinc-200">{validJobs.length}</span> positions
       </div>
 
