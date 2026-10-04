@@ -149,4 +149,71 @@ Karan Kapoor | Enterprise Account Executive
     expect(salesProfile.skills).toContain('Salesforce');
     expect(salesProfile.skills).toContain('B2b Sales');
   });
+
+  it('should accurately match a non-tech Talent Acquisition resume against live job opportunities', () => {
+    const nonTechResume = `
+Priya Sharma
+Gurugram, Haryana | priya.sharma@example.com | +91 98765 43210
+Senior Talent Acquisition Specialist with 6+ years of experience in technical recruiting, talent acquisition, and candidate sourcing.
+Extensive experience managing ATS platforms including Greenhouse, Lever, and Workday.
+Expertise in people operations, human resources, employee relations, and stakeholder management.
+    `;
+
+    const profile = extractCandidateProfile(nonTechResume);
+    expect(profile.detectedTrack).toBe('HR & Talent Acquisition');
+    expect(profile.seniority).toBe('Senior');
+    expect(profile.yoeEstimate).toBe(6);
+    expect(profile.skills).toContain('Recruiting');
+    expect(profile.skills).toContain('Hr');
+
+    const sampleJobs: Job[] = [
+      {
+        id: 101,
+        title: 'Senior Technical Recruiter',
+        company: 'Stripe',
+        city: 'Bengaluru',
+        hub: 'Outer Ring Road',
+        lat: 12.92,
+        lon: 77.68,
+        experience_level: 'Senior',
+        skills: ['Recruiting', 'Talent Acquisition', 'Sourcing', 'Greenhouse'],
+      },
+      {
+        id: 102,
+        title: 'People Operations & HR Generalist',
+        company: 'Postman',
+        city: 'Bengaluru',
+        hub: 'Indiranagar',
+        lat: 12.97,
+        lon: 77.64,
+        experience_level: 'Mid',
+        skills: ['Human Resources', 'HRIS', 'Employee Relations'],
+      },
+      {
+        id: 103,
+        title: 'Principal Distributed Systems Engineer',
+        company: 'Databricks',
+        city: 'Bengaluru',
+        hub: 'Whitefield',
+        lat: 12.98,
+        lon: 77.75,
+        experience_level: 'Lead',
+        skills: ['C++', 'Rust', 'Distributed Systems', 'Kafka'],
+      },
+    ];
+
+    const ranked = rankJobsByResume(sampleJobs, profile);
+
+    // Verify non-tech recruiter job ranks at the top with a high match score
+    expect(ranked[0].id).toBe(101);
+    expect(ranked[0].matchResult?.matchScore).toBeGreaterThanOrEqual(75);
+    expect(ranked[0].matchResult?.titleScore).toBeGreaterThanOrEqual(80);
+
+    // Verify people operations / HR job ranks second
+    expect(ranked[1].id).toBe(102);
+    expect(ranked[1].matchResult?.matchScore).toBeGreaterThanOrEqual(40);
+
+    // Verify unrelated deep-tech role scores below threshold and is excluded
+    expect(ranked.some((j) => j.id === 103)).toBe(false);
+  });
 });

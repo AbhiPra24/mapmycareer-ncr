@@ -136,8 +136,10 @@ export const SKILL_TAXONOMY: Record<string, string[]> = {
   accounting: ['accounting', 'gaap', 'ifrs', 'general ledger', 'quickbooks', 'netsuite', 'sap'],
 
   // HR & Talent Acquisition
-  recruiting: ['recruiting', 'talent acquisition', 'technical recruiting', 'candidate sourcing', 'ats', 'greenhouse', 'lever'],
-  hr: ['human resources', 'hr generalist', 'employee relations', 'people operations', 'hris', 'workday'],
+  recruiting: ['recruiting', 'talent acquisition', 'technical recruiting', 'candidate sourcing', 'sourcing', 'ats'],
+  greenhouse: ['greenhouse'],
+  lever: ['lever'],
+  hr: ['human resources', 'hr generalist', 'employee relations', 'people operations', 'hris', 'workday', 'hr'],
 
   // Methodologies & Principles
   agile: ['agile', 'scrum', 'kanban'],
