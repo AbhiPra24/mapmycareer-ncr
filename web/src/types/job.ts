@@ -33,6 +33,7 @@ export interface Job {
   experience_level?: ExperienceTier | string;
   job_type?: string;
   city: TechHubCity;
+  location?: string;
   hub: string;
   lat: number;
   lon: number;
