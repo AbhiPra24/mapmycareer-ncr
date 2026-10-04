@@ -127,20 +127,36 @@ def is_valid_title(title: str) -> bool:
             return False
     return True
 
-def build_job(c: Dict, title: str, url: str, loc: str, remote: bool, src: str) -> Optional[Dict[str, Any]]:
+def atomic_save(data: Any, path: str):
+    tmp_path = f"{path}.tmp"
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(tmp_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    os.replace(tmp_path, path)
+
+def build_job(c: Dict, title: str, url: str, loc: str, remote: bool, src: str, now_iso: str) -> Optional[Dict[str, Any]]:
     if not is_valid_title(title):
         return None
     yoe, exp, std = detect_experience(title)
     sal_range, sal_min, sal_max = get_salary_by_level(exp)
     city_list = list(CITY_HUBS.keys())
-    matched_city = "Bengaluru"
+    
+    # Check if a specific city was mentioned in location string
+    matched_city = None
+    loc_lower = (loc or "").lower()
     for ct in city_list:
-        if ct.lower() in (loc or "").lower():
+        if ct.lower() in loc_lower:
             matched_city = ct
             break
-    if remote and "Bengaluru" == matched_city:
-        matched_city = random.choice(city_list)
-        
+
+    # If no city match, check remote status
+    if not matched_city:
+        if remote or "remote" in loc_lower or "anywhere" in loc_lower:
+            matched_city = "Bengaluru"
+            remote = True
+        else:
+            matched_city = "Bengaluru"
+
     hub = CITY_HUBS[matched_city]
     company_name = c.get("name", "Tech Startup")
     return {
@@ -154,93 +170,129 @@ def build_job(c: Dict, title: str, url: str, loc: str, remote: bool, src: str) -
         "workplace_model": "Remote" if remote else "Hybrid", "apply_url": url,
         "source": src, "standard_level": std, "level_name": f"{exp} Engineer",
         "level_code": std, "level_tier": exp, "level_yoe_range": yoe,
-        "levels_fyi_benchmark": sal_range, "levels_fyi_url": "https://www.levels.fyi"
+        "levels_fyi_benchmark": sal_range, "levels_fyi_url": "https://www.levels.fyi",
+        "first_seen_at": now_iso, "last_seen_at": now_iso
     }
 
+def fetch_greenhouse_board(c: Dict, now_iso: str) -> List[Dict[str, Any]]:
+    jobs = []
+    data = fetch_json(f"https://boards-api.greenhouse.io/v1/boards/{c['slug']}/jobs")
+    if data and "jobs" in data:
+        for j in data["jobs"]:
+            built = build_job(c, j.get("title", ""), j.get("absolute_url", ""), j.get("location",{}).get("name",""), True, "greenhouse", now_iso)
+            if built:
+                jobs.append(built)
+    return jobs
+
+def fetch_lever_board(c: Dict, now_iso: str) -> List[Dict[str, Any]]:
+    jobs = []
+    data = fetch_json(f"https://api.lever.co/v0/postings/{c['slug']}?mode=json")
+    if data and isinstance(data, list):
+        for j in data:
+            built = build_job(c, j.get("text", ""), j.get("hostedUrl", ""), j.get("categories",{}).get("location",""), True, "lever", now_iso)
+            if built:
+                jobs.append(built)
+    return jobs
+
+def fetch_ashby_board(c: Dict, now_iso: str) -> List[Dict[str, Any]]:
+    jobs = []
+    data = fetch_json(f"https://api.ashbyhq.com/posting-api/job-board/{c['slug']}")
+    if data and "jobs" in data:
+        for j in data["jobs"]:
+            built = build_job(c, j.get("title", ""), j.get("jobUrl", ""), j.get("location",""), True, "ashby", now_iso)
+            if built:
+                jobs.append(built)
+    return jobs
+
 def main():
+    from datetime import datetime, timezone
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    now_iso = datetime.now(timezone.utc).isoformat()
     jobs = []
     
-    # 1. Greenhouse ATS
-    for c in GREENHOUSE_COMPANIES:
-        data = fetch_json(f"https://boards-api.greenhouse.io/v1/boards/{c['slug']}/jobs")
-        if data and "jobs" in data:
-            for j in data["jobs"]:
-                built = build_job(c, j.get("title", ""), j.get("absolute_url", ""), j.get("location",{}).get("name",""), True, "greenhouse")
-                if built:
-                    jobs.append(built)
-                
-    # 2. Lever ATS
-    for c in LEVER_COMPANIES:
-        data = fetch_json(f"https://api.lever.co/v0/postings/{c['slug']}?mode=json")
-        if data and isinstance(data, list):
-            for j in data:
-                built = build_job(c, j.get("text", ""), j.get("hostedUrl", ""), j.get("categories",{}).get("location",""), True, "lever")
-                if built:
-                    jobs.append(built)
+    print("Initiating high-throughput concurrent corporate board ingestion...")
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = []
+        for c in GREENHOUSE_COMPANIES:
+            futures.append(executor.submit(fetch_greenhouse_board, c, now_iso))
+        for c in LEVER_COMPANIES:
+            futures.append(executor.submit(fetch_lever_board, c, now_iso))
+        for c in ASHBY_COMPANIES:
+            futures.append(executor.submit(fetch_ashby_board, c, now_iso))
 
-    # 3. Ashby ATS
-    for c in ASHBY_COMPANIES:
-        data = fetch_json(f"https://api.ashbyhq.com/posting-api/job-board/{c['slug']}")
-        if data and "jobs" in data:
-            for j in data["jobs"]:
-                built = build_job(c, j.get("title", ""), j.get("jobUrl", ""), j.get("location",""), True, "ashby")
-                if built:
-                    jobs.append(built)
+        for fut in as_completed(futures):
+            try:
+                res = fut.result()
+                if res:
+                    jobs.extend(res)
+            except Exception as e:
+                pass
 
-    # 4. Global Remote verified APIs (English tech & business postings)
+    print(f"Fetched {len(jobs)} active jobs from ATS boards concurrently.")
+
+    # APIs with English Tech postings
     data = fetch_json("https://remotive.com/api/remote-jobs")
     if data and "jobs" in data:
         for j in data["jobs"][:300]:
-            built = build_job({"name": j.get("company_name", "Startup"), "domain": "remotive.com"}, j.get("title", ""), j.get("url", ""), "Remote", True, "remotive")
+            built = build_job({"name": j.get("company_name", "Startup"), "domain": "remotive.com"}, j.get("title", ""), j.get("url", ""), "Remote", True, "remotive", now_iso)
             if built:
                 jobs.append(built)
 
     data = fetch_json("https://jobicy.com/api/v2/remote-jobs")
     if data and "jobs" in data:
         for j in data["jobs"][:300]:
-            built = build_job({"name": j.get("companyName", "Startup"), "domain": "jobicy.com"}, j.get("jobTitle", ""), j.get("url", ""), "Remote", True, "jobicy")
+            built = build_job({"name": j.get("companyName", "Startup"), "domain": "jobicy.com"}, j.get("jobTitle", ""), j.get("url", ""), "Remote", True, "jobicy", now_iso)
             if built:
                 jobs.append(built)
             
     # Load and clean existing
     existing = []
-    if os.path.exists("data/sample_jobs.json"):
-        raw_existing = json.load(open("data/sample_jobs.json"))
+    data_file = "data/sample_jobs.json"
+    web_file = "web/public/data/jobs.json"
+
+    if os.path.exists(data_file):
+        raw_existing = json.load(open(data_file))
         for j in raw_existing:
-            # Filter out german / arbeitnow records
             src = j.get("source", "")
             url = j.get("apply_url", "")
             title = j.get("title", "")
             if "arbeitnow" in src or "arbeitnow" in url or not is_valid_title(title):
                 continue
-            # Canonicalize company name if matching
             comp = j.get("company", "")
             if comp.lower() in COMPANY_CANONICAL_NAMES:
                 j["company"] = COMPANY_CANONICAL_NAMES[comp.lower()]
             elif comp == comp.lower():
                 j["company"] = comp.title()
-            # If salary was the static placeholder, calibrate by seniority
             if j.get("salary_range") == "₹20 - 50 LPA" and j.get("experience_level"):
                 sal_range, sal_min, sal_max = get_salary_by_level(j["experience_level"])
                 j["salary_range"] = sal_range
                 j["salary_min_lpa"] = sal_min
                 j["salary_max_lpa"] = sal_max
                 j["levels_fyi_benchmark"] = sal_range
+            if "first_seen_at" not in j:
+                j["first_seen_at"] = now_iso
             existing.append(j)
         
-    urls = {x.get("apply_url") for x in existing if x.get("apply_url")}
+    url_map = {x.get("apply_url"): x for x in existing if x.get("apply_url")}
     max_id = max([x.get("id", 0) for x in existing], default=0)
+
     for j in jobs:
-        if j["apply_url"] not in urls:
+        apply_url = j.get("apply_url")
+        if apply_url in url_map:
+            # Update last_seen_at for active job
+            url_map[apply_url]["last_seen_at"] = now_iso
+        else:
             max_id += 1
             j["id"] = max_id
             j["company_logo"] = f"https://www.google.com/s2/favicons?domain={j['company_domain']}&sz=128"
             existing.append(j)
-            urls.add(j["apply_url"])
+            url_map[apply_url] = j
             
     print(f"Total curated jobs: {len(existing)}")
-    json.dump(existing, open("data/sample_jobs.json", "w"), indent=2)
-    json.dump(existing, open("web/public/data/jobs.json", "w"), indent=2)
+    atomic_save(existing, data_file)
+    atomic_save(existing, web_file)
+    print("Atomic save complete.")
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
-Job Liveness Validator for MapMyCareer
-Checks active status of existing jobs and prunes closed or stale ones.
+Production Job Liveness Validator for MapMyCareer
+- In-memory memoization of ATS boards (eliminates duplicate calls & 429s)
+- URL normalization (strips tracking query params)
+- Soft-tombstoning (requires 3 consecutive failures before pruning)
+- Atomic file writes to prevent JSON corruption
 """
 
 import json
@@ -9,143 +12,168 @@ import os
 import argparse
 import urllib.request
 import urllib.parse
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Dict, Any, List
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timezone
+from collections import defaultdict
+from typing import Dict, Any, List, Set, Optional
 
-def fetch_json(url: str, timeout: int = 8) -> Dict[Any, Any]:
-    headers = {"User-Agent": "MapMyCareer-Validator/1.0"}
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/json,application/xhtml+xml",
+}
+
+def clean_url(url: str) -> str:
+    """Strips query parameters and fragments for robust matching."""
+    if not url:
+        return ""
+    p = urllib.parse.urlparse(url)
+    return urllib.parse.urlunparse((p.scheme, p.netloc, p.path.rstrip('/'), '', '', ''))
+
+def fetch_json(url: str, timeout: int = 10) -> Optional[Any]:
     try:
-        req = urllib.request.Request(url, headers=headers)
-        with urllib.request.urlopen(req, timeout=timeout) as response:
-            if response.status == 200:
-                return json.loads(response.read().decode('utf-8'))
+        req = urllib.request.Request(url, headers=HEADERS)
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            if resp.status == 200:
+                return json.loads(resp.read().decode('utf-8'))
     except Exception:
-        pass
-    return {}
+        return None
+    return None
 
-def check_greenhouse_liveness(apply_url: str) -> bool:
-    # Example: https://boards.greenhouse.io/cloudflare/jobs/12345
-    parts = apply_url.rstrip('/').split('/')
-    if len(parts) >= 5 and "greenhouse.io" in apply_url:
-        company_slug = parts[3]
-        job_id = parts[5] if len(parts) > 5 else parts[4]
-        if "jobs" in company_slug:
-            company_slug = parts[4] if len(parts) > 4 else ""
-        if company_slug:
-            data = fetch_json(f"https://boards-api.greenhouse.io/v1/boards/{company_slug}/jobs")
-            if data and "jobs" in data:
-                return any(str(j.get("id")) == job_id or j.get("absolute_url") == apply_url for j in data["jobs"])
-    return check_web_liveness(apply_url)
+class ATSBoardCache:
+    """Caches board responses so each company board is fetched at most once."""
+    def __init__(self):
+        self.greenhouse_active_urls: Dict[str, Set[str]] = {}
+        self.lever_active_urls: Dict[str, Set[str]] = {}
+        self.ashby_active_urls: Dict[str, Set[str]] = {}
 
-def check_lever_liveness(apply_url: str) -> bool:
-    # Example: https://jobs.lever.co/hotstar/job-id-uuid
-    parts = apply_url.rstrip('/').split('/')
-    if len(parts) >= 4 and "lever.co" in apply_url:
-        company_slug = parts[3]
-        data = fetch_json(f"https://api.lever.co/v0/postings/{company_slug}?mode=json")
-        if isinstance(data, list):
-            return any(j.get("hostedUrl") == apply_url for j in data)
-    return check_web_liveness(apply_url)
+    def is_greenhouse_active(self, company: str, clean_apply_url: str) -> Optional[bool]:
+        if company not in self.greenhouse_active_urls:
+            data = fetch_json(f"https://boards-api.greenhouse.io/v1/boards/{company}/jobs")
+            if not data or "jobs" not in data:
+                return None  # Inconclusive / API error
+            self.greenhouse_active_urls[company] = {clean_url(j.get("absolute_url", "")) for j in data["jobs"]}
+        return clean_apply_url in self.greenhouse_active_urls[company]
 
-def check_ashby_liveness(apply_url: str) -> bool:
-    # Example: https://jobs.ashbyhq.com/notion/uuid
-    parts = apply_url.rstrip('/').split('/')
-    if len(parts) >= 4 and "ashbyhq.com" in apply_url:
-        company_slug = parts[3]
-        data = fetch_json(f"https://api.ashbyhq.com/posting-api/job-board/{company_slug}")
-        if data and "jobs" in data:
-            return any(j.get("jobUrl") == apply_url for j in data["jobs"])
-    return check_web_liveness(apply_url)
+    def is_lever_active(self, company: str, clean_apply_url: str) -> Optional[bool]:
+        if company not in self.lever_active_urls:
+            data = fetch_json(f"https://api.lever.co/v0/postings/{company}?mode=json")
+            if not isinstance(data, list):
+                return None
+            self.lever_active_urls[company] = {clean_url(j.get("hostedUrl", "")) for j in data}
+        return clean_apply_url in self.lever_active_urls[company]
 
-def check_web_liveness(apply_url: str) -> bool:
-    if not apply_url or not apply_url.startswith("http"):
-        return False
-    headers = {"User-Agent": "MapMyCareer-Liveness/1.0"}
+    def is_ashby_active(self, company: str, clean_apply_url: str) -> Optional[bool]:
+        if company not in self.ashby_active_urls:
+            data = fetch_json(f"https://api.ashbyhq.com/posting-api/job-board/{company}")
+            if not data or "jobs" not in data:
+                return None
+            self.ashby_active_urls[company] = {clean_url(j.get("jobUrl", "")) for j in data["jobs"]}
+        return clean_apply_url in self.ashby_active_urls[company]
+
+def check_http_status(url: str) -> Optional[bool]:
+    """Fallback web check with bot-blocking awareness."""
     try:
-        req = urllib.request.Request(apply_url, headers=headers, method="HEAD")
-        with urllib.request.urlopen(req, timeout=5) as response:
-            return response.status in [200, 301, 302, 307, 308]
-    except Exception:
-        try:
-            req = urllib.request.Request(apply_url, headers=headers)
-            with urllib.request.urlopen(req, timeout=5) as response:
-                return response.status == 200
-        except Exception:
+        req = urllib.request.Request(url, headers=HEADERS, method="HEAD")
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            return resp.status in [200, 301, 302]
+    except urllib.error.HTTPError as e:
+        if e.code in [404, 410]:
             return False
+        if e.code in [403, 429]:
+            return None  # Inconclusive (bot block / rate limit)
+        return False
+    except Exception:
+        return None
 
-def check_job(job: Dict[str, Any]) -> bool:
-    url = job.get("apply_url", "")
-    source = job.get("source", "")
+def extract_slug(url: str, domain_pattern: str) -> str:
+    parsed = urllib.parse.urlparse(url)
+    parts = [p for p in parsed.path.split('/') if p]
+    if "greenhouse.io" in domain_pattern:
+        return parts[1] if (len(parts) > 1 and parts[0] == "embed") else (parts[0] if parts else "")
+    if "lever.co" in domain_pattern or "ashbyhq.com" in domain_pattern:
+        return parts[0] if parts else ""
+    return ""
+
+def validate_job(job: Dict[str, Any], cache: ATSBoardCache) -> bool:
+    raw_url = job.get("apply_url", "")
+    url = clean_url(raw_url)
+    source = (job.get("source") or "").lower()
+
+    result = None
     if "greenhouse" in source or "greenhouse.io" in url:
-        return check_greenhouse_liveness(url)
+        slug = extract_slug(url, "greenhouse.io")
+        if slug:
+            result = cache.is_greenhouse_active(slug, url)
     elif "lever" in source or "lever.co" in url:
-        return check_lever_liveness(url)
-    elif "ashby" in source or "ashbyhq" in url:
-        return check_ashby_liveness(url)
-    else:
-        return check_web_liveness(url)
+        slug = extract_slug(url, "lever.co")
+        if slug:
+            result = cache.is_lever_active(slug, url)
+    elif "ashby" in source or "ashbyhq.com" in url:
+        slug = extract_slug(url, "ashbyhq.com")
+        if slug:
+            result = cache.is_ashby_active(slug, url)
+
+    # Fall back to HTTP check if ATS validation was inconclusive or not applicable
+    if result is None:
+        result = check_http_status(raw_url)
+
+    # Default to active if still inconclusive to prevent accidental pruning
+    return True if result is None else result
+
+def atomic_save(data: Any, path: str):
+    tmp_path = f"{path}.tmp"
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(tmp_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    os.replace(tmp_path, path)
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--check-all", action="store_true", help="Check all jobs")
-    parser.add_argument("--prune-closed", action="store_true", help="Remove closed jobs")
-    parser.add_argument("--dry-run", action="store_true", help="Do not save changes")
-    parser.add_argument("--stats", action="store_true", help="Show stats")
+    parser = argparse.ArgumentParser(description="MapMyCareer Job Liveness Validator")
+    parser.add_argument("--prune-closed", action="store_true", help="Prune jobs exceeding failure threshold")
+    parser.add_argument("--max-misses", type=int, default=3, help="Failures before pruning (default: 3)")
     args = parser.parse_args()
 
-    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    primary_data_path = os.path.join(root_dir, 'data', 'sample_jobs.json')
-    web_data_path = os.path.join(root_dir, 'web', 'public', 'data', 'jobs.json')
-    
-    if not os.path.exists(primary_data_path):
-        root_dir = os.getcwd()
-        primary_data_path = os.path.join(root_dir, 'data', 'sample_jobs.json')
-        web_data_path = os.path.join(root_dir, 'web', 'public', 'data', 'jobs.json')
+    data_file = "data/sample_jobs.json"
+    web_file = "web/public/data/jobs.json"
 
-    if not os.path.exists(primary_data_path):
-        print(f"Data file not found at {primary_data_path}")
+    if not os.path.exists(data_file):
+        print(f"Data file not found: {data_file}")
         return
 
-    with open(primary_data_path, 'r', encoding='utf-8') as f:
+    with open(data_file, "r", encoding="utf-8") as f:
         jobs = json.load(f)
 
-    if not args.check_all and not args.stats:
-        print("Please provide --check-all or --stats")
-        return
+    print(f"Loaded {len(jobs)} jobs for liveness validation.")
+    cache = ATSBoardCache()
+    now_iso = datetime.now(timezone.utc).isoformat()
 
-    print(f"Total jobs before validation: {len(jobs)}")
-    
-    active_jobs = []
-    closed_jobs = []
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        results = list(executor.map(lambda j: (j, validate_job(j, cache)), jobs))
 
-    with ThreadPoolExecutor(max_workers=20) as executor:
-        future_to_job = {executor.submit(check_job, job): job for job in jobs}
-        for future in as_completed(future_to_job):
-            job = future_to_job[future]
-            try:
-                is_active = future.result()
-                if is_active:
-                    active_jobs.append(job)
-                else:
-                    closed_jobs.append(job)
-            except Exception as e:
-                # Assume active if error occurs during check to avoid false pruning
-                active_jobs.append(job)
+    active_count = 0
+    closed_count = 0
+    updated_jobs = []
 
-    if args.stats:
-        print(f"Stats:")
-        print(f"  Active jobs: {len(active_jobs)}")
-        print(f"  Closed jobs: {len(closed_jobs)}")
+    for job, is_alive in results:
+        if is_alive:
+            active_count += 1
+            job["consecutive_misses"] = 0
+            job["last_verified_at"] = now_iso
+            updated_jobs.append(job)
+        else:
+            closed_count += 1
+            job["consecutive_misses"] = job.get("consecutive_misses", 0) + 1
+            if not args.prune_closed or job["consecutive_misses"] < args.max_misses:
+                updated_jobs.append(job)
 
-    if args.prune_closed and not args.dry_run:
-        print(f"Pruning {len(closed_jobs)} closed jobs.")
-        with open(primary_data_path, 'w', encoding='utf-8') as f:
-            json.dump(active_jobs, f, indent=2, ensure_ascii=False)
-        with open(web_data_path, 'w', encoding='utf-8') as f:
-            json.dump(active_jobs, f, indent=2, ensure_ascii=False)
-        print("Data files updated.")
-    elif args.dry_run:
-        print("Dry run mode. No changes saved.")
+    print(f"Verification Results -> Active: {active_count} | Closed/Unreachable: {closed_count}")
+    if args.prune_closed:
+        pruned_count = len(jobs) - len(updated_jobs)
+        print(f"Pruned {pruned_count} jobs exceeding {args.max_misses} misses.")
 
-if __name__ == '__main__':
+    atomic_save(updated_jobs, data_file)
+    atomic_save(updated_jobs, web_file)
+    print("Files successfully updated.")
+
+if __name__ == "__main__":
     main()
