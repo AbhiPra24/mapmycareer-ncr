@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Job } from '../types/job';
 import { getCleanLogoUrl } from '../lib/filterUtils';
-import { ExternalLink, ChevronRight } from 'lucide-react';
+import { ExternalLink, ChevronRight, Navigation, Compass } from 'lucide-react';
 import { useSuperclusterWorker } from '../hooks/useSuperclusterWorker';
 
 interface MapViewInnerProps {
@@ -377,27 +377,33 @@ const CompanyPopup: React.FC<CompanyPopupProps> = ({ cluster, onSelectJob }) => 
   );
 };
 
-// ─── Supercluster HTML Icons ──────────────────────────────────────────────────
+// ─── Supercluster HTML Icons with Standardized Tiers (<10, 10–99, 100+) ─────────
 const createSuperclusterIcon = (count: number) => {
-  let size = 36;
+  let size = 32;
   let bgGradient = 'from-blue-600 to-indigo-600';
-  let ringColor = 'ring-blue-300/40';
+  let ringColor = 'ring-blue-400/30';
+  let tierLabel = count.toString();
 
   if (count >= 1000) {
-    size = 48;
-    bgGradient = 'from-purple-600 to-indigo-700';
-    ringColor = 'ring-purple-300/40';
+    size = 46;
+    bgGradient = 'from-purple-700 via-indigo-700 to-blue-800';
+    ringColor = 'ring-purple-400/40';
+    tierLabel = `${(count / 1000).toFixed(1)}k`;
   } else if (count >= 100) {
-    size = 42;
-    bgGradient = 'from-blue-700 to-blue-900';
-    ringColor = 'ring-blue-400/40';
+    size = 40;
+    bgGradient = 'from-indigo-600 to-purple-600';
+    ringColor = 'ring-indigo-400/40';
+    tierLabel = `${count}`;
+  } else if (count >= 10) {
+    size = 36;
+    bgGradient = 'from-blue-600 to-blue-800';
+    ringColor = 'ring-blue-300/40';
+    tierLabel = `${count}`;
   }
-
-  const formattedCount = count >= 1000 ? `${(count / 1000).toFixed(1)}k` : count;
 
   const html = `
     <div style="width: ${size}px; height: ${size}px;" class="flex items-center justify-center rounded-full bg-gradient-to-br ${bgGradient} text-white font-bold text-xs shadow-lg ring-4 ${ringColor} backdrop-blur-sm transition-transform active:scale-95 cursor-pointer">
-      <span>${formattedCount}</span>
+      <span>${tierLabel}</span>
     </div>
   `;
 
@@ -547,11 +553,13 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
       <MapContainer
         center={NCR_CENTER}
         zoom={NCR_ZOOM}
+        zoomControl={false}
         scrollWheelZoom={true}
         preferCanvas={true}
         className="h-full w-full"
         style={{ minHeight: '100%', height: '100%', width: '100%', background: '#e5e7eb' }}
       >
+        <ZoomControl position="bottomright" />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -577,13 +585,13 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
       </MapContainer>
 
       {/* Cluster count badge overlay (visible on tablet/desktop) */}
-      <div className="hidden sm:block absolute bottom-4 right-4 z-[400] rounded-lg border border-zinc-200/80 bg-white/90 px-3 py-1.5 shadow-md backdrop-blur-md text-xs font-semibold text-zinc-600 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-zinc-300">
+      <div className="hidden sm:block absolute bottom-5 left-4 z-[400] mb-1 rounded-lg border border-zinc-200/80 bg-white/90 px-3 py-1.5 shadow-md backdrop-blur-md text-xs font-semibold text-zinc-600 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-zinc-300">
         <span className="text-blue-600 font-bold dark:text-blue-400">{companyClusters.length}</span> companies ·{' '}
         <span className="text-zinc-800 font-bold dark:text-zinc-200">{validJobs.length}</span> positions
       </div>
 
-      {/* Map Actions Overlay (Near me) */}
-      <div className="absolute top-12 right-3 sm:top-3 sm:right-4 z-[400] flex flex-col gap-2">
+      {/* Circular GPS Target FAB anchored above bottom-right controls */}
+      <div className="absolute bottom-24 right-3 sm:bottom-20 sm:right-3 z-[400]">
         <button
           onClick={() => {
             if ('geolocation' in navigator) {
@@ -600,16 +608,24 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
               alert('Geolocation is not supported by your browser.');
             }
           }}
-          className="rounded-lg border border-zinc-200/80 bg-white/95 px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs font-bold text-blue-600 shadow-md backdrop-blur-md hover:bg-blue-50 dark:border-zinc-800/80 dark:bg-zinc-900/95 dark:text-blue-400 dark:hover:bg-zinc-800"
-          title="Find jobs near me"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200/80 bg-white/95 text-blue-600 shadow-xl backdrop-blur-md transition hover:bg-blue-50 hover:scale-105 active:scale-95 dark:border-zinc-800 dark:bg-zinc-900/95 dark:text-blue-400 dark:hover:bg-zinc-800"
+          title="Find jobs near me (GPS)"
+          aria-label="Find jobs near me"
         >
-          <span className="hidden sm:inline">📍 Find jobs near me</span>
-          <span className="sm:hidden">📍 Near me</span>
+          <Navigation className="h-5 w-5" />
         </button>
       </div>
 
-      {/* City quick-nav */}
-      <div className="absolute top-2.5 left-2.5 right-14 sm:top-3 sm:left-4 sm:right-36 z-[400] flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-hide">
+      {/* City quick-nav Strip with Frosted Glass Container & Right Fade Carousel Mask */}
+      <div
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitMaskImage: 'linear-gradient(to right, black 88%, transparent 100%)',
+          maskImage: 'linear-gradient(to right, black 88%, transparent 100%)',
+        }}
+        className="absolute top-3 left-3 right-3 z-[400] flex items-center gap-1.5 overflow-x-auto rounded-xl border border-white/20 bg-slate-900/80 py-1.5 pl-3 pr-8 shadow-lg backdrop-blur-md [&::-webkit-scrollbar]:hidden dark:border-zinc-800 dark:bg-zinc-950/85"
+      >
         {[
           { name: 'NCR',       coords: [28.5355, 77.3910] },
           { name: 'Bengaluru', coords: [12.9716, 77.5946] },
@@ -628,29 +644,28 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
                 new CustomEvent('flyTo', { detail: { lat: city.coords[0], lon: city.coords[1], zoom: 11 } })
               )
             }
-            className="whitespace-nowrap rounded-full border border-zinc-200/80 bg-white/90 px-2.5 py-0.5 sm:px-3 sm:py-1 shadow-sm backdrop-blur-md text-[10px] sm:text-[11px] font-bold text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            className="whitespace-nowrap shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-bold text-zinc-200 transition hover:bg-white/20 hover:text-white dark:text-zinc-300 dark:hover:bg-white/10"
           >
             {city.name}
           </button>
         ))}
       </div>
 
-      {/* Map Legend */}
-      <div className="hidden sm:flex absolute bottom-4 left-4 z-[400] items-center gap-3 rounded-lg border border-zinc-200/80 bg-white/90 px-3 py-1.5 shadow-md backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-900/90">
+      {/* Level Legend Pill positioned cleanly above bottom footer */}
+      <div className="hidden sm:flex absolute bottom-12 left-4 z-[400] items-center gap-2.5 rounded-full border border-zinc-200/80 bg-white/90 px-3 py-1 text-xs shadow-md backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-900/90">
         <span className="text-[10px] font-bold uppercase text-zinc-400">Level:</span>
-        <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-700 dark:text-zinc-300">
-          <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Entry
+        <div className="flex items-center gap-1 text-[11px] font-medium text-zinc-700 dark:text-zinc-300">
+          <span className="h-2 w-2 rounded-full bg-emerald-500" /> Entry
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-700 dark:text-zinc-300">
-          <span className="h-2.5 w-2.5 rounded-full bg-blue-600" /> Mid
+        <div className="flex items-center gap-1 text-[11px] font-medium text-zinc-700 dark:text-zinc-300">
+          <span className="h-2 w-2 rounded-full bg-blue-600" /> Mid
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-700 dark:text-zinc-300">
-          <span className="h-2.5 w-2.5 rounded-full bg-purple-600" /> Senior
+        <div className="flex items-center gap-1 text-[11px] font-medium text-zinc-700 dark:text-zinc-300">
+          <span className="h-2 w-2 rounded-full bg-purple-600" /> Senior
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-700 dark:text-zinc-300">
-          <span className="h-2.5 w-2.5 rounded-full bg-amber-500" /> Lead
+        <div className="flex items-center gap-1 text-[11px] font-medium text-zinc-700 dark:text-zinc-300">
+          <span className="h-2 w-2 rounded-full bg-amber-500" /> Lead
         </div>
-        <span className="text-[10px] text-zinc-400">· border = dominant level</span>
       </div>
     </div>
   );

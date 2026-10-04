@@ -26,6 +26,29 @@ export default function Home() {
   const [modalJob, setModalJob] = useState<Job | null>(null);
   const [mobileTab, setMobileTab] = useState<'list' | 'map'>('list');
 
+  // Resizable Split Pane State
+  const [feedWidthPercent, setFeedWidthPercent] = useState<number>(42);
+  const splitContainerRef = React.useRef<HTMLDivElement>(null);
+
+  const handleMouseDownDivider = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      if (!splitContainerRef.current) return;
+      const rect = splitContainerRef.current.getBoundingClientRect();
+      const newWidth = ((moveEvent.clientX - rect.left) / rect.width) * 100;
+      if (newWidth >= 25 && newWidth <= 65) {
+        setFeedWidthPercent(newWidth);
+      }
+    };
+    const handleMouseUp = () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.dispatchEvent(new Event('mapInvalidateSize'));
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  };
+
   // CareerForge Modals State
   const [isAtsModalOpen, setIsAtsModalOpen] = useState<boolean>(false);
   const [isResumeBuilderOpen, setIsResumeBuilderOpen] = useState<boolean>(false);
@@ -286,21 +309,27 @@ export default function Home() {
           </div>
         )}
 
-        {/* Filter Bar */}
-        <FilterBar
-          filters={filters}
-          onFilterChange={setFilters}
-          cities={cities}
-          hubs={hubs}
-          onReset={handleResetFilters}
-        />
+        {/* Sticky Filter Bar */}
+        <div className="sticky top-0 z-20">
+          <FilterBar
+            filters={filters}
+            onFilterChange={setFilters}
+            cities={cities}
+            hubs={hubs}
+            onReset={handleResetFilters}
+          />
+        </div>
 
-        {/* Split Screen Content: Left Job Feed, Right Geospatial Map */}
-        <div className="relative grid flex-1 grid-cols-1 gap-3 overflow-hidden lg:grid-cols-12">
-          {/* Left: Job Cards List */}
+        {/* Split Screen Content: Left Job Feed, Right Geospatial Map with Resizable Splitter */}
+        <div
+          ref={splitContainerRef}
+          className="relative flex flex-1 flex-col lg:flex-row gap-0 overflow-hidden rounded-xl"
+        >
+          {/* Left: Job Cards Feed (Independent Scroll) */}
           <div
             onScroll={handleScrollFeed}
-            className={`h-full flex-col overflow-y-auto pr-1 lg:col-span-5 xl:col-span-4 ${
+            style={{ width: typeof window !== 'undefined' && window.innerWidth >= 1024 ? `${feedWidthPercent}%` : '100%' }}
+            className={`h-full flex-col overflow-y-auto pr-1 lg:pr-2 ${
               mobileTab === 'list' ? 'flex' : 'hidden lg:flex'
             }`}
           >
@@ -335,26 +364,43 @@ export default function Home() {
             ) : (
               <div className="flex flex-col gap-2.5 pb-28 lg:pb-6">
                 {displayedJobs.map((job) => (
-                  <JobCard
-                    key={job.id}
-                    job={job}
-                    isSelected={selectedJob?.id === job.id}
-                    isSaved={savedJobIds.has(job.id)}
-                    matchResult={activeResumeProfile ? jobMatchMap.get(job.id) : undefined}
-                    onSelect={(j) => {
-                      setSelectedJob(j);
-                      setModalJob(j);
-                    }}
-                    onHover={(j) => setHoveredJob(j)}
-                    onToggleSave={(j, e) => {
-                      e.stopPropagation();
-                      toggleSaveJob(j.id);
-                    }}
-                  />
+                  <div key={job.id} id={`job-card-${job.id}`}>
+                    <JobCard
+                      job={job}
+                      isSelected={selectedJob?.id === job.id}
+                      isSaved={savedJobIds.has(job.id)}
+                      matchResult={activeResumeProfile ? jobMatchMap.get(job.id) : undefined}
+                      onSelect={(j) => {
+                        setSelectedJob(j);
+                        setModalJob(j);
+                      }}
+                      onHover={(j) => setHoveredJob(j)}
+                      onToggleSave={(j, e) => {
+                        e.stopPropagation();
+                        toggleSaveJob(j.id);
+                      }}
+                    />
+                  </div>
                 ))}
                 {displayLimit < filteredJobs.length && (
-                  <div className="py-2 text-center text-xs text-zinc-400">
-                    Scroll down to load more ({displayedJobs.length} of {filteredJobs.length} loaded)...
+                  <div className="space-y-2.5 py-2">
+                    {/* Animated Skeleton Loading Card Placeholders */}
+                    <div className="animate-pulse rounded-xl border border-zinc-200/80 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900/60">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-lg bg-zinc-200 dark:bg-zinc-800" />
+                          <div className="space-y-1.5">
+                            <div className="h-3.5 w-36 rounded bg-zinc-200 dark:bg-zinc-800" />
+                            <div className="h-2.5 w-24 rounded bg-zinc-200 dark:bg-zinc-800" />
+                          </div>
+                        </div>
+                        <div className="h-5 w-16 rounded bg-zinc-200 dark:bg-zinc-800" />
+                      </div>
+                      <div className="mt-4 flex gap-2">
+                        <div className="h-3 w-20 rounded bg-zinc-200 dark:bg-zinc-800" />
+                        <div className="h-3 w-20 rounded bg-zinc-200 dark:bg-zinc-800" />
+                      </div>
+                    </div>
                   </div>
                 )}
                 <CorridorFaqSection />
@@ -362,9 +408,19 @@ export default function Home() {
             )}
           </div>
 
-          {/* Right: Map Explorer — hidden on mobile when list tab is active to prevent accidental scroll into dead space */}
+          {/* Desktop Resizable Divider Handle */}
           <div
-            className={`h-full w-full lg:col-span-7 xl:col-span-8 ${
+            onMouseDown={handleMouseDownDivider}
+            className="hidden lg:flex w-2 cursor-col-resize items-center justify-center transition-colors hover:bg-blue-500/20 active:bg-blue-500/40 select-none group"
+            title="Drag to resize feed & map"
+          >
+            <div className="h-10 w-1 rounded-full bg-zinc-300 transition-colors group-hover:bg-blue-500 dark:bg-zinc-700" />
+          </div>
+
+          {/* Right: Map Explorer */}
+          <div
+            style={{ width: typeof window !== 'undefined' && window.innerWidth >= 1024 ? `calc(${100 - feedWidthPercent}% - 8px)` : '100%' }}
+            className={`h-full flex-1 ${
               mobileTab === 'map'
                 ? 'block relative'
                 : 'hidden lg:block'
@@ -377,13 +433,21 @@ export default function Home() {
               onSelectJob={(j) => {
                 setSelectedJob(j);
                 setModalJob(j);
+                // Scroll card into view in left pane
+                const cardEl = document.getElementById(`job-card-${j.id}`);
+                if (cardEl) {
+                  cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
               }}
             />
           </div>
         </div>
 
-        {/* Mobile Floating View Switcher Pill — positioned above iOS home indicator */}
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1 rounded-full border border-zinc-200/80 bg-zinc-900/90 p-1.5 shadow-2xl backdrop-blur-md dark:border-zinc-700/80 dark:bg-zinc-900/95 lg:hidden">
+        {/* Mobile Floating View Switcher Pill — positioned with safe-area spacing */}
+        <div
+          style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)' }}
+          className="fixed left-1/2 -translate-x-1/2 z-40 flex items-center gap-1 rounded-full border border-zinc-200/80 bg-zinc-900/90 p-1.5 shadow-2xl backdrop-blur-md dark:border-zinc-700/80 dark:bg-zinc-900/95 lg:hidden"
+        >
           <button
             onClick={() => setMobileTab('list')}
             className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-all ${
