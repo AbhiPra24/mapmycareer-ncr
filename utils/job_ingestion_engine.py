@@ -37,6 +37,21 @@ COMPANY_CANONICAL_NAMES = {
     "hotstar": "Disney+ Hotstar",
     "mux": "Mux",
     "gemini": "Google Gemini",
+    "coinbase": "Coinbase",
+    "robinhood": "Robinhood",
+    "datadog": "Datadog",
+    "scaleai": "Scale AI",
+    "pagerduty": "PagerDuty",
+    "duolingo": "Duolingo",
+    "launchdarkly": "LaunchDarkly",
+    "cockroachlabs": "Cockroach Labs",
+    "circleci": "CircleCI",
+    "posthog": "PostHog",
+    "midjourney": "Midjourney",
+    "elevenlabs": "ElevenLabs",
+    "langchain": "LangChain",
+    "runway": "Runway",
+    "synthesia": "Synthesia",
 }
 
 def get_canonical_company_name(slug: str) -> str:
@@ -45,15 +60,21 @@ def get_canonical_company_name(slug: str) -> str:
 GREENHOUSE_COMPANIES = [{"slug": c, "name": get_canonical_company_name(c), "domain": f"{c}.com"} for c in [
     "databricks", "rubrik", "mongodb", "zscaler", "inmobi", "postman", "slice", "groww", "affirm", "gusto", 
     "cloudflare", "elastic", "gitlab", "stripe", "twilio", "pinterest", "instacart", "reddit", "okta", "druva", 
-    "thoughtspot", "hashicorp", "confluent", "snowflake", "airbnb", "doordash", "uber", "lyft", "fivetran"
+    "thoughtspot", "hashicorp", "confluent", "snowflake", "airbnb", "doordash", "uber", "lyft", "fivetran",
+    "coinbase", "robinhood", "datadog", "samsara", "scaleai", "ripple", "dropbox", "chime", "pagerduty",
+    "brex", "duolingo", "sofi", "carta", "checkr", "verkada", "launchdarkly", "braze", "canonical",
+    "cockroachlabs", "circleci"
 ]]
 
 LEVER_COMPANIES = [{"slug": c, "name": get_canonical_company_name(c), "domain": f"{c}.com"} for c in [
-    "hotstar", "atlassian", "mux", "palantir", "spotify", "coursera", "udemy", "netflix", "canva", "figma"
+    "hotstar", "atlassian", "mux", "palantir", "spotify", "coursera", "udemy", "netflix", "canva", "figma",
+    "outreach"
 ]]
 
 ASHBY_COMPANIES = [{"slug": c, "name": get_canonical_company_name(c), "domain": f"{c}.com"} for c in [
-    "notion", "docker", "linear", "ramp", "cursor", "vanta", "replit", "perplexity", "cohere", "openai", "supabase", "resend", "brex", "gemini"
+    "notion", "docker", "linear", "ramp", "cursor", "vanta", "replit", "perplexity", "cohere", "openai", 
+    "supabase", "resend", "brex", "gemini", "posthog", "dust", "midjourney", "modal", "langchain", 
+    "elevenlabs", "pika", "runway", "tavily", "synthesia"
 ]]
 
 def fetch_json(url: str) -> Optional[Any]:
