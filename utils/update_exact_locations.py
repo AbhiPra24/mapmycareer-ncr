@@ -8,7 +8,7 @@ for all companies in the dataset with deterministic micro-jittering to prevent o
 import json
 import os
 import hashlib
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple, Optional, Any
 
 # Master Verified Office Locations Database: (City, Company) -> (exact_hub, lat, lon)
 EXACT_OFFICES: Dict[Tuple[str, str], Tuple[str, float, float]] = {
@@ -369,6 +369,12 @@ EXACT_OFFICES: Dict[Tuple[str, str], Tuple[str, float, float]] = {
     ("Chennai", "PayPal"): ("PayPal India Development Center, Futura SV IT Park, OMR, Sholinganallur, Chennai", 12.9010, 80.2280),
 }
 
+# Pre-compute a case-insensitive index for O(1) fallback lookups
+LOWERCASE_OFFICES = {
+    (city.lower(), comp.lower()): data 
+    for (city, comp), data in EXACT_OFFICES.items()
+}
+
 
 def apply_deterministic_jitter(lat: float, lon: float, job_id: int, max_jitter: float = 0.0006) -> Tuple[float, float]:
     """
@@ -385,9 +391,26 @@ def apply_deterministic_jitter(lat: float, lon: float, job_id: int, max_jitter: 
     )
 
 
+def atomic_save(data: Any, path: str) -> None:
+    """Safely writes JSON data via a temporary file to prevent corruption."""
+    tmp_path = f"{path}.tmp"
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(tmp_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    os.replace(tmp_path, path)
+
+
 def update_dataset(data_path: str) -> int:
+    if not os.path.exists(data_path):
+        print(f"Skipping {data_path} (File not found)")
+        return 0
+
     with open(data_path, "r", encoding="utf-8") as f:
-        jobs = json.load(f)
+        try:
+            jobs = json.load(f)
+        except json.JSONDecodeError:
+            print(f"Error: {data_path} contains invalid JSON.")
+            return 0
 
     updated_count = 0
     missing_mappings = set()
@@ -397,53 +420,55 @@ def update_dataset(data_path: str) -> int:
         company = job.get("company", "").strip()
         job_id = job.get("id", 0)
 
-        lookup_key = (city, company)
+        if not city or not company:
+            continue
 
+        lookup_key = (city, company)
+        lower_key = (city.lower(), company.lower())
+
+        # O(1) lookups for both exact and case-insensitive matches
         if lookup_key in EXACT_OFFICES:
             hub_name, base_lat, base_lon = EXACT_OFFICES[lookup_key]
-            # Apply micro-jitter for exact pinpointing without cluttering
-            pin_lat, pin_lon = apply_deterministic_jitter(base_lat, base_lon, job_id)
-
-            job["hub"] = hub_name
-            job["lat"] = pin_lat
-            job["lon"] = pin_lon
-            updated_count += 1
+        elif lower_key in LOWERCASE_OFFICES:
+            hub_name, base_lat, base_lon = LOWERCASE_OFFICES[lower_key]
         else:
-            # Check case-insensitive company match for this city
-            matched = False
-            for (c_city, c_comp), (hub_name, base_lat, base_lon) in EXACT_OFFICES.items():
-                if c_city.lower() == city.lower() and c_comp.lower() == company.lower():
-                    pin_lat, pin_lon = apply_deterministic_jitter(base_lat, base_lon, job_id)
-                    job["hub"] = hub_name
-                    job["lat"] = pin_lat
-                    job["lon"] = pin_lon
-                    updated_count += 1
-                    matched = True
-                    break
-            if not matched:
-                missing_mappings.add((city, company))
+            missing_mappings.add(lookup_key)
+            continue
 
-    with open(data_path, "w", encoding="utf-8") as f:
-        json.dump(jobs, f, indent=2, ensure_ascii=False)
+        pin_lat, pin_lon = apply_deterministic_jitter(base_lat, base_lon, job_id)
+        job["hub"] = hub_name
+        job["lat"] = pin_lat
+        job["lon"] = pin_lon
+        updated_count += 1
 
+    atomic_save(jobs, data_path)
     print(f"[{data_path}] Successfully updated {updated_count}/{len(jobs)} jobs.")
+    
     if missing_mappings:
-        print(f"Missing {len(missing_mappings)} mappings: {missing_mappings}")
+        print(f"Missing {len(missing_mappings)} mappings (Top 5: {list(missing_mappings)[:5]})")
 
     return updated_count
 
 
 def main():
-    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # Resolve paths robustly across both local execution and GitHub Actions runners
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    root_dir = os.path.dirname(current_dir)
+    
     primary_path = os.path.join(root_dir, "data", "sample_jobs.json")
     web_path = os.path.join(root_dir, "web", "public", "data", "jobs.json")
+
+    # Fallback to CWD if script is run directly from the root directory
+    if not os.path.exists(primary_path):
+        root_dir = os.getcwd()
+        primary_path = os.path.join(root_dir, "data", "sample_jobs.json")
+        web_path = os.path.join(root_dir, "web", "public", "data", "jobs.json")
 
     print(f"Updating primary dataset: {primary_path}")
     update_dataset(primary_path)
 
-    if os.path.exists(os.path.dirname(web_path)):
-        print(f"Updating web public dataset: {web_path}")
-        update_dataset(web_path)
+    print(f"Updating web public dataset: {web_path}")
+    update_dataset(web_path)
 
 
 if __name__ == "__main__":
