@@ -67,7 +67,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job, isSelected, isSaved, matc
               <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400">{job.company}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-start gap-2 shrink-0">
             <div className="flex flex-col items-end gap-1">
               {matchResult && (
                 <span
@@ -98,7 +98,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job, isSelected, isSaved, matc
               <button
                 onClick={(e) => onToggleSave(job, e)}
                 aria-label={isSaved ? 'Remove from saved jobs' : 'Save job'}
-                className={`flex h-11 w-11 items-center justify-center rounded-lg transition active:scale-95 ${
+                className={`flex h-11 w-11 self-start items-center justify-center rounded-lg transition active:scale-95 ${
                   isSaved
                     ? 'text-rose-600 bg-rose-50 dark:bg-rose-950/40 ring-1 ring-rose-500/20'
                     : 'text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800'

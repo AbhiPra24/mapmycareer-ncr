@@ -585,7 +585,7 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
       </MapContainer>
 
       {/* Cluster count badge overlay (visible on tablet/desktop) */}
-      <div className="hidden sm:block absolute bottom-4 left-4 z-[400] rounded-lg border border-zinc-200/80 bg-white/90 px-3 py-1.5 shadow-md backdrop-blur-md text-xs font-semibold text-zinc-600 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-zinc-300">
+      <div className="hidden sm:block absolute bottom-5 left-4 z-[400] mb-1 rounded-lg border border-zinc-200/80 bg-white/90 px-3 py-1.5 shadow-md backdrop-blur-md text-xs font-semibold text-zinc-600 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-zinc-300">
         <span className="text-blue-600 font-bold dark:text-blue-400">{companyClusters.length}</span> companies ·{' '}
         <span className="text-zinc-800 font-bold dark:text-zinc-200">{validJobs.length}</span> positions
       </div>
@@ -616,8 +616,16 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
         </button>
       </div>
 
-      {/* City quick-nav Strip with Frosted Glass Container */}
-      <div className="absolute top-3 left-3 right-3 z-[400] flex items-center gap-1.5 overflow-x-auto rounded-xl border border-white/20 bg-slate-900/80 p-1.5 shadow-lg backdrop-blur-md scrollbar-hide dark:border-zinc-800 dark:bg-zinc-950/85">
+      {/* City quick-nav Strip with Frosted Glass Container & Right Fade Carousel Mask */}
+      <div
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitMaskImage: 'linear-gradient(to right, black 88%, transparent 100%)',
+          maskImage: 'linear-gradient(to right, black 88%, transparent 100%)',
+        }}
+        className="absolute top-3 left-3 right-3 z-[400] flex items-center gap-1.5 overflow-x-auto rounded-xl border border-white/20 bg-slate-900/80 py-1.5 pl-3 pr-8 shadow-lg backdrop-blur-md [&::-webkit-scrollbar]:hidden dark:border-zinc-800 dark:bg-zinc-950/85"
+      >
         {[
           { name: 'NCR',       coords: [28.5355, 77.3910] },
           { name: 'Bengaluru', coords: [12.9716, 77.5946] },
@@ -636,7 +644,7 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
                 new CustomEvent('flyTo', { detail: { lat: city.coords[0], lon: city.coords[1], zoom: 11 } })
               )
             }
-            className="whitespace-nowrap rounded-lg px-2.5 py-1 text-[11px] font-bold text-zinc-200 transition hover:bg-white/20 hover:text-white dark:text-zinc-300 dark:hover:bg-white/10"
+            className="whitespace-nowrap shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-bold text-zinc-200 transition hover:bg-white/20 hover:text-white dark:text-zinc-300 dark:hover:bg-white/10"
           >
             {city.name}
           </button>

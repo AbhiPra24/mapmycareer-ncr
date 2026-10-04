@@ -96,7 +96,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </div>
 
         {/* City Filter */}
-        <div className={`w-full md:w-44 ${isMobileExpanded ? 'block' : 'hidden sm:block'}`}>
+        <div className={`w-full md:w-44 md:min-w-[140px] ${isMobileExpanded ? 'block' : 'hidden sm:block'}`}>
           <select
             value={filters.selectedCity}
             onChange={(e) =>
@@ -106,7 +106,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 selectedHub: 'All Hubs', // reset hub when city changes
               })
             }
-            className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 px-2.5 text-xs font-medium text-zinc-900 outline-none transition focus:border-blue-500 focus:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+            className="w-full truncate rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 px-2.5 text-xs font-medium text-zinc-900 outline-none transition focus:border-blue-500 focus:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
           >
             <option value="All Cities">All Indian Cities</option>
             {cities.map((city) => (
@@ -118,11 +118,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </div>
 
         {/* Hub Filter */}
-        <div className={`w-full md:w-48 ${isMobileExpanded ? 'block' : 'hidden sm:block'}`}>
+        <div className={`w-full md:w-48 md:min-w-[160px] md:max-w-[200px] ${isMobileExpanded ? 'block' : 'hidden sm:block'}`}>
           <select
             value={filters.selectedHub}
             onChange={(e) => onFilterChange({ ...filters, selectedHub: e.target.value })}
-            className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 px-2.5 text-xs font-medium text-zinc-900 outline-none transition focus:border-blue-500 focus:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+            className="w-full truncate rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 px-2.5 text-xs font-medium text-zinc-900 outline-none transition focus:border-blue-500 focus:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
           >
             <option value="All Hubs">All Tech Hubs / Zones</option>
             {hubs.map((hub) => (
@@ -134,7 +134,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </div>
 
         {/* Reset button */}
-        <div className={`w-full md:w-auto ${isMobileExpanded ? 'flex' : 'hidden sm:flex'}`}>
+        <div className={`w-full md:w-auto shrink-0 ${isMobileExpanded ? 'flex' : 'hidden sm:flex'}`}>
           <button
             onClick={onReset}
             className="flex w-full md:w-auto items-center justify-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-100 py-2 px-3 text-xs font-medium text-zinc-600 transition hover:bg-zinc-200 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-white"
@@ -211,11 +211,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </div>
 
         {/* Min Salary Filter */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
             Min Salary:
           </span>
-          <div className="flex items-center gap-1 text-xs font-bold text-zinc-700 dark:text-zinc-300">
+          <div className="flex items-center gap-1 text-xs font-bold text-zinc-700 dark:text-zinc-300 min-w-[58px]">
             <IndianRupee className="h-3.5 w-3.5 text-emerald-500" />
             <span>{filters.minSalaryLPA > 0 ? `${filters.minSalaryLPA} LPA+` : 'Any'}</span>
           </div>
