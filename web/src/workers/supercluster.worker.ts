@@ -4,11 +4,12 @@ import {
   CompactJobTuple,
   ClusterFeature,
   GeoPointProperties,
+  GeoClusterProperties,
   WorkerInMessage,
   WorkerOutMessage,
 } from '../types/geo';
 
-let index: Supercluster<GeoPointProperties, any> | null = null;
+let index: Supercluster<GeoPointProperties, GeoClusterProperties> | null = null;
 
 /**
  * Transforms compact tuple arrays into GeoJSON Points for Supercluster indexing.
@@ -47,7 +48,7 @@ self.onmessage = (event: MessageEvent<WorkerInMessage>) => {
       const geoFeatures = convertTuplesToGeoJSON(data.points);
 
       // Supercluster instance with fast spatial k-d tree
-      index = new Supercluster<GeoPointProperties, any>({
+      index = new Supercluster<GeoPointProperties, GeoClusterProperties>({
         radius: 60,
         maxZoom: 18,
         minPoints: 2,
