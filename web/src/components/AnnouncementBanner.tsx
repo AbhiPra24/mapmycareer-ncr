@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sparkles, X, ArrowRight } from 'lucide-react';
+
+const STORAGE_KEY = 'mmc_live_radar_dismissed_v1';
 
 interface AnnouncementBannerProps {
   initialMessage?: string | null;
@@ -10,7 +12,27 @@ interface AnnouncementBannerProps {
 export function AnnouncementBanner({
   initialMessage = '🚀 1,450+ verified live tech jobs across Bengaluru, NCR & Hyderabad mapped with campus accuracy!',
 }: AnnouncementBannerProps) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      const isDismissed = localStorage.getItem(STORAGE_KEY) === 'true';
+      if (!isDismissed) {
+        setIsOpen(true);
+      }
+    } catch {
+      setIsOpen(true);
+    }
+  }, []);
+
+  const handleDismiss = () => {
+    setIsOpen(false);
+    try {
+      localStorage.setItem(STORAGE_KEY, 'true');
+    } catch {
+      // localStorage may fail in private mode
+    }
+  };
 
   if (!isOpen || !initialMessage) {
     return null;
@@ -29,7 +51,7 @@ export function AnnouncementBanner({
         </span>
       </div>
       <button
-        onClick={() => setIsOpen(false)}
+        onClick={handleDismiss}
         aria-label="Dismiss banner"
         className="rounded-md p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-blue-400 transition hover:bg-blue-900/50 hover:text-white"
       >

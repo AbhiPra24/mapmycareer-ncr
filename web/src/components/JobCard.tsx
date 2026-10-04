@@ -98,7 +98,11 @@ export const JobCard: React.FC<JobCardProps> = ({ job, isSelected, isSaved, matc
               <button
                 onClick={(e) => onToggleSave(job, e)}
                 aria-label={isSaved ? 'Remove from saved jobs' : 'Save job'}
-                className={`p-1.5 rounded-md transition ${isSaved ? 'text-rose-500 bg-rose-50 dark:bg-rose-950/30' : 'text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
+                className={`flex h-11 w-11 items-center justify-center rounded-lg transition active:scale-95 ${
+                  isSaved
+                    ? 'text-rose-600 bg-rose-50 dark:bg-rose-950/40 ring-1 ring-rose-500/20'
+                    : 'text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                }`}
               >
                 <Bookmark className="h-4 w-4" fill={isSaved ? 'currentColor' : 'none'} />
               </button>
@@ -107,9 +111,11 @@ export const JobCard: React.FC<JobCardProps> = ({ job, isSelected, isSaved, matc
         </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-y-1.5 gap-x-3 text-xs text-zinc-500 dark:text-zinc-400">
-          <div className="flex items-center gap-1">
-            <MapPin className="h-3.5 w-3.5 text-rose-500" />
-            <span className="line-clamp-1">{job.hub || job.city}</span>
+          <div className="flex items-center gap-1" title={job.location || job.hub || job.city}>
+            <MapPin className="h-3.5 w-3.5 text-rose-500 shrink-0" />
+            <span className="line-clamp-1">
+              {job.hub ? `${job.hub}, ${job.city}` : (job.city || job.location || 'India')}
+            </span>
           </div>
           {job.salary_range && (
             <div className="flex items-center gap-1 font-semibold text-zinc-700 dark:text-zinc-300">
@@ -126,8 +132,8 @@ export const JobCard: React.FC<JobCardProps> = ({ job, isSelected, isSaved, matc
         </div>
 
         {job.skills && job.skills.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1">
-            {job.skills.slice(0, 5).map((skill, idx) => {
+          <div className="mt-3 flex flex-wrap items-center gap-1">
+            {job.skills.slice(0, 3).map((skill, idx) => {
               const isMatched = matchResult?.matchedSkills.some(
                 (ms) => ms.toLowerCase() === skill.toLowerCase()
               );
@@ -144,9 +150,12 @@ export const JobCard: React.FC<JobCardProps> = ({ job, isSelected, isSaved, matc
                 </span>
               );
             })}
-            {job.skills.length > 5 && (
-              <span className="rounded-md bg-zinc-50 px-1.5 py-0.5 text-[10px] text-zinc-400 dark:bg-zinc-800/50">
-                +{job.skills.length - 5}
+            {job.skills.length > 3 && (
+              <span
+                className="rounded-md bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+                title={job.skills.slice(3).join(', ')}
+              >
+                +{job.skills.length - 3} more
               </span>
             )}
           </div>
@@ -163,7 +172,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job, isSelected, isSaved, matc
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-1 rounded-md bg-blue-50 px-2.5 py-2 min-h-[44px] text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-100 dark:bg-blue-950/50 dark:text-blue-400 dark:hover:bg-blue-900/60"
+            className="flex items-center gap-1 rounded-md bg-blue-50 px-3 py-2 min-h-[44px] text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-100 dark:bg-blue-950/50 dark:text-blue-400 dark:hover:bg-blue-900/60"
           >
             <span>Apply</span>
             <ExternalLink className="h-3 w-3" />

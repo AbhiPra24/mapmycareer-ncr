@@ -43,74 +43,80 @@ export const CorridorFaqSection: React.FC = () => {
       {/* Crawlable Semantic Content Body */}
       {isOpen && (
         <div id="corridor-insights-body" className="mt-4 space-y-6 text-xs text-zinc-700 dark:text-zinc-300">
-          {/* Question 1: Table Snippet Target */}
-          <article className="space-y-2.5">
-            <h3 className="text-xs font-bold text-zinc-900 dark:text-white sm:text-sm">
-              What is the average tech salary in DLF Cyber City vs Outer Ring Road Bengaluru?
-            </h3>
-            <p className="leading-relaxed text-zinc-600 dark:text-zinc-400">
-              According to verified compensation data across 10,500+ active roles, tech salaries in DLF Cyber City (Gurugram NCR) offer parity in base pay for senior positions while Outer Ring Road (ORR Bengaluru) yields higher equity grants for early-stage and Series B/C product firms:
-            </p>
-            <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
-              <table className="w-full text-left text-[11px]">
-                <thead className="bg-zinc-50 text-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-200">
-                  <tr>
-                    <th scope="col" className="px-3 py-2 font-semibold">Experience Tier</th>
-                    <th scope="col" className="px-3 py-2 font-semibold">DLF Cyber City (Gurugram)</th>
-                    <th scope="col" className="px-3 py-2 font-semibold">Outer Ring Road (Bengaluru)</th>
-                    <th scope="col" className="px-3 py-2 font-semibold">Primary Industry Focus</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
-                  <tr className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30">
-                    <td className="px-2 py-1.5 font-medium text-zinc-900 dark:text-white">Entry (0-2 YOE)</td>
-                    <td className="px-2 py-1.5">₹10 - ₹18 LPA</td>
-                    <td className="px-2 py-1.5">₹12 - ₹22 LPA</td>
-                    <td className="px-2 py-1.5 text-zinc-500 dark:text-zinc-400">Fintech, E-commerce, SaaS</td>
-                  </tr>
-                  <tr className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30">
-                    <td className="px-2 py-1.5 font-medium text-zinc-900 dark:text-white">Mid-Level (3-6 YOE)</td>
-                    <td className="px-2 py-1.5">₹22 - ₹38 LPA</td>
-                    <td className="px-2 py-1.5">₹24 - ₹42 LPA</td>
-                    <td className="px-2 py-1.5 text-zinc-500 dark:text-zinc-400">BigTech, Cloud Platforms, AI/ML</td>
-                  </tr>
-                  <tr className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30">
-                    <td className="px-2 py-1.5 font-medium text-zinc-900 dark:text-white">Senior / Staff (7-11 YOE)</td>
-                    <td className="px-2 py-1.5">₹42 - ₹75 LPA</td>
-                    <td className="px-2 py-1.5">₹45 - ₹80 LPA</td>
-                    <td className="px-2 py-1.5 text-zinc-500 dark:text-zinc-400">Enterprise Systems, GCCs</td>
-                  </tr>
-                  <tr className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30">
-                    <td className="px-2 py-1.5 font-medium text-zinc-900 dark:text-white">Principal / Lead (12+ YOE)</td>
-                    <td className="px-2 py-1.5">₹70 - ₹1.3 Cr</td>
-                    <td className="px-2 py-1.5">₹75 - ₹1.4 Cr</td>
-                    <td className="px-2 py-1.5 text-zinc-500 dark:text-zinc-400">Global Capability Centers & VC tech</td>
-                  </tr>
-                </tbody>
-              </table>
+          {/* Collapsible Salary Benchmark Accordion */}
+          <details className="group rounded-lg border border-zinc-200 bg-zinc-50/50 p-3 open:bg-white dark:border-zinc-800 dark:bg-zinc-800/40 dark:open:bg-zinc-900" open>
+            <summary className="flex cursor-pointer list-none items-center justify-between font-bold text-zinc-900 group-open:text-blue-600 dark:text-white dark:group-open:text-blue-400">
+              <span className="text-xs sm:text-sm">What is the average tech salary in DLF Cyber City vs Outer Ring Road Bengaluru?</span>
+              <ChevronDown className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" />
+            </summary>
+            <div className="mt-3 space-y-2.5">
+              <p className="leading-relaxed text-zinc-600 dark:text-zinc-400">
+                According to verified compensation data across 10,500+ active roles, tech salaries in DLF Cyber City (Gurugram NCR) offer parity in base pay for senior positions while Outer Ring Road (ORR Bengaluru) yields higher equity grants for early-stage and Series B/C product firms:
+              </p>
+              <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+                <table className="w-full text-left text-[11px]">
+                  <thead className="bg-zinc-50 text-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-200">
+                    <tr>
+                      <th scope="col" className="px-3 py-2 font-semibold">Experience Tier</th>
+                      <th scope="col" className="px-3 py-2 font-semibold">DLF Cyber City (Gurugram)</th>
+                      <th scope="col" className="px-3 py-2 font-semibold">Outer Ring Road (Bengaluru)</th>
+                      <th scope="col" className="px-3 py-2 font-semibold">Primary Industry Focus</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                    <tr className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30">
+                      <td className="px-2 py-1.5 font-medium text-zinc-900 dark:text-white">Entry (0-2 YOE)</td>
+                      <td className="px-2 py-1.5">₹10 - ₹18 LPA</td>
+                      <td className="px-2 py-1.5">₹12 - ₹22 LPA</td>
+                      <td className="px-2 py-1.5 text-zinc-500 dark:text-zinc-400">Fintech, E-commerce, SaaS</td>
+                    </tr>
+                    <tr className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30">
+                      <td className="px-2 py-1.5 font-medium text-zinc-900 dark:text-white">Mid-Level (3-6 YOE)</td>
+                      <td className="px-2 py-1.5">₹22 - ₹38 LPA</td>
+                      <td className="px-2 py-1.5">₹24 - ₹42 LPA</td>
+                      <td className="px-2 py-1.5 text-zinc-500 dark:text-zinc-400">BigTech, Cloud Platforms, AI/ML</td>
+                    </tr>
+                    <tr className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30">
+                      <td className="px-2 py-1.5 font-medium text-zinc-900 dark:text-white">Senior / Staff (7-11 YOE)</td>
+                      <td className="px-2 py-1.5">₹42 - ₹75 LPA</td>
+                      <td className="px-2 py-1.5">₹45 - ₹80 LPA</td>
+                      <td className="px-2 py-1.5 text-zinc-500 dark:text-zinc-400">Enterprise Systems, GCCs</td>
+                    </tr>
+                    <tr className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30">
+                      <td className="px-2 py-1.5 font-medium text-zinc-900 dark:text-white">Principal / Lead (12+ YOE)</td>
+                      <td className="px-2 py-1.5">₹70 - ₹1.3 Cr</td>
+                      <td className="px-2 py-1.5">₹75 - ₹1.4 Cr</td>
+                      <td className="px-2 py-1.5 text-zinc-500 dark:text-zinc-400">Global Capability Centers & VC tech</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </article>
+          </details>
 
-          {/* Question 2: Ordered List Snippet Target */}
-          <article className="space-y-2">
-            <h3 className="text-xs font-bold text-zinc-900 dark:text-white sm:text-sm">
-              How to choose between Gurugram and Bengaluru tech jobs?
-            </h3>
-            <ol className="list-decimal space-y-1.5 pl-4 leading-relaxed text-zinc-600 dark:text-zinc-400">
-              <li>
-                <strong className="text-zinc-800 dark:text-zinc-200">Evaluate Primary Sector Fit:</strong> Gurugram NCR leads in Global Capability Centers (GCCs), Big 4 Advisory, Fintech, and Consumer Internet. Bengaluru specializes in core Developer Tooling, deep AI/ML R&D, and venture-backed SaaS.
-              </li>
-              <li>
-                <strong className="text-zinc-800 dark:text-zinc-200">Calculate Effective Net Savings (Rent vs CTC):</strong> While base pay in Bengaluru averages 5-8% higher, Gurugram micro-markets (Golf Course Extn, Cyber Hub) provide superior metro connectivity and faster commute times per kilometer.
-              </li>
-              <li>
-                <strong className="text-zinc-800 dark:text-zinc-200">Consider Transit & Infrastructure:</strong> NCR features direct Rapid Metro integration with DLF Cyber City and Delhi Airport access, whereas Bengaluru ORR relies heavily on feeder shuttles and upcoming metro phases.
-              </li>
-              <li>
-                <strong className="text-zinc-800 dark:text-zinc-200">Assess Stock Grants (ESOPs vs Liquid RSUs):</strong> Bengaluru startups heavily weight compensation toward equity, while NCR MNCs and Fortune 500 GCCs offer high liquid cash components.
-              </li>
-            </ol>
-          </article>
+          {/* Collapsible City Comparison Guide Accordion */}
+          <details className="group rounded-lg border border-zinc-200 bg-zinc-50/50 p-3 open:bg-white dark:border-zinc-800 dark:bg-zinc-800/40 dark:open:bg-zinc-900">
+            <summary className="flex cursor-pointer list-none items-center justify-between font-bold text-zinc-900 group-open:text-blue-600 dark:text-white dark:group-open:text-blue-400">
+              <span className="text-xs sm:text-sm">How to choose between Gurugram and Bengaluru tech jobs?</span>
+              <ChevronDown className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" />
+            </summary>
+            <div className="mt-3">
+              <ol className="list-decimal space-y-1.5 pl-4 leading-relaxed text-zinc-600 dark:text-zinc-400">
+                <li>
+                  <strong className="text-zinc-800 dark:text-zinc-200">Evaluate Primary Sector Fit:</strong> Gurugram NCR leads in Global Capability Centers (GCCs), Big 4 Advisory, Fintech, and Consumer Internet. Bengaluru specializes in core Developer Tooling, deep AI/ML R&D, and venture-backed SaaS.
+                </li>
+                <li>
+                  <strong className="text-zinc-800 dark:text-zinc-200">Calculate Effective Net Savings (Rent vs CTC):</strong> While base pay in Bengaluru averages 5-8% higher, Gurugram micro-markets (Golf Course Extn, Cyber Hub) provide superior metro connectivity and faster commute times per kilometer.
+                </li>
+                <li>
+                  <strong className="text-zinc-800 dark:text-zinc-200">Consider Transit & Infrastructure:</strong> NCR features direct Rapid Metro integration with DLF Cyber City and Delhi Airport access, whereas Bengaluru ORR relies heavily on feeder shuttles and upcoming metro phases.
+                </li>
+                <li>
+                  <strong className="text-zinc-800 dark:text-zinc-200">Assess Stock Grants (ESOPs vs Liquid RSUs):</strong> Bengaluru startups heavily weight compensation toward equity, while NCR MNCs and Fortune 500 GCCs offer high liquid cash components.
+                </li>
+              </ol>
+            </div>
+          </details>
 
           {/* Question 3: Semantic Accordion FAQ */}
           <div className="space-y-2">

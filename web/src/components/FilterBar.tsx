@@ -62,34 +62,33 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
   return (
     <div className="flex flex-col gap-2.5 sm:gap-3 rounded-xl border border-zinc-200 bg-white p-3 sm:p-3.5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90">
-      {/* Top Search & Dropdown Row */}
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-12">
-        {/* Search input + Mobile filter toggle */}
-        <div className="flex flex-col items-stretch gap-2 md:col-span-4 md:flex-row md:items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400 dark:text-zinc-500" />
-            <input
-              type="text"
-              placeholder="Search role, skills, or company..."
-              value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
-              className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 pl-9 pr-3 text-xs font-medium text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400 dark:focus:border-blue-400"
-            />
-          </div>
+      {/* Connected Search & Filter Unit */}
+      <div className="flex flex-col gap-2 md:flex-row md:items-center">
+        {/* Search input with integrated mobile filter trigger */}
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400 dark:text-zinc-500" />
+          <input
+            type="text"
+            placeholder="Search role, skills, or company..."
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 pl-9 pr-11 text-xs font-medium text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400 dark:focus:border-blue-400 sm:pr-3"
+          />
 
-          {/* Mobile Filter Expand Toggle */}
+          {/* Embedded Mobile Filter Expand Toggle */}
           <button
             onClick={() => setIsMobileExpanded((prev) => !prev)}
-            className={`flex items-center justify-center gap-1.5 rounded-lg border px-2.5 py-2.5 min-h-[44px] text-xs font-semibold sm:hidden transition ${
+            className={`absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-md border text-xs font-semibold sm:hidden transition ${
               isMobileExpanded || activeFiltersCount > 0
                 ? 'border-blue-500 bg-blue-50 text-blue-600 dark:border-blue-500 dark:bg-blue-950/50 dark:text-blue-400'
-                : 'border-zinc-200 bg-zinc-50 text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
+                : 'border-zinc-200 bg-zinc-100 text-zinc-600 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-300'
             }`}
             title="Toggle filters"
+            aria-label="Toggle filters"
           >
             <SlidersHorizontal className="h-3.5 w-3.5" />
             {activeFiltersCount > 0 && (
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+              <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-blue-600 text-[9px] font-bold text-white">
                 {activeFiltersCount}
               </span>
             )}
@@ -97,7 +96,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </div>
 
         {/* City Filter */}
-        <div className={`md:col-span-3 ${isMobileExpanded ? 'block' : 'hidden sm:block'}`}>
+        <div className={`w-full md:w-44 ${isMobileExpanded ? 'block' : 'hidden sm:block'}`}>
           <select
             value={filters.selectedCity}
             onChange={(e) =>
@@ -107,7 +106,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 selectedHub: 'All Hubs', // reset hub when city changes
               })
             }
-            className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 px-3 text-xs font-medium text-zinc-900 outline-none transition focus:border-blue-500 focus:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+            className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 px-2.5 text-xs font-medium text-zinc-900 outline-none transition focus:border-blue-500 focus:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
           >
             <option value="All Cities">All Indian Cities</option>
             {cities.map((city) => (
@@ -119,11 +118,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </div>
 
         {/* Hub Filter */}
-        <div className={`md:col-span-3 ${isMobileExpanded ? 'block' : 'hidden sm:block'}`}>
+        <div className={`w-full md:w-48 ${isMobileExpanded ? 'block' : 'hidden sm:block'}`}>
           <select
             value={filters.selectedHub}
             onChange={(e) => onFilterChange({ ...filters, selectedHub: e.target.value })}
-            className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 px-3 text-xs font-medium text-zinc-900 outline-none transition focus:border-blue-500 focus:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+            className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 py-2 px-2.5 text-xs font-medium text-zinc-900 outline-none transition focus:border-blue-500 focus:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
           >
             <option value="All Hubs">All Tech Hubs / Zones</option>
             {hubs.map((hub) => (
@@ -135,10 +134,10 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </div>
 
         {/* Reset button */}
-        <div className={`items-center md:col-span-2 ${isMobileExpanded ? 'flex' : 'hidden sm:flex'}`}>
+        <div className={`w-full md:w-auto ${isMobileExpanded ? 'flex' : 'hidden sm:flex'}`}>
           <button
             onClick={onReset}
-            className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-100 py-2 px-3 text-xs font-medium text-zinc-600 transition hover:bg-zinc-200 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-white"
+            className="flex w-full md:w-auto items-center justify-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-100 py-2 px-3 text-xs font-medium text-zinc-600 transition hover:bg-zinc-200 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-white"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             <span>Reset</span>
