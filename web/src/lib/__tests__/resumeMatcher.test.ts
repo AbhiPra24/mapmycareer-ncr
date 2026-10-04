@@ -129,4 +129,24 @@ Go, Python, Microservices, Kubernetes, Docker, Kafka, Redis, PostgreSQL, AWS, RE
     expect(ranked[0].id).toBe(2);
     expect(ranked[0].matchResult?.matchScore).toBeGreaterThan(ranked[1]?.matchResult?.matchScore || 0);
   });
+
+  it('should detect Product Management and B2B Sales tracks accurately', () => {
+    const pmResume = `
+Rohan Mehta | Senior Product Manager
+6 years building PRDs, roadmaps, running A/B testing and agile sprints with Jira and Mixpanel.
+`;
+    const pmProfile = extractCandidateProfile(pmResume);
+    expect(pmProfile.detectedTrack).toBe('Product Manager / TPM');
+    expect(pmProfile.skills).toContain('Product Management');
+    expect(pmProfile.skills).toContain('Jira');
+
+    const salesResume = `
+Karan Kapoor | Enterprise Account Executive
+5 years exceeding quota in B2B enterprise sales using Salesforce, MEDDPICC and cold prospecting.
+`;
+    const salesProfile = extractCandidateProfile(salesResume);
+    expect(salesProfile.detectedTrack).toBe('B2B Sales & Account Executive');
+    expect(salesProfile.skills).toContain('Salesforce');
+    expect(salesProfile.skills).toContain('B2b Sales');
+  });
 });

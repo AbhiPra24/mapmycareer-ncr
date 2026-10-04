@@ -49,7 +49,36 @@ def detect_experience(title: str) -> tuple[str, str, str]:
     return "2-5 yrs", "Mid", "L2"
 
 def detect_skills(text: str) -> List[str]:
-    return ["Python", "JavaScript", "React", "AWS", "SQL"]
+    t = (text or "").lower()
+    if any(k in t for k in ["sdet", "qa", "quality", "test", "automation"]):
+        return ["Selenium", "Playwright", "Cypress", "Python", "Test Automation", "Postman", "CI/CD"]
+    if any(k in t for k in ["product manager", "product owner", "tpm", "program manager", "scrum master"]):
+        return ["Product Strategy", "PRD Writing", "Agile/Scrum", "Jira", "A/B Testing", "Mixpanel", "SQL"]
+    if any(k in t for k in ["designer", "ui/ux", "product design", "ux", "visual design"]):
+        return ["Figma", "UI/UX", "User Research", "Wireframing", "Design Systems", "Prototyping"]
+    if any(k in t for k in ["security", "cyber", "infosec", "soc", "penetration"]):
+        return ["Cybersecurity", "SIEM", "Splunk", "OWASP", "Penetration Testing", "SOC", "Cloud Security"]
+    if any(k in t for k in ["account executive", "sales", "bdr", "sdr", "business development"]):
+        return ["Salesforce", "Enterprise Sales", "B2B Sales", "MEDDPICC", "Lead Generation", "Pipeline Management"]
+    if any(k in t for k in ["customer success", "client success", "account manager", "csm"]):
+        return ["Customer Success", "Salesforce", "Retention", "QBRs", "Zendesk", "Client Onboarding"]
+    if any(k in t for k in ["marketing", "growth", "seo", "content", "brand"]):
+        return ["Growth Marketing", "Google Analytics", "SEO", "PPC/SEM", "HubSpot", "A/B Testing"]
+    if any(k in t for k in ["operations", "chief of staff", "bizops", "strategy"]):
+        return ["Business Operations", "KPI Dashboards", "Process Optimization", "OKRs", "Financial Modeling"]
+    if any(k in t for k in ["finance", "financial", "accounting", "fp&a", "audit", "tax"]):
+        return ["Financial Modeling", "FP&A", "Variance Analysis", "Excel/VBA", "GAAP/IFRS", "NetSuite"]
+    if any(k in t for k in ["recruiter", "talent", "human resources", "hr ", "people ops"]):
+        return ["Technical Recruiting", "Candidate Sourcing", "Greenhouse", "ATS", "People Operations", "HRIS"]
+    if any(k in t for k in ["data", "ml", "ai", "machine learning", "analytics"]):
+        return ["Python", "Machine Learning", "PyTorch", "SQL", "Spark", "Databricks", "Snowflake"]
+    if any(k in t for k in ["devops", "sre", "cloud", "infrastructure", "platform"]):
+        return ["AWS", "Kubernetes", "Docker", "Terraform", "CI/CD", "Linux", "Prometheus"]
+    if any(k in t for k in ["frontend", "front end", "react", "ui "]):
+        return ["React", "TypeScript", "Next.js", "Tailwind CSS", "JavaScript", "HTML/CSS"]
+    if any(k in t for k in ["mobile", "android", "ios", "flutter"]):
+        return ["React Native", "Flutter", "Swift", "Kotlin", "Mobile App Development"]
+    return ["Python", "JavaScript", "React", "AWS", "SQL", "Microservices"]
 
 def build_job(c: Dict, title: str, url: str, loc: str, remote: bool, src: str) -> Dict[str, Any]:
     yoe, exp, std = detect_experience(title)

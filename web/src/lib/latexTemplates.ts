@@ -347,6 +347,332 @@ export const ROLE_TEMPLATES: Record<string, RoleTemplateDefinition> = {
       dates: '2015 -- 2019',
       certifications: 'ISTQB Certified Tester -- Advanced Level Test Automation Engineer'
     }
+  },
+
+  pm: {
+    id: 'pm',
+    name: 'Product Manager / Technical PM',
+    category: 'Product & Design',
+    defaultTitle: 'Senior Product Manager',
+    defaultSummary:
+      'Product Manager with 6+ years driving product strategy, roadmap execution, and customer-centric feature delivery for high-scale SaaS and consumer platforms. Proven record of driving 35% growth in MAU and aligning cross-functional engineering, design, and GTM teams.',
+    defaultSkills: [
+      { category: 'Product Strategy & Discovery', skills: 'Product Roadmapping, PRD Writing, Customer Interviews, Competitive Analysis, OKRs' },
+      { category: 'Analytics & Experimentation', skills: 'A/B Testing, Mixpanel, Amplitude, Google Analytics, SQL, Conversion Rate Optimization' },
+      { category: 'Agile & Execution', skills: 'Jira, Confluence, Scrum, User Stories, Backlog Grooming, Sprint Planning' },
+      { category: 'Technical Acumen', skills: 'System Architecture Understanding, REST APIs, Microservices basics, Data Modeling basics' }
+    ],
+    defaultExperience: [
+      {
+        role: 'Senior Product Manager',
+        company: 'Apex SaaS Platforms',
+        dates: '2022 -- Present',
+        location: 'Bengaluru / Hybrid',
+        bullets: [
+          'Led end-to-end product strategy for enterprise self-serve onboarding, boosting conversion by 28% and expanding pipeline by ₹15M ARR.',
+          'Defined product roadmaps and authored comprehensive PRDs across 4 engineering squads comprising 25+ engineers.',
+          'Orchestrated multi-variant A/B experiments on core funnel features, raising activation rates from 34% to 52%.',
+          'Spearheaded bi-weekly sprint planning, roadmap reviews with C-suite executives, and customer discovery interviews.'
+        ]
+      },
+      {
+        role: 'Product Manager',
+        company: 'VentureScale Technologies',
+        dates: '2019 -- 2022',
+        location: 'Gurugram, India',
+        bullets: [
+          'Launched mobile checkout experience reducing transaction abandonment by 18% and processing ₹50M+ GMV monthly.',
+          'Instrumented user behavior tracking via Amplitude and Mixpanel, establishing actionable data-driven metrics.',
+          'Partnered with UX research to conduct 60+ usability testing sessions and translated findings into feature enhancements.'
+        ]
+      }
+    ],
+    defaultEducation: {
+      degree: 'MBA / B.Tech',
+      school: 'Top Tier Institute',
+      dates: '2015 -- 2019',
+      certifications: 'Reforge Product Management Certified / Pragmatic Institute Certified'
+    }
+  },
+
+  design: {
+    id: 'design',
+    name: 'Product Designer / UI-UX Lead',
+    category: 'Product & Design',
+    defaultTitle: 'Senior Product / UI-UX Designer',
+    defaultSummary:
+      'Product Designer with 5+ years crafting accessible, scalable digital experiences and design systems for enterprise SaaS and consumer products. Expert in turning complex user workflows into intuitive interfaces through research-backed iterations.',
+    defaultSkills: [
+      { category: 'Design & Prototyping', skills: 'Figma, FigJam, Sketch, Adobe Creative Cloud, Framer, Principle' },
+      { category: 'UX Research & Validation', skills: 'Usability Testing, User Journey Mapping, Information Architecture, Heuristic Audits' },
+      { category: 'Design Systems', skills: 'Design Tokens, Component Libraries, Atomic Design, Accessibility (WCAG 2.1 AA)' },
+      { category: 'Collaboration & Handoff', skills: 'Design-to-Code Handoff, Zeplin, Zeroheight, HTML/CSS Basics' }
+    ],
+    defaultExperience: [
+      {
+        role: 'Senior Product Designer',
+        company: 'Elevate Cloud Suite',
+        dates: '2022 -- Present',
+        location: 'Bengaluru / Hybrid',
+        bullets: [
+          'Redesigned core enterprise analytics dashboard, resulting in a 40% reduction in time-to-first-insight for power users.',
+          'Built and maintained multi-brand Figma design system utilized across 6 product teams, cutting UI engineering delivery cycle by 35%.',
+          'Conducted 45+ customer interviews and usability sessions to validate high-fidelity prototypes prior to code freeze.',
+          'Ensured 100% WCAG 2.1 AA accessibility compliance across all web and mobile product surfaces.'
+        ]
+      }
+    ],
+    defaultEducation: {
+      degree: 'Bachelor of Design (B.Des) / Human-Computer Interaction',
+      school: 'National Institute of Design',
+      dates: '2017 -- 2021',
+      certifications: 'Nielsen Norman Group UX Master Certified'
+    }
+  },
+
+  security: {
+    id: 'security',
+    name: 'Cybersecurity & InfoSec Engineer',
+    category: 'Infrastructure',
+    defaultTitle: 'Senior Cybersecurity & InfoSec Engineer',
+    defaultSummary:
+      'Information Security Engineer with 6+ years specializing in cloud security, vulnerability management, SIEM architecture, penetration testing, and regulatory compliance (SOC2, ISO 27001). Strong track record of hardening enterprise infrastructure.',
+    defaultSkills: [
+      { category: 'Security Operations & SIEM', skills: 'Splunk, Microsoft Sentinel, CrowdStrike, Incident Response, Threat Hunting' },
+      { category: 'AppSec & Pen Testing', skills: 'OWASP Top 10, Burp Suite, Metasploit, Static/Dynamic Code Analysis (SAST/DAST)' },
+      { category: 'Cloud & Network Security', skills: 'AWS Security Hub, GuardDuty, IAM Hardening, WAF, Firewalls, Zero Trust' },
+      { category: 'Compliance & Governance', skills: 'SOC 2 Type II, ISO/IEC 27001, GDPR, NIST CSF, PCI-DSS' }
+    ],
+    defaultExperience: [
+      {
+        role: 'Senior Security Operations Engineer',
+        company: 'SecureMatrix Defense',
+        dates: '2022 -- Present',
+        location: 'Bengaluru / Hybrid',
+        bullets: [
+          'Led enterprise SIEM implementation across 200+ microservices and cloud workloads, reducing mean time to detect (MTTD) by 65%.',
+          'Conducted routine application vulnerability assessments and red team simulations, isolating critical vulnerabilities pre-exploit.',
+          'Architected Zero Trust IAM governance on AWS, enforcing least-privilege policies across 500+ corporate identities.',
+          'Successfully led technical security audits for annual SOC 2 Type II and ISO 27001 recertifications with zero major non-conformities.'
+        ]
+      }
+    ],
+    defaultEducation: {
+      degree: 'B.Tech in Computer Science / Cybersecurity',
+      school: 'National Institute of Technology',
+      dates: '2016 -- 2020',
+      certifications: 'CISSP, CEH (Certified Ethical Hacker), AWS Certified Security -- Specialty'
+    }
+  },
+
+  sales: {
+    id: 'sales',
+    name: 'Enterprise Account Executive / B2B Sales',
+    category: 'Commercial & Non-Tech',
+    defaultTitle: 'Enterprise Account Executive',
+    defaultSummary:
+      'High-performing Enterprise SaaS Account Executive with 6+ years exceeding multimillion-dollar revenue quotas. Specialized in complex B2B sales cycles, MEDDPICC qualification, executive stakeholder mapping, and strategic pipeline generation.',
+    defaultSkills: [
+      { category: 'Sales Methodology & Strategy', skills: 'MEDDPICC, Challenger Sale, Solution Selling, Value-Based Negotiation, Account Mapping' },
+      { category: 'CRM & Sales Tech', skills: 'Salesforce, HubSpot CRM, LinkedIn Sales Navigator, Outreach.io, Gong, ZoomInfo' },
+      { category: 'Commercial Acumen', skills: 'Contract Negotiation, RFP Responses, Pricing Strategy, Pipeline Forecasting, QBRs' },
+      { category: 'Domain Expertise', skills: 'Enterprise B2B SaaS, Cloud Infrastructure, Data Platforms, Cyber Tech' }
+    ],
+    defaultExperience: [
+      {
+        role: 'Enterprise Account Executive',
+        company: 'Global SaaS Enterprise',
+        dates: '2022 -- Present',
+        location: 'Gurugram / Hybrid',
+        bullets: [
+          'Achieved 145% of annual quota in FY24, closing ₹32M ARR in net-new enterprise software contracts.',
+          'Orchestrated multi-threaded deal cycles involving C-level decision-makers (CTO, CISO, CFO) with average contract value of ₹4M+.',
+          'Partnered with Solutions Architects and Sales Development to build a 4x qualified pipeline across Fortune 500 targets.',
+          'Consistently maintained top 5% rep ranking across a global 60-person revenue organization.'
+        ]
+      }
+    ],
+    defaultEducation: {
+      degree: 'Bachelor of Business Administration / Engineering',
+      school: 'Top University',
+      dates: '2016 -- 2020',
+      certifications: 'Force Management MEDDPICC Certified'
+    }
+  },
+
+  cs: {
+    id: 'cs',
+    name: 'Customer Success Manager',
+    category: 'Commercial & Non-Tech',
+    defaultTitle: 'Senior Customer Success Manager',
+    defaultSummary:
+      'Customer Success Leader with 5+ years driving customer retention, adoption, and net revenue retention (NRR) across mid-market and enterprise SaaS portfolios. Proven ability to reduce gross churn and uncover high-margin expansion opportunities.',
+    defaultSkills: [
+      { category: 'Account Management & Retention', skills: 'Customer Journey Mapping, Health Scoring, QBRs, Churn Mitigation, Renewals, Upselling' },
+      { category: 'Customer Success Tools', skills: 'Gainsight, Salesforce, Zendesk, ChurnZero, HubSpot, Mixpanel' },
+      { category: 'Cross-functional Collaboration', skills: 'Voice of Customer (VoC), Product Advocacy, Executive Sponsor Engagement' },
+      { category: 'Metrics & Operations', skills: 'Net Retention Rate (NRR), Gross Retention Rate (GRR), CSAT, NPS, Time-to-Value (TTV)' }
+    ],
+    defaultExperience: [
+      {
+        role: 'Senior Customer Success Manager',
+        company: 'CloudFlow Technologies',
+        dates: '2022 -- Present',
+        location: 'Bengaluru / Hybrid',
+        bullets: [
+          'Managed a $4.5M ARR book of 35 tier-1 enterprise accounts, achieving a 118% Net Retention Rate (NRR).',
+          'Instituted proactive health scoring models in Gainsight, reducing annual customer churn from 9.2% to 3.8%.',
+          'Facilitated quarterly business reviews (QBRs) with client VP/Director stakeholders to showcase ROI and feature roadmaps.',
+          'Identified and closed $650k in expansion and cross-sell opportunities in tight alignment with Account Executives.'
+        ]
+      }
+    ],
+    defaultEducation: {
+      degree: 'B.A. / B.Com / B.Tech',
+      school: 'Delhi University',
+      dates: '2017 -- 2021',
+      certifications: 'SuccessHACKER Certified Customer Success Manager (CCSM)'
+    }
+  },
+
+  marketing: {
+    id: 'marketing',
+    name: 'Growth & Performance Marketing Manager',
+    category: 'Commercial & Non-Tech',
+    defaultTitle: 'Senior Growth & Performance Marketing Manager',
+    defaultSummary:
+      'Growth Marketing Manager with 6+ years driving profitable customer acquisition, lifecycle engagement, and revenue scaling. Expertise in multi-channel paid acquisition, conversion rate optimization (CRO), SEO, and marketing automation.',
+    defaultSkills: [
+      { category: 'Performance Channels', skills: 'Google Ads (Search/Display), LinkedIn Ads, Meta Ads, YouTube Ads, Programmatic' },
+      { category: 'Analytics & Attribution', skills: 'Google Analytics 4 (GA4), Mixpanel, Tableau, Multi-touch Attribution, SQL Basics' },
+      { category: 'Organic & Lifecycle', skills: 'Technical SEO, Content Marketing, HubSpot, Marketo, Customer.io, Email Drip Campaigns' },
+      { category: 'Experimentation & Strategy', skills: 'CRO, Landing Page Optimization, A/B Testing, CAC/LTV Optimization, Budget Allocation' }
+    ],
+    defaultExperience: [
+      {
+        role: 'Growth Marketing Lead',
+        company: 'ScaleUp Ventures',
+        dates: '2022 -- Present',
+        location: 'Bengaluru / Hybrid',
+        bullets: [
+          'Managed ₹25M annual performance marketing budget, scaling inbound qualified leads by 75% while cutting CAC by 30%.',
+          'Built multi-channel nurture funnels in HubSpot, increasing MQL-to-SQL conversion rate from 14% to 26%.',
+          'Executed technical SEO overhaul that boosted organic traffic by 120,000 monthly unique visitors in 9 months.',
+          'Partnered with product and design to run continuous landing page A/B tests yielding a 22% lift in demo requests.'
+        ]
+      }
+    ],
+    defaultEducation: {
+      degree: 'B.Sc / BBA in Marketing or Communications',
+      school: 'Reputed University',
+      dates: '2016 -- 2020',
+      certifications: 'Google Ads Search & Measurement Certified, HubSpot Inbound Marketing'
+    }
+  },
+
+  ops: {
+    id: 'ops',
+    name: 'Business Operations & Chief of Staff',
+    category: 'Commercial & Non-Tech',
+    defaultTitle: 'Business Operations Manager / Chief of Staff',
+    defaultSummary:
+      'Strategic Business Operations professional with 5+ years driving cross-functional execution, executive alignment, operating cadence, and corporate strategy for high-growth tech organizations.',
+    defaultSkills: [
+      { category: 'Strategy & Execution', skills: 'Operating Cadence, OKR Tracking, Executive Reporting, Process Optimization, Change Management' },
+      { category: 'Analytics & Financials', skills: 'Financial Modeling, KPI Dashboards, Power BI, Excel Modeling, SQL Basics' },
+      { category: 'Project & Program Management', skills: 'Asana, Jira, Notion, Stakeholder Management, Vendor Management' },
+      { category: 'Governance', skills: 'Board Meeting Preparation, Cross-Functional Strategic Initiatives, Resource Allocation' }
+    ],
+    defaultExperience: [
+      {
+        role: 'Business Operations Manager',
+        company: 'HyperScale Mobility',
+        dates: '2022 -- Present',
+        location: 'Gurugram / Hybrid',
+        bullets: [
+          'Partnered directly with CEO and Executive team to lead quarterly OKR planning and operating cadence across 300+ employees.',
+          'Streamlined internal operational processes, cutting cross-departmental approval bottlenecks by 40%.',
+          'Developed automated executive KPI dashboards tracking ARR, burn rate, head-count efficiency, and unit economics.',
+          'Managed end-to-end vendor negotiation initiatives, capturing ₹8M in annual recurring operational savings.'
+        ]
+      }
+    ],
+    defaultEducation: {
+      degree: 'MBA / B.Tech / B.E.',
+      school: 'Top Management Institute',
+      dates: '2016 -- 2020',
+      certifications: 'Project Management Professional (PMP) / Lean Six Sigma Green Belt'
+    }
+  },
+
+  finance: {
+    id: 'finance',
+    name: 'Finance & FP&A Specialist',
+    category: 'Commercial & Non-Tech',
+    defaultTitle: 'Senior FP&A & Financial Analyst',
+    defaultSummary:
+      'Finance & FP&A professional with 5+ years building predictive financial models, budgeting frameworks, cash flow forecasts, and executive board reporting for enterprise and growth-stage tech firms.',
+    defaultSkills: [
+      { category: 'Financial Modeling & Planning', skills: 'Three-Statement Financial Modeling, DCF Valuation, Budgeting & Forecasting, Variance Analysis' },
+      { category: 'Financial Systems & ERP', skills: 'NetSuite, SAP, QuickBooks, Hyperion, Workday Financials' },
+      { category: 'Data & Analytics', skills: 'Advanced Excel, VBA, Power BI, SQL, Financial Reporting Standards (GAAP / IFRS)' },
+      { category: 'Commercial Finance', skills: 'SaaS Metrics (ARR, CAC, LTV, Magic Number), Unit Economics, Cap Table Management' }
+    ],
+    defaultExperience: [
+      {
+        role: 'Senior Financial Analyst -- FP&A',
+        company: 'Apex Financial Technologies',
+        dates: '2022 -- Present',
+        location: 'Mumbai / Hybrid',
+        bullets: [
+          'Built rolling 12-month corporate forecasting models improving annual expense predictability to within 3% variance.',
+          'Partnered with departmental leaders to oversee ₹800M annual OPEX and CAPEX budget allocations.',
+          'Constructed SaaS unit economics dashboards tracking Customer Lifetime Value (LTV), Payback Period, and Net Burn.',
+          'Prepared investor board packages and quarterly financial commentary for Series B & C leadership reviews.'
+        ]
+      }
+    ],
+    defaultEducation: {
+      degree: 'Chartered Accountant (CA) / CFA / MBA in Finance',
+      school: 'ICAI / Top Tier University',
+      dates: '2016 -- 2020',
+      certifications: 'CFA Level II / Certified Financial Modeler (FMVA)'
+    }
+  },
+
+  hr: {
+    id: 'hr',
+    name: 'Talent Acquisition & People Partner',
+    category: 'Commercial & Non-Tech',
+    defaultTitle: 'Lead Talent Acquisition & People Partner',
+    defaultSummary:
+      'People and Talent Acquisition Lead with 6+ years managing full-cycle technical and executive recruitment, employer branding, talent analytics, and employee lifecycle operations in high-growth technology environments.',
+    defaultSkills: [
+      { category: 'Talent Sourcing & Recruiting', skills: 'Full-Cycle Recruiting, Executive Search, Technical Sourcing, Candidate Experience' },
+      { category: 'Recruiting Systems (ATS & HRIS)', skills: 'Greenhouse, Lever, Workday, BambooHR, LinkedIn Recruiter, Gem' },
+      { category: 'People Operations', skills: 'Onboarding, Performance Reviews, Compensation Benchmarking, Employee Relations' },
+      { category: 'Metrics & Analytics', skills: 'Time-to-Hire, Cost-per-Hire, Offer Acceptance Rate, Diversity & Inclusion (D&I)' }
+    ],
+    defaultExperience: [
+      {
+        role: 'Lead Technical Recruiter',
+        company: 'NextGen Systems',
+        dates: '2022 -- Present',
+        location: 'Bengaluru / Hybrid',
+        bullets: [
+          'Scaled engineering and product departments from 45 to 160+ members across India while maintaining an 89% offer acceptance rate.',
+          'Reduced average time-to-hire from 58 days to 32 days through automated candidate nurturing and structured interview loops.',
+          'Configured Greenhouse ATS workflows and analytics dashboards, providing weekly talent funnel insights to VP Engineering.',
+          'Partnered with People Ops on compensation leveling frameworks, employer branding campaigns, and campus hiring drives.'
+        ]
+      }
+    ],
+    defaultEducation: {
+      degree: 'Master of Human Resource Management / MBA HR',
+      school: 'Top Business School',
+      dates: '2016 -- 2020',
+      certifications: 'SHRM-CP / AIRS Certified Internet Recruiter (CIR)'
+    }
   }
 };
 
