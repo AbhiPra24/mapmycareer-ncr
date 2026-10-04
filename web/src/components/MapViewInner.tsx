@@ -585,13 +585,13 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
       </MapContainer>
 
       {/* Cluster count badge overlay (visible on tablet/desktop) */}
-      <div className="hidden sm:block absolute bottom-5 left-4 z-[400] mb-1 rounded-lg border border-zinc-200/80 bg-white/90 px-3 py-1.5 shadow-md backdrop-blur-md text-xs font-semibold text-zinc-600 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-zinc-300">
+      <div className="hidden sm:block absolute bottom-5 left-4 z-10 mb-1 rounded-lg border border-zinc-200/80 bg-white/90 px-3 py-1.5 shadow-md backdrop-blur-md text-xs font-semibold text-zinc-600 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-zinc-300">
         <span className="text-blue-600 font-bold dark:text-blue-400">{companyClusters.length}</span> companies ·{' '}
         <span className="text-zinc-800 font-bold dark:text-zinc-200">{validJobs.length}</span> positions
       </div>
 
       {/* Circular GPS Target FAB anchored above bottom-right controls */}
-      <div className="absolute bottom-24 right-3 sm:bottom-20 sm:right-3 z-[400]">
+      <div className="absolute bottom-24 right-3 sm:bottom-20 sm:right-3 z-10">
         <button
           onClick={() => {
             if ('geolocation' in navigator) {
@@ -624,7 +624,7 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
           WebkitMaskImage: 'linear-gradient(to right, black 88%, transparent 100%)',
           maskImage: 'linear-gradient(to right, black 88%, transparent 100%)',
         }}
-        className="absolute top-3 left-3 right-3 z-[400] flex items-center gap-1.5 overflow-x-auto rounded-xl border border-white/20 bg-slate-900/80 py-1.5 pl-3 pr-8 shadow-lg backdrop-blur-md [&::-webkit-scrollbar]:hidden dark:border-zinc-800 dark:bg-zinc-950/85"
+        className="absolute top-3 left-3 right-3 z-10 flex items-center gap-1.5 overflow-x-auto rounded-xl border border-white/20 bg-slate-900/80 py-1.5 pl-3 pr-8 shadow-lg backdrop-blur-md [&::-webkit-scrollbar]:hidden dark:border-zinc-800 dark:bg-zinc-950/85"
       >
         {[
           { name: 'NCR',       coords: [28.5355, 77.3910] },
@@ -652,7 +652,7 @@ export const MapViewInner: React.FC<MapViewInnerProps> = ({
       </div>
 
       {/* Level Legend Pill positioned cleanly above bottom footer */}
-      <div className="hidden sm:flex absolute bottom-12 left-4 z-[400] items-center gap-2.5 rounded-full border border-zinc-200/80 bg-white/90 px-3 py-1 text-xs shadow-md backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-900/90">
+      <div className="hidden sm:flex absolute bottom-12 left-4 z-10 items-center gap-2.5 rounded-full border border-zinc-200/80 bg-white/90 px-3 py-1 text-xs shadow-md backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-900/90">
         <span className="text-[10px] font-bold uppercase text-zinc-400">Level:</span>
         <div className="flex items-center gap-1 text-[11px] font-medium text-zinc-700 dark:text-zinc-300">
           <span className="h-2 w-2 rounded-full bg-emerald-500" /> Entry

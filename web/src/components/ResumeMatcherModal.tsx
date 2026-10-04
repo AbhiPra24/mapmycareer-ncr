@@ -77,6 +77,49 @@ EDUCATION
 B.Tech in Computer Science (2015 - 2019)
 `;
 
+const SAMPLE_PM_RESUME = `Rohan Mehta
+Senior Product Manager
+Bengaluru, India | rohan.mehta@example.com | linkedin.com/in/rohanmehta
+
+SUMMARY
+Senior Product Manager with 6+ years driving product roadmap strategy, user growth, and agile execution for SaaS & fintech products. Led cross-functional teams of 20+ engineers and designers.
+
+TECHNICAL & DOMAIN SKILLS
+Product Strategy: PRDs, Product Roadmaps, A/B Testing, User Stories, User Research
+Tools & Analytics: Jira, Confluence, Amplitude, Mixpanel, SQL, Google Analytics, Figma
+Methodologies: Agile, Scrum, Kanban, Conversion Rate Optimization (CRO)
+
+EXPERIENCE
+Senior Product Manager -- Apex Fintech (2022 - Present)
+- Led end-to-end launch of instant merchant settlements, boosting conversion by 28% and driving ₹20M in monthly volume.
+- Partnered with engineering and UX design to write detailed PRDs and manage 2-week agile sprint delivery.
+- Conducted multivariate experiments in Amplitude, improving user onboarding activation from 35% to 54%.
+
+EDUCATION
+MBA / B.Tech (2014 - 2018)
+`;
+
+const SAMPLE_SALES_RESUME = `Karan Kapoor
+Enterprise Account Executive
+Gurugram, India | karan.k@example.com | linkedin.com/in/karankapoor
+
+SUMMARY
+Enterprise SaaS Account Executive with 5+ years closing complex B2B sales cycles with C-suite stakeholders. Achieved 140%+ annual quota attainment.
+
+SKILLS & EXPERTISE
+Sales & Methodology: Enterprise B2B Sales, MEDDPICC, Lead Generation, Pipeline Management, Contract Negotiation
+CRM & Tech Stack: Salesforce, HubSpot, LinkedIn Sales Navigator, Outreach, Gong
+
+EXPERIENCE
+Enterprise Account Executive -- Global Cloud Systems (2022 - Present)
+- Closed ₹28M in net-new ARR across 14 enterprise enterprise clients, exceeding FY24 quota at 142%.
+- Prospected and led multi-threaded deal cycles with CTOs and CISOs across banking and retail sectors.
+- Partnered with solutions architects to deliver technical product demos and proofs-of-concept.
+
+EDUCATION
+BBA in Marketing & Management (2015 - 2019)
+`;
+
 export const ResumeMatcherModal: React.FC<ResumeMatcherModalProps> = ({
   isOpen,
   onClose,
@@ -292,7 +335,7 @@ export const ResumeMatcherModal: React.FC<ResumeMatcherModalProps> = ({
                   }}
                   className="text-[11px] font-semibold text-blue-600 hover:underline dark:text-blue-400"
                 >
-                  Sample SDET
+                  SDET
                 </button>
                 <span className="text-zinc-300">|</span>
                 <button
@@ -303,7 +346,29 @@ export const ResumeMatcherModal: React.FC<ResumeMatcherModalProps> = ({
                   }}
                   className="text-[11px] font-semibold text-blue-600 hover:underline dark:text-blue-400"
                 >
-                  Sample Backend
+                  Backend
+                </button>
+                <span className="text-zinc-300">|</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setResumeText(SAMPLE_PM_RESUME);
+                    setLoadedFileName(null);
+                  }}
+                  className="text-[11px] font-semibold text-blue-600 hover:underline dark:text-blue-400"
+                >
+                  PM
+                </button>
+                <span className="text-zinc-300">|</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setResumeText(SAMPLE_SALES_RESUME);
+                    setLoadedFileName(null);
+                  }}
+                  className="text-[11px] font-semibold text-blue-600 hover:underline dark:text-blue-400"
+                >
+                  Sales
                 </button>
               </div>
             </div>

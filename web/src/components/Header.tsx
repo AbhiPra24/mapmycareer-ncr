@@ -39,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between border-b border-zinc-200 bg-white/85 px-3 py-2 sm:px-6 sm:py-2.5 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/85">
+    <header className="sticky top-0 z-50 flex items-center justify-between border-b border-zinc-200 bg-white/85 px-3 py-2 sm:px-6 sm:py-2.5 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/85">
       <div className="flex items-center gap-2 sm:gap-3">
         <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20">
           <Compass className="h-4 w-4 sm:h-5 sm:w-5" />

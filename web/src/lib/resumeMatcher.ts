@@ -104,6 +104,41 @@ export const SKILL_TAXONOMY: Record<string, string[]> = {
   'power bi': ['power bi', 'powerbi'],
   tableau: ['tableau'],
 
+  // Cybersecurity & InfoSec
+  cybersecurity: ['cybersecurity', 'infosec', 'information security'],
+  siem: ['siem', 'splunk', 'sentinel'],
+  'penetration testing': ['penetration testing', 'pen testing', 'ethical hacking', 'metasploit'],
+  owasp: ['owasp', 'vulnerability assessment', 'vapt'],
+  soc: ['soc', 'security operations', 'incident response'],
+
+  // Product & Design
+  'product management': ['product management', 'prd', 'prds', 'product roadmap', 'roadmaps', 'roadmap', 'user stories'],
+  figma: ['figma', 'sketch', 'adobe xd'],
+  'ui/ux': ['ui/ux', 'ux design', 'ui design', 'wireframing', 'prototyping', 'user research'],
+  jira: ['jira', 'confluence'],
+  analytics: ['amplitude', 'mixpanel', 'google analytics', 'ga4'],
+
+  // Sales & Business Development
+  salesforce: ['salesforce', 'sfdc', 'hubspot', 'crm'],
+  'b2b sales': ['b2b sales', 'enterprise sales', 'lead generation', 'prospecting', 'outbound sales'],
+  meddpicc: ['meddpicc', 'meddic', 'bantd'],
+
+  // Customer Success & Operations
+  'customer success': ['customer success', 'client onboarding', 'retention', 'churn reduction', 'qbr'],
+  operations: ['operations', 'business operations', 'bizops', 'process optimization', 'okrs', 'kpis'],
+
+  // Marketing & Growth
+  marketing: ['digital marketing', 'content marketing', 'performance marketing', 'sem', 'ppc', 'growth marketing'],
+  seo: ['seo', 'search engine optimization', 'cro', 'conversion rate optimization'],
+
+  // Finance & Accounting
+  finance: ['financial modeling', 'fpa', 'fp&a', 'financial analysis', 'valuation', 'excel modeling', 'budgeting'],
+  accounting: ['accounting', 'gaap', 'ifrs', 'general ledger', 'quickbooks', 'netsuite', 'sap'],
+
+  // HR & Talent Acquisition
+  recruiting: ['recruiting', 'talent acquisition', 'technical recruiting', 'candidate sourcing', 'ats', 'greenhouse', 'lever'],
+  hr: ['human resources', 'hr generalist', 'employee relations', 'people operations', 'hris', 'workday'],
+
   // Methodologies & Principles
   agile: ['agile', 'scrum', 'kanban'],
   'system design': ['system design', 'solution architecture', 'software architecture'],
@@ -139,6 +174,42 @@ const TRACK_SIGNATURES: Record<string, { skills: string[]; titles: string[] }> =
   'Mobile Engineer': {
     skills: ['react native', 'flutter', 'swift', 'kotlin', 'appium'],
     titles: ['android', 'ios', 'mobile developer', 'react native developer', 'flutter developer'],
+  },
+  'Cybersecurity & InfoSec': {
+    skills: ['cybersecurity', 'siem', 'penetration testing', 'owasp', 'soc', 'linux', 'python'],
+    titles: ['security engineer', 'cyber security', 'infosec', 'soc analyst', 'penetration tester', 'security analyst'],
+  },
+  'Product Manager / TPM': {
+    skills: ['product management', 'jira', 'agile', 'analytics', 'sql', 'system design'],
+    titles: ['product manager', 'technical program manager', 'program manager', 'scrum master', 'product owner', 'tpm'],
+  },
+  'Product / UI-UX Designer': {
+    skills: ['figma', 'ui/ux', 'html', 'css'],
+    titles: ['product designer', 'ux designer', 'ui designer', 'visual designer', 'interaction designer'],
+  },
+  'B2B Sales & Account Executive': {
+    skills: ['salesforce', 'b2b sales', 'meddpicc', 'crm'],
+    titles: ['account executive', 'enterprise sales', 'sales development representative', 'business development representative', 'sdr', 'bdr', 'sales manager'],
+  },
+  'Customer Success & Account Manager': {
+    skills: ['customer success', 'salesforce', 'crm'],
+    titles: ['customer success manager', 'account manager', 'client success', 'csm', 'client relationship'],
+  },
+  'Marketing & Growth': {
+    skills: ['marketing', 'seo', 'analytics', 'hubspot'],
+    titles: ['marketing manager', 'growth marketing', 'performance marketing', 'content marketing', 'seo specialist', 'demand generation'],
+  },
+  'Operations & Strategy': {
+    skills: ['operations', 'jira', 'analytics', 'okrs'],
+    titles: ['operations manager', 'chief of staff', 'business operations', 'strategy manager', 'operations analyst'],
+  },
+  'Finance & Accounting': {
+    skills: ['finance', 'accounting', 'sql', 'excel'],
+    titles: ['financial analyst', 'accountant', 'fp&a', 'finance manager', 'controller', 'finance director'],
+  },
+  'HR & Talent Acquisition': {
+    skills: ['recruiting', 'hr', 'ats', 'greenhouse', 'lever'],
+    titles: ['technical recruiter', 'talent acquisition', 'recruiter', 'hr manager', 'people partner', 'people operations'],
   },
 };
 
