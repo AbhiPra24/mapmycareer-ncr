@@ -19,17 +19,40 @@ CITY_HUBS = {
     "Chandigarh": {"default_hub": "IT Park, Chandigarh", "lat": 30.7333, "lon": 76.7794}
 }
 
-GREENHOUSE_COMPANIES = [{"slug": c, "name": c.title(), "domain": f"{c}.com"} for c in [
+COMPANY_CANONICAL_NAMES = {
+    "openai": "OpenAI",
+    "mongodb": "MongoDB",
+    "gitlab": "GitLab",
+    "fivetran": "Fivetran",
+    "hashicorp": "HashiCorp",
+    "thoughtspot": "ThoughtSpot",
+    "postman": "Postman",
+    "atlassian": "Atlassian",
+    "cloudflare": "Cloudflare",
+    "databricks": "Databricks",
+    "snowflake": "Snowflake",
+    "zscaler": "Zscaler",
+    "supabase": "Supabase",
+    "perplexity": "Perplexity AI",
+    "hotstar": "Disney+ Hotstar",
+    "mux": "Mux",
+    "gemini": "Google Gemini",
+}
+
+def get_canonical_company_name(slug: str) -> str:
+    return COMPANY_CANONICAL_NAMES.get(slug.lower(), slug.title())
+
+GREENHOUSE_COMPANIES = [{"slug": c, "name": get_canonical_company_name(c), "domain": f"{c}.com"} for c in [
     "databricks", "rubrik", "mongodb", "zscaler", "inmobi", "postman", "slice", "groww", "affirm", "gusto", 
     "cloudflare", "elastic", "gitlab", "stripe", "twilio", "pinterest", "instacart", "reddit", "okta", "druva", 
     "thoughtspot", "hashicorp", "confluent", "snowflake", "airbnb", "doordash", "uber", "lyft", "fivetran"
 ]]
 
-LEVER_COMPANIES = [{"slug": c, "name": c.title(), "domain": f"{c}.com"} for c in [
+LEVER_COMPANIES = [{"slug": c, "name": get_canonical_company_name(c), "domain": f"{c}.com"} for c in [
     "hotstar", "atlassian", "mux", "palantir", "spotify", "coursera", "udemy", "netflix", "canva", "figma"
 ]]
 
-ASHBY_COMPANIES = [{"slug": c, "name": c.title(), "domain": f"{c}.com"} for c in [
+ASHBY_COMPANIES = [{"slug": c, "name": get_canonical_company_name(c), "domain": f"{c}.com"} for c in [
     "notion", "docker", "linear", "ramp", "cursor", "vanta", "replit", "perplexity", "cohere", "openai", "supabase", "resend", "brex", "gemini"
 ]]
 
@@ -47,6 +70,17 @@ def detect_experience(title: str) -> tuple[str, str, str]:
     if any(k in t for k in ["senior", "sr"]): return "5-8 yrs", "Senior", "L3"
     if any(k in t for k in ["intern", "junior", "entry"]): return "0-2 yrs", "Entry", "L1"
     return "2-5 yrs", "Mid", "L2"
+
+def get_salary_by_level(exp: str) -> tuple[str, int, int]:
+    if exp == "Entry":
+        return "₹8 - 16 LPA", 8, 16
+    elif exp == "Mid":
+        return "₹16 - 32 LPA", 16, 32
+    elif exp == "Senior":
+        return "₹30 - 60 LPA", 30, 60
+    elif exp == "Lead":
+        return "₹50 - 90 LPA", 50, 90
+    return "₹18 - 36 LPA", 18, 36
 
 def detect_skills(text: str) -> List[str]:
     t = (text or "").lower()
@@ -80,8 +114,24 @@ def detect_skills(text: str) -> List[str]:
         return ["React Native", "Flutter", "Swift", "Kotlin", "Mobile App Development"]
     return ["Python", "JavaScript", "React", "AWS", "SQL", "Microservices"]
 
-def build_job(c: Dict, title: str, url: str, loc: str, remote: bool, src: str) -> Dict[str, Any]:
+FOREIGN_TITLE_PATTERNS = [
+    r'\(m/w/d\)', r'\(all genders\)', r'\(m/f/d\)', r'werkstudent', r'gmbh',
+    r'entwickler', r'berater', r'spezialist', r'techniker', r'leiter', r'praktikant'
+]
+
+def is_valid_title(title: str) -> bool:
+    if not title:
+        return False
+    for pat in FOREIGN_TITLE_PATTERNS:
+        if re.search(pat, title, re.IGNORECASE):
+            return False
+    return True
+
+def build_job(c: Dict, title: str, url: str, loc: str, remote: bool, src: str) -> Optional[Dict[str, Any]]:
+    if not is_valid_title(title):
+        return None
     yoe, exp, std = detect_experience(title)
+    sal_range, sal_min, sal_max = get_salary_by_level(exp)
     city_list = list(CITY_HUBS.keys())
     matched_city = "Bengaluru"
     for ct in city_list:
@@ -92,64 +142,91 @@ def build_job(c: Dict, title: str, url: str, loc: str, remote: bool, src: str) -
         matched_city = random.choice(city_list)
         
     hub = CITY_HUBS[matched_city]
+    company_name = c.get("name", "Tech Startup")
     return {
-        "title": title, "company": c["name"], "company_domain": c["domain"],
+        "title": title, "company": company_name, "company_domain": c["domain"],
         "experience_yoe": yoe, "experience_level": exp, "job_type": "Full-time",
         "city": matched_city, "hub": hub["default_hub"],
         "lat": hub["lat"] + (random.random()-0.5)*0.01,
         "lon": hub["lon"] + (random.random()-0.5)*0.01,
-        "skills": detect_skills(title), "salary_range": "₹20 - 50 LPA",
+        "skills": detect_skills(title), "salary_range": sal_range,
+        "salary_min_lpa": sal_min, "salary_max_lpa": sal_max,
         "workplace_model": "Remote" if remote else "Hybrid", "apply_url": url,
         "source": src, "standard_level": std, "level_name": f"{exp} Engineer",
         "level_code": std, "level_tier": exp, "level_yoe_range": yoe,
-        "levels_fyi_benchmark": "₹20 - 50 LPA", "levels_fyi_url": "https://www.levels.fyi"
+        "levels_fyi_benchmark": sal_range, "levels_fyi_url": "https://www.levels.fyi"
     }
 
 def main():
     jobs = []
     
-    # 1. Greenhouse
+    # 1. Greenhouse ATS
     for c in GREENHOUSE_COMPANIES:
         data = fetch_json(f"https://boards-api.greenhouse.io/v1/boards/{c['slug']}/jobs")
         if data and "jobs" in data:
             for j in data["jobs"]:
-                jobs.append(build_job(c, j.get("title", ""), j.get("absolute_url", ""), j.get("location",{}).get("name",""), True, "greenhouse"))
+                built = build_job(c, j.get("title", ""), j.get("absolute_url", ""), j.get("location",{}).get("name",""), True, "greenhouse")
+                if built:
+                    jobs.append(built)
                 
-    # 2. Lever
+    # 2. Lever ATS
     for c in LEVER_COMPANIES:
         data = fetch_json(f"https://api.lever.co/v0/postings/{c['slug']}?mode=json")
         if data and isinstance(data, list):
             for j in data:
-                jobs.append(build_job(c, j.get("text", ""), j.get("hostedUrl", ""), j.get("categories",{}).get("location",""), True, "lever"))
+                built = build_job(c, j.get("text", ""), j.get("hostedUrl", ""), j.get("categories",{}).get("location",""), True, "lever")
+                if built:
+                    jobs.append(built)
 
-    # 3. Ashby
+    # 3. Ashby ATS
     for c in ASHBY_COMPANIES:
         data = fetch_json(f"https://api.ashbyhq.com/posting-api/job-board/{c['slug']}")
         if data and "jobs" in data:
             for j in data["jobs"]:
-                jobs.append(build_job(c, j.get("title", ""), j.get("jobUrl", ""), j.get("location",""), True, "ashby"))
+                built = build_job(c, j.get("title", ""), j.get("jobUrl", ""), j.get("location",""), True, "ashby")
+                if built:
+                    jobs.append(built)
 
-    # 4. APIs
-    for p in range(1, 10):
-        data = fetch_json(f"https://www.arbeitnow.com/api/job-board-api?page={p}")
-        if data and "data" in data:
-            for j in data["data"]:
-                jobs.append(build_job({"name": j.get("company_name", "Tech Startup"), "domain": "arbeitnow.com"}, j.get("title", ""), j.get("url", ""), "Remote", True, "arbeitnow"))
-
+    # 4. Global Remote verified APIs (English tech & business postings)
     data = fetch_json("https://remotive.com/api/remote-jobs")
     if data and "jobs" in data:
         for j in data["jobs"][:300]:
-            jobs.append(build_job({"name": j.get("company_name", "Startup"), "domain": "remotive.com"}, j.get("title", ""), j.get("url", ""), "Remote", True, "remotive"))
+            built = build_job({"name": j.get("company_name", "Startup"), "domain": "remotive.com"}, j.get("title", ""), j.get("url", ""), "Remote", True, "remotive")
+            if built:
+                jobs.append(built)
 
     data = fetch_json("https://jobicy.com/api/v2/remote-jobs")
     if data and "jobs" in data:
         for j in data["jobs"][:300]:
-            jobs.append(build_job({"name": j.get("companyName", "Startup"), "domain": "jobicy.com"}, j.get("jobTitle", ""), j.get("url", ""), "Remote", True, "jobicy"))
+            built = build_job({"name": j.get("companyName", "Startup"), "domain": "jobicy.com"}, j.get("jobTitle", ""), j.get("url", ""), "Remote", True, "jobicy")
+            if built:
+                jobs.append(built)
             
-    # Load exist
+    # Load and clean existing
     existing = []
     if os.path.exists("data/sample_jobs.json"):
-        existing = json.load(open("data/sample_jobs.json"))
+        raw_existing = json.load(open("data/sample_jobs.json"))
+        for j in raw_existing:
+            # Filter out german / arbeitnow records
+            src = j.get("source", "")
+            url = j.get("apply_url", "")
+            title = j.get("title", "")
+            if "arbeitnow" in src or "arbeitnow" in url or not is_valid_title(title):
+                continue
+            # Canonicalize company name if matching
+            comp = j.get("company", "")
+            if comp.lower() in COMPANY_CANONICAL_NAMES:
+                j["company"] = COMPANY_CANONICAL_NAMES[comp.lower()]
+            elif comp == comp.lower():
+                j["company"] = comp.title()
+            # If salary was the static placeholder, calibrate by seniority
+            if j.get("salary_range") == "₹20 - 50 LPA" and j.get("experience_level"):
+                sal_range, sal_min, sal_max = get_salary_by_level(j["experience_level"])
+                j["salary_range"] = sal_range
+                j["salary_min_lpa"] = sal_min
+                j["salary_max_lpa"] = sal_max
+                j["levels_fyi_benchmark"] = sal_range
+            existing.append(j)
         
     urls = {x.get("apply_url") for x in existing if x.get("apply_url")}
     max_id = max([x.get("id", 0) for x in existing], default=0)
@@ -161,7 +238,7 @@ def main():
             existing.append(j)
             urls.add(j["apply_url"])
             
-    print(f"Total jobs: {len(existing)}")
+    print(f"Total curated jobs: {len(existing)}")
     json.dump(existing, open("data/sample_jobs.json", "w"), indent=2)
     json.dump(existing, open("web/public/data/jobs.json", "w"), indent=2)
 
