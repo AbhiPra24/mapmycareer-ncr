@@ -51,4 +51,8 @@ jobs:
           else
             git commit -m "chore(data): auto-sync live verified jobs [skip ci] [skip actions]"
             git push
+            if [ -n "${{ secrets.VERCEL_DEPLOY_HOOK_URL }}" ]; then
+              echo "Triggering Vercel production deployment hook..."
+              curl -s -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_URL }}"
+            fi
           fi
